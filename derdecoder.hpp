@@ -1,4 +1,5 @@
 namespace Vlinder { namespace Rubicon {
+template < unsigned int max_bits_per_integer__ = 2048 >
 class DERDecoder
 {
 public :
@@ -17,23 +18,35 @@ public :
 			switch (state_)
 			{
 			case State::expect_type__ :
+			{
 				parseType(*first++);
 				state_ = State::expect_length__;
 				break;
+			}
 			case State::expect_length__ :
+			{
 				bool complete(parseLength(first, last));
 				if (!complete) return false;
 				state_ = State::expect_value__;
 				break;
+			}
 			case State::expect_value__ :
+			{
 				bool complete(parseValue(first, last));
 				if (!complete) return false;
 				state_ = State::expect_type__;
+				break;
+			}
 			}
 		}
 	}
 	
 	virtual void onEndOfInput() noexcept = 0;
+	// Callee will receive between one and N bytes where
+	// N depends on the maximum number of bits in an integer,
+	// in network byte order.
+	virtual void onInteger(unsigned char *first, unsigned char *last) noexcept = 0;
+	virtual void onEnumerated(int value) noexcept = 0;
 	
 private :
 	enum struct State {
@@ -86,7 +99,7 @@ private :
 	bool parseLength(InputIterator &first, InputIterator last)
 	{
 		if (first == last) return false;
-		assert(length_buffer_size_ < sizeof(length_buffer_));
+		assert(parse_buffer_size_ < sizeof(parse_buffer_));
 		// When we get here, we know we have at least one extra byte to parse
 		// to get the length. We also know that whatever other bytes make up
 		// the length are either waiting in the input or already in the length
@@ -95,37 +108,37 @@ private :
 		// is greater than 64 bits, we bail out.
 		do 
 		{
-			length_buffer_[length_buffer_size_++] = *first++;
-			if (0 == (length_buffer_[0] & 0x80))
+			parse_buffer_[parse_buffer_size_++] = *first++;
+			if (0 == (parse_buffer_[0] & 0x80))
 			{
 				// we have the complete length 
-				length_ = length_buffer_[0];
-				length_buffer_size_ = 0;
+				length_ = parse_buffer_[0];
+				parse_buffer_size_ = 0;
 				return true;
 			}
-			else if (0x80 == length_buffer_[0])
+			else if (0x80 == parse_buffer_[0])
 			{
 				throw IndeterminateSize("Invalid DER");
 			}
-			else if ((length_buffer_[0] & 0x1F) > sizeof(length_buffer_) - 1)
+			else if ((parse_buffer_[0] & 0x1F) > sizeof(parse_buffer_) - 1)
 			{
 				throw SizeTooLarge("only 64 bits or less of size supported");
 			}
 			else 
 			{
-				if ((length_buffer_size_ - 1) == (length_buffer_[0] & 0x1F))
+				if ((parse_buffer_size_ - 1) == (parse_buffer_[0] & 0x1F))
 				{
 					length_ = 0;
 					for (
-						  unsigned char *length_byte(length_buffer_ + 1)
-						; length_byte != (length_buffer + length_buffer_size_)
+						  unsigned char *length_byte(parse_buffer_ + 1)
+						; length_byte != (parse_buffer + parse_buffer_size_)
 						; ++length_byte
 						)
 					{
 						length_ *= 256;
 						length_ += *length_byte;
 					}
-					length_buffer_size_ = 0;
+					parse_buffer_size_ = 0;
 					return true;
 				}
 				else 
@@ -193,14 +206,16 @@ private :
 				unsigned char value(*first++);
 				onBoolean(0 != value);
 				return true;
-			case 0x02 : // integer 
+			case 0x02 : // integer
+				return parseInteger(first, last);
+			case 0x0A : // enumerated
+				return parseEnumerated(first, last);
 			case 0x03 : // bit string (may be constructed)
 			case 0x04 : // octet string (may be constructed)
 			case 0x05 : // null 
 			case 0x06 : // object identifier 
 			case 0x07 : // object descriptor 
 			case 0x09 : // real 
-			case 0x0A : // enumerated 
 			case 0x0C : // UTF8 string (may be constructed)
 			case 0x0D : // relative OID
 			case 0x12 : // numeric string (may be constructed)
@@ -237,10 +252,69 @@ private :
 	{
 	}
 	
+	template < typename InputIterator >
+	bool parseInteger(InputIterator &first, InputIterator last)
+	{
+		if (0 == length_) throw EncodingError("zero-byte integer value");
+		if (length_ > sizeof(parse_buffer_)) throw EncodingError("integer too large"); // increase the max_bits_per_integer__ value if you want to parse bigger integers 
+		// if we get here, we have at least one byte to consume from the input 
+		do 
+		{
+			parse_buffer_[parse_buffer_size_++] = *first++;
+		} while ((first != last) && (parse_buffer_size_ != length_));
+		if (parser_buffer_size_ == length_)
+		{
+			// we don't know what the large integer representation is here, so we
+			// just pass the beginning and end pointer of the parsed integer here.
+			onInteger(parse_buffer_, parse_buffer_ + parse_buffer_size_);
+			parse_buffer_size_ = 0;
+			return true;
+		}
+		else 
+		{ /* not done yet */ }
+		return false;
+	}
+	
+	template < typename InputIterator >
+	bool parseEnumerated(InputIterator &first, InputIterator last)
+	{
+		// enumerated values are parsers as int values and may not be larger than
+		// sizeof(int). They are signed (because nothing I've seen in X.690
+		// indicates they aren't) so we do sign extension.
+		if (length_ > sizeof(int)) throw EncodingError("enumerated value too large");
+		if (0 == length_) throw EncodingError("empty enumerated value");
+		// if we get here we know we have at least one more byte to consume
+		do 
+		{
+			parse_buffer_[parse_buffer_size_++] = *first++;
+		} while ((first != last) && (parse_buffer_size_ != length_));
+		if (parser_buffer_size_ == length_)
+		{
+			int value(parse_buffer_[0] & 0x80 ? ~0 : 0;
+			for (
+				  unsigned char *value_byte(parse_buffer_ + 1)
+				; value_byte != (parse_buffer + parse_buffer_size_)
+				; ++value_byte
+				)
+			{
+				value <<= 8;
+				value |= *value_byte;
+			}
+			onEnumerated(value);
+			parse_buffer_size_ = 0;
+			return true;
+		}
+		else 
+		{ /* not done yet */ }
+		return false;
+	}
+	
 	State state_ = initial__;
 	Type type_;
 	uint64_t length_;
-	unsigned char length_buffer_[9];
-	uint32_t length_buffer_size_ = 0;
+	unsigned char parse_buffer_[max_bits_per_integer__ / 8];
+	static_assert(max_bits_per_integer__ >= 64);
+	static_assert(max_bits_per_integer__ >= (sizeof(int) * 8));
+	uint32_t parse_buffer_size_ = 0;
 };
 }}
