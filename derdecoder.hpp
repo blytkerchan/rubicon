@@ -155,6 +155,29 @@ private :
 		assert(type_.type_class_ == TypeClass::universal__);
 		if (type_.constructed_)
 		{
+			switch (type_. tag_)
+			{
+			case 0x03 : // bit string (may be primitive)
+			case 0x04 : // octet string (may be primitive)
+			case 0x08 : // external
+			case 0x0B : // embedded PDV
+			case 0x0C : // UTF8 string (may be primitive)
+			case 0x10 : // sequence 
+			case 0x11 : // set
+			case 0x12 : // numeric string (may be primitive)
+			case 0x13 : // printable string (may be primitive)
+			case 0x14 : // T61 string (may be primitive)
+			case 0x15 : // Videotex string (may be primitive)
+			case 0x16 : // IA5 string (may be primitive)
+			case 0x17 : // UTC time (may be primitive)
+			case 0x18 : // generalised time (may be primitive)
+			case 0x19 : // graphic string (may be primitive)
+			case 0x1A : // visible string (may be primitive)
+			case 0x1B : // general string (may be primitive)
+			case 0x1C : // universal string (may be primitive)
+			case 0x1D : // character string (may be primitive)
+			case 0x1E : // BMP string (may be primitive)
+			}
 		}
 		else 
 		{
@@ -170,7 +193,31 @@ private :
 				unsigned char value(*first++);
 				onBoolean(0 != value);
 				return true;
-			// HERE
+			case 0x02 : // integer 
+			case 0x03 : // bit string (may be constructed)
+			case 0x04 : // octet string (may be constructed)
+			case 0x05 : // null 
+			case 0x06 : // object identifier 
+			case 0x07 : // object descriptor 
+			case 0x09 : // real 
+			case 0x0A : // enumerated 
+			case 0x0C : // UTF8 string (may be constructed)
+			case 0x0D : // relative OID
+			case 0x12 : // numeric string (may be constructed)
+			case 0x13 : // printable string (may be constructed)
+			case 0x14 : // T61 string (may be constructed)
+			case 0x15 : // Videotex string (may be constructed)
+			case 0x16 : // IA5 string (may be constructed)
+			case 0x17 : // UTC time (may be constructed)
+			case 0x18 : // generalised time (may be constructed)
+			case 0x19 : // graphic string (may be constructed)
+			case 0x1A : // visible string (may be constructed)
+			case 0x1B : // general string (may be constructed)
+			case 0x1C : // universal string (may be constructed)
+			case 0x1D : // character string (may be constructed)
+			case 0x1E : // BMP string (may be constructed)
+			default :
+				throw EncodingError("unknown type");
 			}
 		}
 	}
