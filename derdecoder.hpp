@@ -47,6 +47,7 @@ public :
 	// in network byte order.
 	virtual void onInteger(unsigned char *first, unsigned char *last) noexcept = 0;
 	virtual void onEnumerated(int value) noexcept = 0;
+	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) noexcept = 0;
 	
 private :
 	enum struct State {
@@ -171,6 +172,7 @@ private :
 			switch (type_. tag_)
 			{
 			case 0x03 : // bit string (may be primitive)
+				return parseBitString(first, last);
 			case 0x04 : // octet string (may be primitive)
 			case 0x08 : // external
 			case 0x0B : // embedded PDV
@@ -211,6 +213,7 @@ private :
 			case 0x0A : // enumerated
 				return parseEnumerated(first, last);
 			case 0x03 : // bit string (may be constructed)
+				return parseBitString(first, last;
 			case 0x04 : // octet string (may be constructed)
 			case 0x05 : // null 
 			case 0x06 : // object identifier 
@@ -309,12 +312,71 @@ private :
 		return false;
 	}
 	
+	template < typename InputIterator >
+	bool parseBitString(InputIterator &first, InputIterator last)
+	{
+		if (0 == length_) throw EncodingError("zero-length bit string");
+		// If we get here, we are either constructing or consuming the string.
+		// The parse_buffer_size_ member contains the number of bytes we've read
+		// from the input. The first byte contains the number of bits that are not
+		// used in the final byte. We only pass this to onBitString if we're
+		// passing the final byte as well. 
+		assert(first != last);
+		uint64_t parse_buffer_size(parse_buffer_size_);
+		auto avail(sizeof(parse_buffer_) - 1/* for the leading octet, which were need to preserve */);
+		do 
+		{
+			if (0 == parse_buffer_size_)
+			{
+				parse_buffer_[parse_buffer_size_++] = *first++;
+				parse_buffer_size = parse_buffer_size_;
+			}
+			else if (avail && (parse_buffer_size_ < length_))
+			{
+				parse_buffer_[parse_buffer_size_++ - parse_buffer_size + 1] = *first++;
+				--avail;
+			}
+			else break;
+		} while (first != last);
+		if (parse_buffer_[0]/*unused bits the last byte*/ > 7) throw EncodingError("Too many unused bits in the final byte");
+		bool const empty_bit_string((length_ == 1) && (parse_buffer_size_ == 1));
+		bool const content_bytes_in_buffer(parse_buffer_size_ > parse_buffer_size);
+		uint64_t const available_bytes(parse_buffer_size_ - parse_buffer_size);
+		bool const final(length_ == parse_buffer_size_);
+		unsigned int const unused_bits(final ? parse_buffer_[0]);
+		auto const beg(parse_buffer_ + 1);
+		auto const end(parse_buffer_ + (parse_buffer_size_ - parse_buffer_size) + 1);
+		assert(((parse_buffer_size_ - parse_buffer_size) + 1) <= sizeof(parse_buffer_));
+		if (empty_bit_string || content_bytes_in_buffer)
+		{
+			if (empty_bit_string)
+			{
+				assert(0 == available_bytes);
+				assert(final);
+				if (parse_buffer_[0] != 0) throw EncodingError("unused bits in an empty bit string");
+			}
+			else 
+			{ /* not an empty bit string */ }
+			onBitString(
+				  final
+				, unused_bits
+				, beg
+				, end
+				);
+		}
+		else
+		{ /* nothing to report yet */ }
+		
+		if (final) parse_buffer_size_ = 0;
+		return final;
+	}
+	
 	State state_ = initial__;
 	Type type_;
 	uint64_t length_;
 	unsigned char parse_buffer_[max_bits_per_integer__ / 8];
 	static_assert(max_bits_per_integer__ >= 64);
 	static_assert(max_bits_per_integer__ >= (sizeof(int) * 8));
-	uint32_t parse_buffer_size_ = 0;
+	uint64_t parse_buffer_size_ = 0;
 };
 }}
