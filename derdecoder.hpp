@@ -13,22 +13,23 @@ public :
 	template < typename InputIterator >
 	bool parse(InputIterator &first, InputIterator last)
 	{
-		while (first != last)
+		while (1)
 		{
 			switch (state_)
 			{
 			case State::expect_type__ :
 			{
+				if (first == last) return false;
 				parseType(*first++);
 				state_ = State::expect_length__;
-				break;
+				// fall through
 			}
 			case State::expect_length__ :
 			{
 				bool complete(parseLength(first, last));
 				if (!complete) return false;
 				state_ = State::expect_value__;
-				break;
+				// fall through
 			}
 			case State::expect_value__ :
 			{
@@ -213,12 +214,13 @@ private :
 			case 0x0A : // enumerated
 				return parseEnumerated(first, last);
 			case 0x03 : // bit string (may be constructed)
-				return parseBitString(first, last;
+				return parseBitString(first, last);
+			case 0x09 : // real 
+				return parseReal(first, last);
 			case 0x04 : // octet string (may be constructed)
 			case 0x05 : // null 
 			case 0x06 : // object identifier 
 			case 0x07 : // object descriptor 
-			case 0x09 : // real 
 			case 0x0C : // UTF8 string (may be constructed)
 			case 0x0D : // relative OID
 			case 0x12 : // numeric string (may be constructed)
@@ -259,6 +261,7 @@ private :
 	bool parseInteger(InputIterator &first, InputIterator last)
 	{
 		if (0 == length_) throw EncodingError("zero-byte integer value");
+		if (first == last) return false;
 		if (length_ > sizeof(parse_buffer_)) throw EncodingError("integer too large"); // increase the max_bits_per_integer__ value if you want to parse bigger integers 
 		// if we get here, we have at least one byte to consume from the input 
 		do 
@@ -286,6 +289,7 @@ private :
 		// indicates they aren't) so we do sign extension.
 		if (length_ > sizeof(int)) throw EncodingError("enumerated value too large");
 		if (0 == length_) throw EncodingError("empty enumerated value");
+		if (first == last) return false;
 		// if we get here we know we have at least one more byte to consume
 		do 
 		{
@@ -321,7 +325,7 @@ private :
 		// from the input. The first byte contains the number of bits that are not
 		// used in the final byte. We only pass this to onBitString if we're
 		// passing the final byte as well. 
-		assert(first != last);
+		if (first != last) return false;
 		uint64_t parse_buffer_size(parse_buffer_size_);
 		auto avail(sizeof(parse_buffer_) - 1/* for the leading octet, which were need to preserve */);
 		do 
@@ -369,6 +373,45 @@ private :
 		
 		if (final) parse_buffer_size_ = 0;
 		return final;
+	}
+	
+	template < typename InputIterator >
+	bool parseReal(InputIterator &first, InputIterator last)
+	{
+		if (0 == length_)
+		{
+			onReal(0);
+			return true;
+		}
+		else 
+		{ /* we have content octets to parse */ }
+		if (first == last) return false;
+		// When we get here, we know the value being encoded is not non-negative
+		// zero. We don't support base-10 encoding (because I don't have a copy
+		// of ISO 6093 and really — who would do such a thing?) so we bail out
+		// if we see that that's what's in the input.
+		int sign(1);
+		do 
+		{
+			parse_buffer_[parse_buffer_size_++] = *first++;
+			switch (parse_buffer_[0] & 0xC0)
+			{
+			case 0x00 : throw DecodingError("base-10 (decimal) encoding of real values is not supported!");
+			case 0x40 :
+				if (length_ != 1) throw EncodingError("more than one octet for a ``special'' real value");
+				switch (parse_buffer_[0])
+				{
+				case 0x40 : /* positive infinity */
+				case 0x41 : /* negative infinity */
+				case 0x42 : /* not-a-number (qNaN) */
+				case 0x43 : /* negative zero */
+				default : throw EncodingError("reserved special real value");
+				}
+				return true;
+			default 
+				// binary encoding
+			
+		} while ((first != last) && (parse_buffer_size_ < length_));
 	}
 	
 	State state_ = initial__;
