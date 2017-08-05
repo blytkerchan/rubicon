@@ -42,7 +42,7 @@ public :
 		}
 	}
 	
-	virtual void onEndOfInput() noexcept = 0;
+	virtual void onEndOfContents() noexcept = 0;
 	// Callee will receive between one and N bytes where
 	// N depends on the maximum number of bits in an integer,
 	// in network byte order.
@@ -120,11 +120,11 @@ private :
 			}
 			else if (0x80 == parse_buffer_[0])
 			{
-				throw IndeterminateSize("Invalid DER");
+				throw EncodingError("Invalid DER: indeterminate size");
 			}
 			else if ((parse_buffer_[0] & 0x1F) > sizeof(parse_buffer_) - 1)
 			{
-				throw SizeTooLarge("only 64 bits or less of size supported");
+				throw EncodingError("only 64 bits or less of size supported");
 			}
 			else 
 			{
@@ -201,7 +201,7 @@ private :
 			{
 			case 0x00 : // end of input
 				if (0 != length_) throw EncodingError("Non-zero length for end-of-input tag");
-				onEndOfInput();
+				onEndOfContents();
 				return true;
 			case 0x01 : // boolean
 				if (length_ != 1) throw EncodingError("Wrong length for Boolean value");
