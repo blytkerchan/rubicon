@@ -43,10 +43,7 @@ public :
 	}
 	
 	virtual void onEndOfContents() noexcept = 0;
-	// Callee will receive between one and N bytes where
-	// N depends on the maximum number of bits in an integer,
-	// in network byte order.
-	virtual void onInteger(unsigned char *first, unsigned char *last) noexcept = 0;
+	virtual void onInteger(Details::Integer const &value) noexcept = 0;
 	virtual void onEnumerated(int value) noexcept = 0;
 	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) noexcept = 0;
 	
@@ -270,9 +267,7 @@ private :
 		} while ((first != last) && (parse_buffer_size_ != length_));
 		if (parser_buffer_size_ == length_)
 		{
-			// we don't know what the large integer representation is here, so we
-			// just pass the beginning and end pointer of the parsed integer here.
-			onInteger(parse_buffer_, parse_buffer_ + parse_buffer_size_);
+			onInteger(Details::Integer(parse_buffer_, parse_buffer_ + parse_buffer_size_));
 			parse_buffer_size_ = 0;
 			return true;
 		}
@@ -383,6 +378,10 @@ private :
 			onReal(0);
 			return true;
 		}
+		else if (length_ > sizeof(parse_buffer_))
+		{
+			throw DecodingError("parse buffer too small for real value");
+		}
 		else 
 		{ /* we have content octets to parse */ }
 		if (first == last) return false;
@@ -390,7 +389,6 @@ private :
 		// zero. We don't support base-10 encoding (because I don't have a copy
 		// of ISO 6093 and really — who would do such a thing?) so we bail out
 		// if we see that that's what's in the input.
-		int sign(1);
 		do 
 		{
 			parse_buffer_[parse_buffer_size_++] = *first++;
@@ -401,17 +399,44 @@ private :
 				if (length_ != 1) throw EncodingError("more than one octet for a ``special'' real value");
 				switch (parse_buffer_[0])
 				{
-				case 0x40 : /* positive infinity */
-				case 0x41 : /* negative infinity */
-				case 0x42 : /* not-a-number (qNaN) */
-				case 0x43 : /* negative zero */
+				case 0x40 : onReal(std::numeric_limits::infinity()); return true;
+				case 0x41 : onReal(-std::numeric_limits::infinity()); return true;
+				case 0x42 : onReal(std::numeric_limits::quiet_nan()); return true;
+				case 0x43 : onReal(-0); return true;
 				default : throw EncodingError("reserved special real value");
 				}
 				return true;
-			default 
+			default :
 				// binary encoding
-			
+				break;
+			}
 		} while ((first != last) && (parse_buffer_size_ < length_));
+		// when we get here, were either have the entire real value in the parse buffer (parse_buffer_size_ == length_) or we've run out of input data. 
+		if (parse_buffer_size_ == length_)
+		{
+			int sign((parse_buffer_[0] & 0x40) == 0x40 ? -1 : 1);
+			int base;
+			switch (parse_buffer_[0] & 0x30)
+			{
+			case 0x00 :
+				base = 2;
+				break;
+			case 0x10 :
+				base = 8;
+				break;
+			case 0x20 :
+				base = 16;
+				break;
+			default :
+				throw EncodingError("reserved value for real base");
+			}
+			unsigned int scale_factor((parse_buffer_[0] & 0x0C) >> 2);
+			// HERE: get the number of bytes for the exponent
+		}
+		else 
+		{
+			return false;
+		}
 	}
 	
 	State state_ = initial__;
