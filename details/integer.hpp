@@ -25,7 +25,15 @@ struct Integer
 	Integer(unsigned long long value) { set(value);}
 #endif
 	template < typename InputIterator >
-	Integer(Input Iterator
+	Integer(InputIterator first, InputIterator last)
+		: size_(0)
+	{
+		while ((first != last) && (size_ != sizeof(value_))
+		{
+			value_[size_++] = *first++;
+		}
+		if ((sizeof(value_) == size_) && (first != last)) throw EncodingError("Integer too large");
+	}
 	
 	Integer& operator=(Integer const&) = default;
 	Integer& operator=(Integer&&) = default;
