@@ -12,21 +12,22 @@ struct Integer
 	Integer(Integer const&) = default;
 	Integer(Integer&&) = default;
 	
-	Integer(char value) { set(value);}
-	Integer(unsigned char value) { set(value);}
-	Integer(short value) { set(value);}
-	Integer(unsigned short value) { set(value);}
-	Integer(int value) { set(value);}
-	Integer(unsigned int value) { set(value);}
-	Integer(long value) { set(value);}
-	Integer(unsigned long value) { set(value);}
+	Integer(char value) : signed_(true), size_(0) { set(value); }
+	Integer(unsigned char value) : signed_(false), size_(0) { set(value);}
+	Integer(short value) : signed_(true), size_(0) { set(value);}
+	Integer(unsigned short value) : signed_(false), size_(0) { set(value);}
+	Integer(int value) : signed_(true), size_(0) { set(value);}
+	Integer(unsigned int value) : signed_(false), size_(0) { set(value);}
+	Integer(long value) : signed_(true), size_(0) { set(value);}
+	Integer(unsigned long value) : signed_(false), size_(0) { set(value);}
 #ifdef HAVE_LONG_LONG
-	Integer(long long value) { set(value);}
-	Integer(unsigned long long value) { set(value);}
+	Integer(long long value) : signed_(true), size_(0) { set(value);}
+	Integer(unsigned long long value) : signed_(false), size_(0) { set(value);}
 #endif
 	template < typename InputIterator >
-	Integer(InputIterator first, InputIterator last)
-		: size_(0)
+	Integer(bool is_signed, InputIterator first, InputIterator last)
+		: signed_(is_signed)
+		, size_(0)
 	{
 		while ((first != last) && (size_ != sizeof(value_))
 		{
@@ -45,9 +46,28 @@ struct Integer
 	unsigned char const* cend() const noexcept { return value_ + size_; }
 	unsigned char* begin() noexcept { return value_; }
 	unsigned char* end() noexcept { return value_ + size_; }
+	void compact()
+	{
+		while (size_ && (value_[0] == 0) && ((size_ == 1) || ((value_[1] & 0x80) == 0)))
+		{
+			std::copy_backward(value_ + 1, value_ + size_, value_);
+			--size_;
+		}
+		if (signed_)
+		{
+			while ((size_ > 1) && (value_[0] == 0xFF) && ((value_[1] & 0x80) == 0x80))
+			{
+				std::copy_backward(value_ + 1, value_ + size_, value_);
+				--size_;
+			}
+		}
+		else 
+		{ /* not a signed integer */ }
+	}
 	
 	static_assert((max_bits_per_integer__ % 8) == 0);
 	unsigned char value_[max_bits_per_integer__ / 8];
+	bool signed_ = false;
 	unsigned int size_ = 0;
 	
 private :
