@@ -1,9 +1,9 @@
-#-Rubicon
-Proof-of-concept ASN.1 code.
+# -Rubicon Proof-of-concept ASN.1 code.
 
 This project is mostly proof-of-concept at the moment. The goal is to show that "DER code ain't that bad".
 
-##About ASN.1
+## About ASN.1
+
 ASN.1, or Abstract Syntax Notation 1, is a domain-specific language (DSL) that consists of a human-readable schema language and several machine-readable representations for data encoded according to a schema described by that schema language.
 
 ASN.1, as a DSL is immensely annoying, but it is also a well-accepted industry standard used in the likes of X.509 (the standards that govern the security of the Internet), and IEC 61850 (a suite of standards used in power systems automation, based mostly on XML schemas, but using ASN.1 over MMS as a transport).
@@ -12,7 +12,8 @@ ASN.1 is annoying because its schema language, which describes such things as wh
 
 Further, there are several ways to encode data as described by ASN.1, some of which are almost indistinguishable from each other, but again differ in subtle ways. The ones normalised by ASN.1 are BER, DER, CER, PER and XER. The only close-to-sane one in the bunch is DER because *it*, at least, is unambiguous.
 
-##Inception
+## Inception
+
 The French have an expression: "coup de tête", which translates roughly to "a rash decision" but isn't quite as rash (in the negative sense), nor quite as deliberated as a decision ought to be. 
 
 Anyway, there was a modern-day equivalent of a bike shed discussion (#random channel on Slack) that started with ASN.1 and fairly quickly veered to error handling in Python, which had Adam, who had started the discussion about ASN.1, "quietly back away from the bike shed". A few days later, Adam said "ASN.1 is a terrible DSL for security oriented message definitions. Way too complex. Security message/file formats must be simpler." on [Twitter] (https://twitter.com/jadamcrain/status/891732011773284352). This started a brief discussion in which I ended up defending DER (which is, of course, my own fault: I said "The problem with ASN.1 is specific (too many variants of too many types, no guidance when to use which). DER is not the problem." [here](https://twitter.com/blytkerchan/status/891797275768479744)).
@@ -27,7 +28,8 @@ The discussion picked up as I was pulling out of the monastery store, where I'd 
 
 The discussion went on in the way back home, when I checked my Twitter feed while getting a cup of coffee (which I ended up doing a few times) and at one point I decided to pull over, download X.690 and set up the skeleton of a DER decoder. I stopped for about thirty minutes, wrote about 140 lines of code on my iPad and drove on home. Once I got home, I read what I'd written, made a few minor corrections and decided two things: firstly, that I was right and DER is not the problem, and secondly that the code I'd written earlier that day was worth keeping and spending a bit more time on. My "coup de tête" from earlier that day had become a project.
 
-##Design 
+## Design 
+
 The DERDecoder class is a syntactic scanner: it consumes input from an input iterator and decodes the Type-Length-Value tuples out finds, handing the decoded values to a derived class.
 
 The iterators it expects are standard input iterators: single-pass, each position read exactly once. This is the weakest category of iterators one can read from and therefore allows the greatest flexibility to the calling code as to where to get the data from. When values read from the input need to be re-read, they are stored on an internal parse buffer, the size of which is dictated by the number of bits that the implementation should be able to read for an integer value. That value must be at least 64, and defaults to 2048. With that default, the parse buffer is 256 bytes in size, which makes the whole decoder about 280 bytes in terms of its state. 
