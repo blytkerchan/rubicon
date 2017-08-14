@@ -399,13 +399,13 @@ private :
 				if (length_ != 1) throw EncodingError("more than one octet for a ``special'' real value");
 				switch (parse_buffer_[0])
 				{
-				case 0x40 : onReal(std::numeric_limits::infinity()); return true;
-				case 0x41 : onReal(-std::numeric_limits::infinity()); return true;
-				case 0x42 : onReal(std::numeric_limits::quiet_nan()); return true;
+				case 0x40 : onReal(std::numeric_limits< double >::infinity()); return true;
+				case 0x41 : onReal(-std::numeric_limits< double >::infinity()); return true;
+				case 0x42 : onReal(std::numeric_limits< double >::quiet_nan()); return true;
 				case 0x43 : onReal(-0); return true;
 				default : throw EncodingError("reserved special real value");
 				}
-				return true;
+				throw std::logic_error("unreachable code");
 			default :
 				// binary encoding
 				break;
@@ -430,8 +430,48 @@ private :
 			default :
 				throw EncodingError("reserved value for real base");
 			}
-			unsigned int scale_factor((parse_buffer_[0] & 0x0C) >> 2);
-			// HERE: get the number of bytes for the exponent
+			unsigned int const scale_factor((parse_buffer_[0] & 0x0C) >> 2);
+			if (length_ < 2) throw EncodingError("Impossibly small real encoding");
+			unsigned int const bytes_in_exponent(
+				  ((parse_buffer_[0] & 0x03) == 3) ? parse_buffer_[1]
+				: (parse_buffer_[0] & 0x03) + 1
+				);
+			unsigned char const *beg(parse_buffer_ + (((parse_buffer_[0] & 0x03) == 3) ? 2 : 1));
+			unsigned char const *end(parse_buffer_ + parse_buffer_size_);
+			if ((bytes_in_exponent > sizeof(uint64_t)) || (distance(beg, end) < bytes_in_exponent)) throw EncodingError("exponent length error");
+			end = beg + bytes_in_exponent;
+			uint64_t exponent(0);
+			for ( ; beg != end; ++beg)
+			{
+				exponent <<= 8;
+				exponent |= *beg;
+			}
+			end = parse_buffer_ + parse_buffer_size_;
+			uint64_t n(0);
+			if (distance(beg, end) > sizeof(n)) throw EncodingError("N part of the mantissa too large");
+			for ( ; beg != end; ++beg)
+			{
+				n <<= 8;
+				n |= *beg;
+			}
+			double value = sign * n;
+			for (unsigned int s(0); s < scale_factor; ++s)
+			{
+				value *= 2;
+			}
+			assert((base == 2) || (base == 8) || (base == 16));
+			while (base != 2)
+			{
+				if (exponent > (std::numeric_limits< int >::max() / 2)) throw EncodingError("exponent too large");
+				exponent *= 2;
+				base /= 2;
+			}
+			if (exponent > std::numeric_limits< int >::max() throw EncodingError("exponent too large");
+			int exp((int)(exponent));
+			value = ldexp(value, exp);
+			onReal(value);
+			length_ = 0;
+			return true;
 		}
 		else 
 		{
