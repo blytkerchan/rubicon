@@ -12,6 +12,22 @@ public :
 	DEREncoder& operator=(DEREncoder const&) = default;
 	DEREncoder& operator=(DEREncoder &&) = default;
 	
+	template < typename OutputIterator >
+	void encodeEndOfContents(OutputIterator &out)
+	{
+		// encode the type octet 
+		*out++ = 0x00;
+		encodeLength(out, 0);
+	}
+	
+	template < typename OutputIterator >
+	void encodeBoolean(OutputIterator &out, bool value)
+	{
+		*out++ = 0x01;
+		encodeLength(out, 1);
+		*out++ = value ? 0xFF : 0x00;
+	}
+	
 	template < typename OutputIterator, typename MultiPassInputIterator >
 	void encodeOctetString(
 		  OutputIterator &out 
