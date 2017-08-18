@@ -28,6 +28,15 @@ public :
 		*out++ = value ? 0xFF : 0x00;
 	}
 	
+	template < typename OutputIterator >
+	void encodeInteger(OutputIterator &out, Details::Integer value)
+	{
+		*out++ = 0x02;
+		value.compact();
+		encodeLength(out, value.size());
+		out = std::copy(value.begin(), value.end(), out);
+	}
+	
 	template < typename OutputIterator, typename MultiPassInputIterator >
 	void encodeOctetString(
 		  OutputIterator &out 
