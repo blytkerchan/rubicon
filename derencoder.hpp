@@ -48,6 +48,21 @@ public :
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
+	void encodeBitString(
+		  OutputIterator &out
+		, unsigned int unused_bits
+		, MultiPassInputIterator first
+		, MultiPassInputIterator last
+		)
+	{
+		pre_condition(unused_bits < 8);
+		*out++ = 0x03;
+		*out++ = unused_bits;
+		encodeLength(out, std::distance(first, last);
+		out = std::copy(first, last, out);
+	}
+	
+	template < typename OutputIterator, typename MultiPassInputIterator >
 	void encodeOctetString(
 		  OutputIterator &out 
 		, MultiPassInputIterator first 
