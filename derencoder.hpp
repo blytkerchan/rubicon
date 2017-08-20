@@ -37,6 +37,16 @@ public :
 		out = std::copy(value.begin(), value.end(), out);
 	}
 	
+	template < typename OutputIterator >
+	void encodeEnumerated(OutputIterator &out, int value)
+	{
+		*out++ = 0x0A;
+		Details::Integer value_as_integer(value);
+		value_as_integer.compact();
+		encodeLength(out, value_as_integer.size());
+		out = std::copy(value_as_integer.begin(), value_as_integer.end(), out);
+	}
+	
 	template < typename OutputIterator, typename MultiPassInputIterator >
 	void encodeOctetString(
 		  OutputIterator &out 
