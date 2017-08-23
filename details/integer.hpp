@@ -1,7 +1,8 @@
-#ifndef 
-vlinder_rubicon_details_integer_hpp
-#define 
-vlinder_rubicon_details_integer_hpp
+#ifndef vlinder_rubicon_details_integer_hpp
+#define vlinder_rubicon_details_integer_hpp
+
+#include "../exceptions.hpp"
+#include "../exceptions/contract.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Details {
 template < unsigned int max_bits_per_integer__ = 2048 >
@@ -29,7 +30,7 @@ struct Integer
 		: signed_(is_signed)
 		, size_(0)
 	{
-		while ((first != last) && (size_ != sizeof(value_))
+		while ((first != last) && (size_ != sizeof(value_)))
 		{
 			value_[size_++] = *first++;
 		}
@@ -64,8 +65,23 @@ struct Integer
 		else 
 		{ /* not a signed integer */ }
 	}
-	
-	static_assert((max_bits_per_integer__ % 8) == 0);
+
+	int compare(Integer other) const
+	{
+		if (negative() && !other.negative()) return -1;
+		if (!negative() && other.negative()) return 1;
+		Integer temp(*this);
+		temp.compact();
+		other.compact();
+		return temp.compare_(other);
+	}
+
+	bool negative() const
+	{
+		return signed_ && ((value_[0] & 0x80) == 0x80);
+	}
+
+	static_assert((max_bits_per_integer__ % 8) == 0, "max bits per integer should be an integer multiple of 8");
 	unsigned char value_[max_bits_per_integer__ / 8];
 	bool signed_ = false;
 	unsigned int size_ = 0;
@@ -74,7 +90,7 @@ private :
 	template < typename I >
 	void set(I i)
 	{
-		static_assert(sizeof(I) <= sizeof(value_));
+		static_assert(sizeof(I) <= sizeof(value_), "Integer too large");
 		size_ = sizeof(I);
 		for(
 			  unsigned int index(0)
@@ -86,7 +102,28 @@ private :
 			i >>= 8;
 		}
 	}
+
+	int compare_(Integer const &other) const
+	{
+		pre_condition(negative() == other.negative()); // otherwise we should never get here
+		if (size() < other.size()) return negative() ? 1 : -1;
+		if (size() > other.size()) return negative() ? -1 : 1;
+		for (unsigned int index(0); index < size_; ++index)
+		{
+			if (value_[index] != other.value_[index]) return negative() ? (int)value_[index] - (int)other.value_[index] : (int)other.value_[index] - (int)value_[index];
+		}
+
+		return 0;
+	}
 };
+template < unsigned int max_bits_per_integer__ > bool operator==(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) == 0; }
+template < unsigned int max_bits_per_integer__ > bool operator!=(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) != 0; }
+template < unsigned int max_bits_per_integer__ > bool operator<(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) < 0; }
+template < unsigned int max_bits_per_integer__ > bool operator<=(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) <= 0; }
+template < unsigned int max_bits_per_integer__ > bool operator>(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) > 0; }
+template < unsigned int max_bits_per_integer__ > bool operator>=(Details::Integer< max_bits_per_integer__ > const &lhs, Details::Integer< max_bits_per_integer__ > const &rhs) { return lhs.compare(rhs) >= 0; }
+
 }}}
 
 #endif
+
