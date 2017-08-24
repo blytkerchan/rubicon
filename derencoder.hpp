@@ -2,8 +2,17 @@
 #define vlinder_rubicon_derencoder_hpp
 
 namespace Vlinder { namespace Rubicon {
+template < unsigned int max_bits_per_integer__ = 2048 >
 class DEREncoder
 {
+	enum struct DoubleValueCategory {
+		  normal__
+		, positive_infinity__
+		, negative_infinity__
+		, not_a_number__
+		, positive_zero__
+		, negative_zero__
+		};
 public :
 	DEREncoder() = default;
 	~DEREncoder() = default;
@@ -65,59 +74,48 @@ public :
 	template < typename OutputIterator >
 	void encodeReal(OutputIterator &out, double value)
 	{
+		DoubleValueCategory category;
+		int sign;
+		Details::Integer< max_bits_per_integer__ > mantissa;
+		unsigned int base;
+		unsigned int scale_factor
+		int exponent;
+		dissectDouble(value, category, sign, mantissa, base, scale_factor, exponent);
+	
 		*out++ = 0x09;
 		// a few special values to handle first 
-		switch (std::fpclassify(value))
+		switch (category)
 		{
-		case FP_INFINITE	:
+		case DoubleValueCategory::positive_infinity__ :
 			encodeLength(out, 1);
-			*out++ = std::signbit(value) ? 0x41 : 0x40;
+			*out++ = 0x40;
+			break;
+		case DoubleValueCategory::negative_infinity__ :
+			encodeLength(out, 1);
+			*out++ = 0x41;
 			return;
-		case FP_NAN			:
+		case DoubleValueCategory::not_a_number__ :
 			encodeLength(out, 1);
 			*out++ = 0x42;
 			return;
-		case FP_ZERO		:
-			if (std::signbit(value))
-			{
-				encodeLength(out, 1);
-				*out++ = 0x43;
-			}
-			else 
-			{
-				encodeLength(out, 0);
-			}
+		case DoubleValueCategory::negative_zero__ :
+			encodeLength(out, 1);
+			*out++ = 0x43;
+			return;
+		case DoubleValueCategory::positive_zero__ :
+			encodeLength(out, 0);
 			return;
 		default :
 			// either normal or subnormal, we'll encode 
 			break;
 		}
 		
-		int exponent;
-		double mantissa(frexp(value, &exponent));
 		Details::Integer exponent_as_integer(exponent);
 		// the first encoded value octet doesn't have a name in X.690, but it
 		// *indicates* the way the value is encoded, so I decided to call it
 		// the "indicator octet".
 		unsigned char indicator_octet(0x80); // bit 8(7) to indicate binary encoding 
-		indicator_octet |= std::signbit(value) ? 0x40 : 0x00;
-		uint64_t mantissa_as_int(mantissa);
-		unsigned int base(2);
-		if ((mantissa_as_int % 4) == 0)
-		{
-			base *= 4;
-			mantissa_as_int /= 4;
-		}
-		else 
-		{ /* base 8 */ }
-		if ((mantissa_as_int % 2) == 0)
-		{
-			assert(base == 8);
-			base *= 2;
-			mantissa_as_int /= 2;
-		}
-		else 
-		{ /* base is final */ }
+		indicator_octet |= (sign == -1) ? 0x40 : 0x00;
 		switch (base)
 		{
 		case 2 :
@@ -151,7 +149,7 @@ public :
 		default :
 			indicator_octet |= 0x03;
 		}
-		mantissa_as_integer.compact();
+		mantissa.compact();
 		unsigned int const bytes_for_indicator(1);
 		unsigned int const bytes_for_exponent_length(exponent_as_integer.size() > 3 ? 1 : 0);
 		unsigned int const bytes_for_exponent_value(exponent_as_integer.size());
@@ -172,8 +170,8 @@ public :
 		{
 			out = std::copy(exponent_as_integer.begin(), exponent_as_integer.end(), out);
 		}
-		assert(mantissa_as_integer.size() != 0):
-		out = std::copy(mantissa_as_integer.begin(), mantissa_as_integer.end(), out);
+		assert(mantissa.size() != 0):
+		out = std::copy(mantissa.begin(), mantissa.end(), out);
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
@@ -210,6 +208,81 @@ private :
 			out = std::copy(integer_length.begin(), integer_length.end(), out);
 		}
 	}
+	
+	static void dissectDouble(
+		  double value
+		, DoubleValueCategory &category
+		, int &sign
+		, Details::Integer<> &mantissa
+		, unsigned int &base
+		, unsigned int &scale_factor
+		, int &exponent
+		)
+	{
+		switch (fpclassify(value))
+		{
+		case FP_INFINITE :
+			category = signbit(value) ? DoubleValueCategory::negative_infinity__ : DoubleValueCategory::positive_infinity__;
+			return;
+		case FP_NAN :
+			category = DoubleValueCategory::not_a_number__;
+			return;
+		case FP_ZERO :
+			category = signbit(value) ? DoubleValueCategory::negative_zero__ : DoubleValueCategory::positive_zero__;
+			return;
+		default :
+			category = DoubleValueCategory::normal__;
+		}
+	
+		sign = signbit(value) ? -1 : 1;
+		value *= sign;
+		double const mantissa_as_double(frexp(value, &exponent));
+		double const mantissa_as_intermediate_for_integer(ldexp(mantissa_as_double, numeric_limits< double >::digits));
+		exponent -= numeric_limits< double >::digits;
+		static_assert(numeric_limits< double >::digits < numeric_limits< uint64_t >::digits, "double is expected to have a smaller mantissa than the bits in a 64-bit integer");
+		static_assert(numeric_limits< double >::radix == numeric_limits< uint64_t >::radix, "radix for double and int should be the same");
+		uint64_t mantissa_as_uint(mantissa_as_intermediate_for_integer);
+		while ((mantissa_as_uint % 256) == 0)
+		{
+			exponent += 8;
+			mantissa_as_uint /= 256;
+		}
+		while ((mantissa_as_uint % 16) == 0)
+		{
+			exponent += 4;
+			mantissa_as_uint /= 16;
+		}
+		while ((mantissa_as_uint % 2) == 0)
+		{
+			++exponent;
+			mantissa_as_uint /= 2;
+		}
+		mantissa = Details::Integer< max_bits_per_integer__ >(mantissa_as_uint);
+		base = 2;
+		if ((exponent % 4) == 0)
+		{
+			base = 16;
+			exponent /= 4;
+		}
+		else if ((exponent % 3) == 0)
+		{
+			base = 8;
+			exponent /= 3;
+		}
+		else
+		{ /* don't adjust the base */ }
+		for (scale_factor = 3; scale_factor > 1; --scale_factor)
+		{
+			if ((exponent % scale_factor) == 0)
+			{
+				exponent /= scale_factor;
+				break;
+			}
+			else
+			{ /* not this one */ }
+		}
+	}
+
 };
 }}
 

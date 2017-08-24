@@ -43,7 +43,7 @@ public :
 	}
 	
 	virtual void onEndOfContents() noexcept = 0;
-	virtual void onInteger(Details::Integer const &value) noexcept = 0;
+	virtual void onInteger(Details::Integer< max_bits_per_integer__ > const &value) noexcept = 0;
 	virtual void onEnumerated(int value) noexcept = 0;
 	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) noexcept = 0;
 	
@@ -267,7 +267,7 @@ private :
 		} while ((first != last) && (parse_buffer_size_ != length_));
 		if (parser_buffer_size_ == length_)
 		{
-			onInteger(Details::Integer(parse_buffer_, parse_buffer_ + parse_buffer_size_));
+			onInteger(Details::Integer< max_bits_per_integer__ >(parse_buffer_, parse_buffer_ + parse_buffer_size_));
 			parse_buffer_size_ = 0;
 			return true;
 		}
@@ -415,7 +415,7 @@ private :
 		if (parse_buffer_size_ == length_)
 		{
 			int sign((parse_buffer_[0] & 0x40) == 0x40 ? -1 : 1);
-			int base;
+			unsigned int base;
 			switch (parse_buffer_[0] & 0x30)
 			{
 			case 0x00 :
@@ -438,37 +438,18 @@ private :
 				);
 			unsigned char const *beg(parse_buffer_ + (((parse_buffer_[0] & 0x03) == 3) ? 2 : 1));
 			unsigned char const *end(parse_buffer_ + parse_buffer_size_);
-			if ((bytes_in_exponent > sizeof(uint64_t)) || (distance(beg, end) < bytes_in_exponent)) throw EncodingError("exponent length error");
+			int exponent(0);
+			if ((bytes_in_exponent > sizeof(exponent)) || (distance(beg, end) < bytes_in_exponent)) throw EncodingError("exponent length error");
 			end = beg + bytes_in_exponent;
-			uint64_t exponent(0);
+			if ((bytes_in_exponent != 0) && ((*beg & 0x80) == 0x80)) exponent = ~0;
 			for ( ; beg != end; ++beg)
 			{
 				exponent <<= 8;
 				exponent |= *beg;
 			}
 			end = parse_buffer_ + parse_buffer_size_;
-			uint64_t n(0);
-			if (distance(beg, end) > sizeof(n)) throw EncodingError("N part of the mantissa too large");
-			for ( ; beg != end; ++beg)
-			{
-				n <<= 8;
-				n |= *beg;
-			}
-			double value = sign * n;
-			for (unsigned int s(0); s < scale_factor; ++s)
-			{
-				value *= 2;
-			}
-			assert((base == 2) || (base == 8) || (base == 16));
-			while (base != 2)
-			{
-				if (exponent > (std::numeric_limits< int >::max() / 2)) throw EncodingError("exponent too large");
-				exponent *= 2;
-				base /= 2;
-			}
-			if (exponent > std::numeric_limits< int >::max() throw EncodingError("exponent too large");
-			int exp((int)(exponent));
-			value = ldexp(value, exp);
+			
+			double value(buildDouble(sign, Details::Integer< max_bits_per_integer__ >(beg, end), base, scale_factor, exponent));
 			onReal(value);
 			length_ = 0;
 			return true;
@@ -477,6 +458,45 @@ private :
 		{
 			return false;
 		}
+	}
+	
+	static double buildDouble(
+		  int sign
+		, Details::Integer< max_bits_per_integer__ > mantissa
+		, unsigned int base
+		, unsigned int scale_factor
+		, int exponent
+		)
+	{
+		static_assert(numeric_limits< double >::radix == 2, "radix of double must be 2");
+		double retval(0.0);
+	
+		pre_condition((base == 2) || (base == 8) || (base == 16));
+		switch (base)
+		{
+		case 2 :
+			base = 1;
+			break;
+		case 8:
+			base = 3;
+			break;
+		case 16:
+			base = 4;
+			break;
+		}
+		for_each(
+			  mantissa.begin()
+			, mantissa.end()
+			, [&retval](unsigned char octet){
+				retval = ldexp(retval, 8) + octet;
+			});
+		pre_condition(scale_factor <= 3);
+		pre_condition(		(exponent >= numeric_limits< decltype(exponent) >::min() / 12/*see below*/)
+				&& 	(exponent <= numeric_limits< decltype(exponent) >::max() / 12/*maximum value for scale_factor * base*/)
+				);
+		retval = ldexp(retval, exponent * scale_factor * base) * sign;
+	
+		return retval;
 	}
 	
 	State state_ = initial__;

@@ -8,9 +8,7 @@
 using namespace std;
 using namespace Vlinder::Rubicon;
 
-static_assert(numeric_limits< double >::radix == 2, "radix of double must be 2");
-
-enum struct Category {
+enum struct DoubleValueCategory {
 	  normal__
 	, positive_infinity__
 	, negative_infinity__
@@ -19,8 +17,15 @@ enum struct Category {
 	, negative_zero__
 	};
 
-double buildDouble(int sign, Details::Integer<> mantissa, unsigned int base, unsigned int scale_factor, int exponent)
+static double buildDouble(
+	  int sign
+	, Details::Integer<> mantissa
+	, unsigned int base
+	, unsigned int scale_factor
+	, int exponent
+	)
 {
+	static_assert(numeric_limits< double >::radix == 2, "radix of double must be 2");
 	double retval(0.0);
 
 	pre_condition((base == 2) || (base == 8) || (base == 16));
@@ -51,21 +56,29 @@ double buildDouble(int sign, Details::Integer<> mantissa, unsigned int base, uns
 	return retval;
 }
 
-void dissectDouble(double value, Category &category, int &sign, Details::Integer<> &mantissa, unsigned int &base, unsigned int &scale_factor, int &exponent)
+static void dissectDouble(
+	  double value
+	, DoubleValueCategory &category
+	, int &sign
+	, Details::Integer<> &mantissa
+	, unsigned int &base
+	, unsigned int &scale_factor
+	, int &exponent
+	)
 {
 	switch (fpclassify(value))
 	{
 	case FP_INFINITE :
-		category = signbit(value) ? Category::negative_infinity__ : Category::positive_infinity__;
+		category = signbit(value) ? DoubleValueCategory::negative_infinity__ : DoubleValueCategory::positive_infinity__;
 		return;
 	case FP_NAN :
-		category = Category::not_a_number__;
+		category = DoubleValueCategory::not_a_number__;
 		return;
 	case FP_ZERO :
-		category = signbit(value) ? Category::negative_zero__ : Category::positive_zero__;
+		category = signbit(value) ? DoubleValueCategory::negative_zero__ : DoubleValueCategory::positive_zero__;
 		return;
 	default :
-		category = Category::normal__;
+		category = DoubleValueCategory::normal__;
 	}
 
 	sign = signbit(value) ? -1 : 1;
@@ -122,14 +135,14 @@ int main()
 	cout << "-4*2^(1*12) = " << buildDouble(-1, Details::Integer<>(4), 2, 1, 12) << endl;
 	cout << "827 * 16^(2*13) = " << buildDouble(1, Details::Integer<>(827), 16, 2, 13) << endl;
 
-	Category category;
+	DoubleValueCategory category;
 	int sign;
 	Details::Integer<> mantissa;
 	unsigned int base;
 	unsigned int scale_factor;
 	int exponent;
 	dissectDouble(buildDouble(-1, Details::Integer<>(4), 2, 1, 12), category, sign, mantissa, base, scale_factor, exponent);
-	assert(category == Category::normal__);
+	assert(category == DoubleValueCategory::normal__);
 	assert(sign == -1);
 	assert(mantissa == Details::Integer<>(1));
 	assert(base == 2);
