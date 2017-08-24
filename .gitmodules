@@ -1,3 +1,6 @@
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/VlinderSoftware/cmake.git
+[submodule "exceptions"]
+	path = cmake
+	url = https://github.com/VlinderSoftware/exceptions.git
