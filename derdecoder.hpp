@@ -9,7 +9,14 @@ public :
 	DERDecoder(DERDecoder &&) = default;
 	DERDecoder& operator=DERDecoder(DERDecoder const &) = default;
 	DERDecoder& operator=DERDecoder(DERDecoder &&) = default;
-
+	
+	void reset()
+	{
+		state_ = State::expect_type__;
+		parse_buffer_size_ = 0;
+		length_ = 0;
+	}
+	
 	template < typename InputIterator >
 	bool parse(InputIterator &first, InputIterator last)
 	{
@@ -35,7 +42,7 @@ public :
 			{
 				bool complete(parseValue(first, last));
 				if (!complete) return false;
-				state_ = State::expect_type__;
+				reset();
 				break;
 			}
 			}
@@ -46,6 +53,8 @@ public :
 	virtual void onInteger(Details::Integer< max_bits_per_integer__ > const &value) noexcept = 0;
 	virtual void onEnumerated(int value) noexcept = 0;
 	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) noexcept = 0;
+	virtual void onOctetString(bool final, unsigned char *first, unsigned char *last) noexcept = 0;
+	virtual void onNull() noexcept = 0;
 	
 private :
 	enum struct State {
@@ -172,6 +181,7 @@ private :
 			case 0x03 : // bit string (may be primitive)
 				return parseBitString(first, last);
 			case 0x04 : // octet string (may be primitive)
+				return parseOctetString(first, last);
 			case 0x08 : // external
 			case 0x0B : // embedded PDV
 			case 0x0C : // UTF8 string (may be primitive)
@@ -215,7 +225,11 @@ private :
 			case 0x09 : // real 
 				return parseReal(first, last);
 			case 0x04 : // octet string (may be constructed)
-			case 0x05 : // null 
+				return parseOctetString(first, last);
+			case 0x05 : // null
+				if (0 != length_) throw EncodingError("Non-zero length for null tag");
+				onNull();
+				break;
 			case 0x06 : // object identifier 
 			case 0x07 : // object descriptor 
 			case 0x0C : // UTF8 string (may be constructed)
@@ -452,12 +466,50 @@ private :
 			double value(buildDouble(sign, Details::Integer< max_bits_per_integer__ >(beg, end), base, scale_factor, exponent));
 			onReal(value);
 			length_ = 0;
+			parse_buffer_size_ = 0;
 			return true;
 		}
 		else 
 		{
 			return false;
 		}
+	}
+	
+	template < typename InputIterator >
+	bool parseOctetString(InputIterator &first, InputIterator last)
+	{
+		// like bit strings, we don't necessarily expect to have the entire octet
+		// string available when we're called, so we indicate whether this is the
+		// final chunk when calling onOctetString. Having the limitation of using
+		// input iterator (which by definition can only be read from once) means
+		// we read in chunks no bigger than our parse buffer. 
+		while (first != last)
+		{
+			uint64_t initial_parse_buffer_size(parse_buffer_size_);
+			uint64_t working_length(min(length_ - initial_parse_buffer_size), sizeof(parse_buffer_));
+			// there is no combination of std::copy and std::copy_n that works for
+			// this particular situation, where I want to copy up to n elements
+			// from a range, so I'll have to write an actual copying loop by hand :(
+			for (uint64_t i(0); (first != last) && (i < working_length); )
+			{
+				parse_buffer_[i++] = *first++;
+				++parse_buffer_size_;
+			}
+			onOctetString(
+				  parse_buffer_size_ == length_
+				, parse_buffer_
+				, parse_buffer_ + working_length
+				);
+		}
+		bool const done(parse_buffer_size_ == length_);
+		if (done)
+		{
+			parse_buffer_size_ = 0;
+			length_ = 0;
+		}
+		else 
+		{ /* not done yet */ }
+		return done;
 	}
 	
 	static double buildDouble(
