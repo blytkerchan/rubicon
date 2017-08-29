@@ -1,5 +1,5 @@
 namespace Vlinder { namespace Rubicon {
-template < unsigned int max_bits_per_integer__ = 2048 >
+template < unsigned int max_bits_per_integer__ = 2048, unsigned int stack_size__ = 16 >
 class DERDecoder
 {
 public :
@@ -15,6 +15,7 @@ public :
 		state_ = State::expect_type__;
 		parse_buffer_size_ = 0;
 		length_ = 0;
+		stack_depth_ = 0;
 	}
 	
 	template < typename InputIterator >
@@ -42,19 +43,40 @@ public :
 			{
 				bool complete(parseValue(first, last));
 				if (!complete) return false;
-				reset();
+				state_ = State::expect_type__;
+				parse_buffer_size_ = 0;
+				length_ = 0;
+				if ((0 != stack_depth_) && (0 == length_stack_[stack_depth_ - 1]))
+				{
+					switch (type_stack_[stack_depth_].tag_)
+					{
+					case 0x10 : // sequence
+						onEndSequence();
+						break;
+					case 0x11 : // set
+						onEndSet();
+						break;
+					default :
+						throw std::logic_error("End of what?");
+					}
+					--stack_depth_;
+				}
 				break;
 			}
 			}
 		}
 	}
 	
-	virtual void onEndOfContents() noexcept = 0;
-	virtual void onInteger(Details::Integer< max_bits_per_integer__ > const &value) noexcept = 0;
-	virtual void onEnumerated(int value) noexcept = 0;
-	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) noexcept = 0;
-	virtual void onOctetString(bool final, unsigned char *first, unsigned char *last) noexcept = 0;
-	virtual void onNull() noexcept = 0;
+	virtual void onEndOfContents() = 0;
+	virtual void onInteger(Details::Integer< max_bits_per_integer__ > const &value) = 0;
+	virtual void onEnumerated(int value) = 0;
+	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) = 0;
+	virtual void onOctetString(bool final, unsigned char *first, unsigned char *last) = 0;
+	virtual void onNull() = 0;
+	virtual void onBeginSequence() = 0;
+	virtual void onEndSequence() = 0;
+	virtual void onBeginSet() = 0;
+	virtual void onEndSet() = 0;
 	
 private :
 	enum struct State {
@@ -147,6 +169,11 @@ private :
 						length_ += *length_byte;
 					}
 					parse_buffer_size_ = 0;
+					if (0 != stack_depth_)
+					{
+						if (length_ > length_stack_[stack_depth_ - 1]) throw EncodingError("TLV larger than remaining space in construct");
+						lenght_stack_[stack_depth_ - 1] -= length_;
+					}
 					return true;
 				}
 				else 
@@ -185,8 +212,14 @@ private :
 			case 0x08 : // external
 			case 0x0B : // embedded PDV
 			case 0x0C : // UTF8 string (may be primitive)
-			case 0x10 : // sequence 
+			case 0x10 : // sequence
+				onBeginSequence();
+				push(type_);
+				return true;
 			case 0x11 : // set
+				onBeginSet();
+				push(type_);
+				return true;
 			case 0x12 : // numeric string (may be primitive)
 			case 0x13 : // printable string (may be primitive)
 			case 0x14 : // T61 string (may be primitive)
@@ -511,7 +544,16 @@ private :
 		{ /* not done yet */ }
 		return done;
 	}
-	
+
+	void push(Type const &type)
+	{
+		static_assert((sizeof(type_stack_) / sizeof(type_stack_[0])) == (sizeof(length_stack_) / sizeof(length_stack_[0])), "Both stacks should be the same size");
+		if (stack_depth_ == (sizeof(type_stack_) / sizeof(type_stack_[0]))) throw StackOverflow("Too many levels of structured data");
+		length_stack_[stack_depth_] = length_;
+		type_stack_[stack_depth_] = type;
+		++stack_depth_;
+	}
+
 	static double buildDouble(
 		  int sign
 		, Details::Integer< max_bits_per_integer__ > mantissa
@@ -558,5 +600,8 @@ private :
 	static_assert(max_bits_per_integer__ >= 64);
 	static_assert(max_bits_per_integer__ >= (sizeof(int) * 8));
 	uint64_t parse_buffer_size_ = 0;
+	uint64_t length_stack_[stack_size__];
+	Type type_stack_[stack_size__];
+	uint64_t stack_depth_ = 0;
 };
 }}

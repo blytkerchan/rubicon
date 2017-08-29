@@ -186,7 +186,31 @@ public :
 		encodeLength(out, std::distance(first, last));
 		out = std::copy(first, last, out);
 	}
+
+	template < typename OutputIterator, typename MultiPassInputIterator >
+	void encodeSequence(
+		  OutputIterator &out
+		, MultiPassInputIterator first
+		, MultiPassInputIterator last
+		)
+	{
+		*out++ = 0x30;
+		encodeLength(out, std::distance(first, last));
+		out = std::copy(first, last, out);
+	}
 	
+	template < typename OutputIterator, typename MultiPassInputIterator >
+	void encodeSet(
+		  OutputIterator &out
+		, MultiPassInputIterator first
+		, MultiPassInputIterator last
+		)
+	{
+		*out++ = 0x31;
+		encodeLength(out, std::distance(first, last));
+		out = std::copy(first, last, out);
+	}
+
 private :
 	template < typename OutputIterator >
 	void encodeLength(OutputIterator &out, uint64_t length)
