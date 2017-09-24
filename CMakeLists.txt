@@ -13,6 +13,17 @@ target_link_libraries(poc-real exceptions)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
+add_custom_target(preproc-grammar
+	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	SOURCES preproc.g4
+	)
+add_custom_target(asn1-grammar
+	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated asn1.g4
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	SOURCES preproc.g4
+	)
+
 set(preproc-GENERATED_SRC 
 	${PROJECT_SOURCE_DIR}/generated/preprocBaseListener.cpp
 	${PROJECT_SOURCE_DIR}/generated/preprocBaseListener.h
@@ -38,5 +49,7 @@ foreach(src_file ${preproc-SRC})
 endforeach()
 
 add_executable(preproc ${preproc-SRC})
+add_dependencies(preproc preproc-grammar)
 target_link_libraries(preproc antlr4-runtime boost_program_options exceptions)
+
 

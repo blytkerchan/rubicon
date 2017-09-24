@@ -1,3 +1,4 @@
 #! /bin/bash
 java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
+java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated asn1.g4
 
