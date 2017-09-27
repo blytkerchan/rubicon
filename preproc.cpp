@@ -1,9 +1,12 @@
 #include "generated/preprocLexer.h"
+#include "generated/preprocParser.h"
+#include "preprocessor/listener.hpp"
 #include "exceptions/contract.hpp"
 #include <iostream>
 #include <string>
+#include <memory>
 #include <boost/program_options.hpp>
-#include <antlr4-runtime/ANTLRFileStream.h>
+#include <antlr4-runtime/antlr4-runtime.h>
 
 using namespace antlr4;
 using namespace std;
@@ -37,116 +40,25 @@ int main(int argc, char const **argv)
 		cerr << opts << endl;
 		return 1;
 	}
+	else
+	{ /* all is well */ }
+	ostream *out(&cout);
+	unique_ptr< ofstream > output_file;
+	if (vm.count("output"))
+	{
+		output_file = move(make_unique< ofstream >(vm["output"].as< string >()));
+		out = output_file.get();
+	}
+	else
+	{ /* use stdout */ }
 
 	ANTLRFileStream input(vm["input-file"].as< string >());
 	preprocLexer lexer(&input);
 	CommonTokenStream tokens(&lexer);
-	tokens.fill();
-
-	ostream *out(&cout);
-
-	enum struct State {
-		  initial__
-		, expect_anything__ = initial__
-		, wait_for_end_of_c_style_comment__
-		, wait_for_end_of_ada_style_comment__
-		, wait_for_end_of_quote__
-		} state(State::initial__);
-	for (auto token : tokens.getTokens())
-	{
-		switch (token->getType())
-		{
-		case preprocLexer::BEGIN_C_STYLE_COMMENT :
-			if (State::expect_anything__ == state)
-			{
-				state = State::wait_for_end_of_c_style_comment__;
-			}
-			else if (State::wait_for_end_of_quote__ == state)
-			{
-				*out << token->getText();
-			}
-			else
-			{
-				invariant((State::wait_for_end_of_c_style_comment__ == state) || (State::wait_for_end_of_ada_style_comment__ == state));
-			}
-			break;
-		case preprocLexer::END_C_STYLE_COMMENT :
-			if (State::expect_anything__ == state)
-			{
-				cerr << vm["input-file"].as< string >() << "(" << token->getLine() << "): Unexpected end of C-style comment" << endl;
-				return 1;
-			}
-			else if (State::wait_for_end_of_c_style_comment__ == state)
-			{
-				state = State::expect_anything__;
-			}
-			else if (State::wait_for_end_of_quote__ == state)
-			{
-				*out << token->getText();
-			}
-			else
-			{
-				invariant(State::wait_for_end_of_ada_style_comment__ == state);
-			}
-			break;
-		case preprocLexer::ADA_STYLE_COMMENT_DELIM :
-			if (State::expect_anything__ == state)
-			{
-				state = State::wait_for_end_of_ada_style_comment__;
-			}
-			else if (State::wait_for_end_of_ada_style_comment__ == state)
-			{
-				state = State::expect_anything__;
-			}
-			else if (State::wait_for_end_of_quote__ == state)
-			{
-				*out << token->getText();
-			}
-			else
-			{
-				invariant(State::wait_for_end_of_c_style_comment__ == state);
-			}
-		case preprocLexer::NEWLINE :
-			switch (state)
-			{
-			case State::wait_for_end_of_ada_style_comment__ :
-				state = State::expect_anything__;
-			case State::expect_anything__ :
-			case State::wait_for_end_of_quote__ :
-				*out << token->getText();
-				break;
-			default :
-				invariant((State::wait_for_end_of_c_style_comment__ == state) || (State::wait_for_end_of_ada_style_comment__ == state));
-				break;
-			}
-			break;
-		case preprocLexer::QUOTE :
-			if (State::expect_anything__ == state)
-			{
-				state = State::wait_for_end_of_quote__;
-				*out << token->getText();
-			}
-			else if (State::wait_for_end_of_quote__ == state)
-			{
-				state = State::expect_anything__;
-				*out << token->getText();
-			}
-			else
-			{
-				invariant((State::wait_for_end_of_c_style_comment__ == state) || (State::wait_for_end_of_ada_style_comment__ == state));
-			}
-		case preprocLexer::CHAR :
-			switch (state)
-			{
-			case State::expect_anything__ :
-			case State::wait_for_end_of_quote__ :
-				*out << token->getText();
-				break;
-			default :
-				invariant((State::wait_for_end_of_c_style_comment__ == state) || (State::wait_for_end_of_ada_style_comment__ == state));
-				break;
-			}
-		}
-	}
+	preprocParser parser(&tokens);
+	auto the_tree(parser.file());
+	tree::ParseTreeWalker walker;
+	Vlinder::Rubicon::Preprocessor::Listener listener(*out);
+	walker.walk(&listener, the_tree);
 }
 

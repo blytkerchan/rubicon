@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(Rubicon)
-set(VLINDER_USING_CXX11 1)
+set(VLINDER_USING_CXX14 1)
 include(cmake/settings.cmake)
 include_directories(/usr/local/include)
 include_directories(/usr/local/include/antlr4-runtime)
@@ -40,7 +40,12 @@ foreach(src_file ${preproc-GENERATED_SRC})
 		PROPERTIES GENERATED TRUE
 		)
 endforeach()
-set(preproc-SRC ${PROJECT_SOURCE_DIR}/preproc.cpp ${preproc-GENERATED_SRC})
+set(preproc-SRC
+	${PROJECT_SOURCE_DIR}/preproc.cpp
+	${PROJECT_SOURCE_DIR}/preprocessor/listener.cpp
+	${PROJECT_SOURCE_DIR}/preprocessor/listener.hpp
+	${preproc-GENERATED_SRC}
+	)
 foreach(src_file ${preproc-SRC})
 	set_source_files_properties(
 		${src_file}
