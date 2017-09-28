@@ -1,152 +1,7 @@
 grammar asn1;
 
-//////////////////////////////////////////////////
-// lexical stuff (sections 11 and 12)
-// X.680 section 11.1 table 2
-LATIN_CAPITAL_LETTER	: [A-Z] ;
-LATIN_SMALL_LETTER		: [a-z] ;
-DIGIT					: [0-9] ;
-EXCLAMATION_MARK		: '!' ;
-QUOTATION_MARK			: '"' ;
-AMPERSAND				: '&' ;
-APOSTROPHE				: '\'' ;
-LEFT_PARENTHESIS		: '(' ;
-RIGHT_PARENTHESIS		: ')' ;
-ASTERISK				: '*' ;
-COMMA					: ',' ;
-HYPHEN_MINUS			: '-' ;
-FULL_STOP				: '.' ;
-SOLIDUS					: '/' ;
-COLON					: ':' ;
-SEMICOLON				: ';' ;
-LESS_THAN_SIGN			: '<' ;
-EQUALS_SIGN				: '=' ;
-GREATER_THAN_SIGN		: '>' ;
-COMMERCIAL_AT			: '@' ;
-LEFT_SQUARE_BRACKET		: '[' ;
-RIGHT_SQUARE_BRACKET	: ']' ;
-CIRCUMFLEX_ACCENT		: '^' ;
-LOW_LINE				: '_' ;
-LEFT_CURLY_BRACKET		: '{' ;
-VERTICAL_LINE			: '|' ;
-RIGHT_CURLY_BRACKET		: '}' ;
-NON_BREAKING_HYPHEN		: '\u2011' ;
-// X.680 11.8
-HYPHEN			: ( HYPHEN_MINUS | NON_BREAKING_HYPHEN ) ;
-// 12.1.6
-HORIZONTAL_TABULATION	: '\t' ;
-LINE_FEED				: '\n' ;
-VERTICAL_TABULATION		: '\u000b' ;
-FORM_FEED				: '\u000c' ;
-CARRIAGE_RETURN			: '\r' ;
-SPACE					: ' ' ;
-NO_BREAK_SPACE			: '\u00a0' ;
-WHITE_SPACE
-	: HORIZONTAL_TABULATION
-	| LINE_FEED
-	| VERTICAL_TABULATION
-	| FORM_FEED
-	| CARRIAGE_RETURN
-	| SPACE
-	| NO_BREAK_SPACE
-	;
-NEW_LINE
-	: LINE_FEED
-	| VERTICAL_TABULATION
-	| FORM_FEED
-	| CARRIAGE_RETURN
-	;
-WS : WHITE_SPACE ; // tell ANTLR to ignore white space
-
-// 12.2
-TYPE_REFERENCE
-	: LATIN_CAPITAL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
-	;
-	
-// 12.3
-IDENTIFIER
-	: LATIN_SMALL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
-	;
-	
-// 12.4
-VALUE_REFERENCE
-	: LATIN_SMALL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
-	;
-
-// 12.5
-MODULE_REFERENCE
-	: LATIN_CAPITAL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
-	;
-
-// shared for 12.2 and 12.3
-TYPE_REFERENCE_OR_IDENTIFIER_CHUNK
-	: (LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT)+
-	;
-	
-TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT
-	: ( HYPHEN TYPE_REFERENCE_OR_IDENTIFIER_CHUNK )+
-	;
-
-// 12.8
-NUMBER
-	: '0'
-	| DIGIT+ // validation that it doesn't start with 0 will be done in code
-	;
-
-// 12.9
-REAL_NUMBER
-	: NUMBER FULL_STOP NUMBER ( 'e' | 'E' ) NUMBER
-	| NUMBER FULL_STOP NUMBER
-	| NUMBER ( 'e' | 'E' ) NUMBER
-	| NUMBER
-	;
-
-// 12.10
-BSTRING
-	: APOSTROPHE ( '0' | '1' | WHITE_SPACE )* '\'B'
-	;
-
-// 12.12
-HSTRING
-	: APOSTROPHE ( '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | WHITE_SPACE )* '\'H'
-	;
-	
-// 12.14
-CSTRING
-	: QUOTATION_MARK ( ( QUOTATION_MARK QUOTATION_MARK ) | . )*? QUOTATION_MARK
-	;
-	
-// 12.16 is not implemented in the grammar: the interpreter will have to verify
-//	   the validity of the string. Here, we just say that a SIMPLE_STRING is a string
-SIMPLE_STRING : CSTRING ;
-
-// 12.17
-TSTRING
-	: QUOTATION_MARK ( DIGIT | '+' | '-' | ':' | '.' | ',' | '/' | 'C' | 'D' | 'H' | 'M' | 'R' | 'P' | 'S' | 'T' | 'W' | 'Y' | 'Z' )* QUOTATION_MARK
-	;
-	
-// 12.19
-PS_NAME : TYPE_REFERENCE ; // the grammer is identical
-
-// 12.20 - 12.24
-ASSIGNMENT				: '::=' ;
-RANGE_SEPARATOR			: '..' ;
-ELLIPSIS				: '...' ;
-LEFT_VERSION_BRACKETS	: '[[' ;
-RIGHT_VERSION_BRACKETS	: ']]' ;
-
-// 12.26
-INTEGER_UNICODE_LABEL
-	: NUMBER
-	;
-
-// 12.27
-NON_INTEGER_UNICODE_LABEL
-	: ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+
-	| ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+ WHITE_SPACE* LEFT_PARENTHESIS WHITE_SPACE* DIGIT+ WHITE_SPACE* RIGHT_PARENTHESIS
-	;
-
 // 12.38 - reserved words
+// these have to come first so they take precedence over identifiers and somesuch
 ABSENT_RW				: 'ABSENT' ;
 INTERSECTION_RW			: 'INTERSECTION' ;
 SEQUENCE_RW				: 'SEQUENCE' ;
@@ -213,13 +68,156 @@ INTEGER_RW				: 'INTEGER' ;
 RELATIVE_OID_IRI_RW   	: 'RELATIVE-OID-IRI' ;
 OPTIONAL_RW				: 'OPTIONAL' ;
 
+//////////////////////////////////////////////////
+// lexical stuff (sections 11 and 12)
+// X.680 section 11.1 table 2
+fragment LATIN_CAPITAL_LETTER	: [A-Z] ;
+fragment LATIN_SMALL_LETTER		: [a-z] ;
+fragment DIGIT					: [0-9] ;
+EXCLAMATION_MARK_TK				: '!' ;
+fragment QUOTATION_MARK			: '"' ;
+QUOTATION_MARK_TK				: '"' ;
+fragment AMPERSAND				: '&' ;
+fragment APOSTROPHE				: '\'' ;
+fragment LEFT_PARENTHESIS		: '(' ;
+LEFT_PARENTHESIS_TK				: '(' ;
+fragment RIGHT_PARENTHESIS		: ')' ;
+RIGHT_PARENTHESIS_TK			: ')' ;
+ASTERISK_TK						: '*' ;
+COMMA_TK						: ',' ;
+fragment HYPHEN_MINUS			: '-' ;
+fragment FULL_STOP				: '.' ;
+FULL_STOP_TK					: '.' ;
+SOLIDUS_TK						: '/' ;
+COLON_TK						: ':' ;
+SEMICOLON_TK					: ';' ;
+LESS_THAN_SIGN_TK				: '<' ;
+EQUALS_SIGN_TK					: '=' ;
+fragment GREATER_THAN_SIGN		: '>' ;
+COMMERCIAL_AT_TK				: '@' ;
+LEFT_SQUARE_BRACKET_TK			: '[' ;
+RIGHT_SQUARE_BRACKET_TK			: ']' ;
+CIRCUMFLEX_ACCENT_TK			: '^' ;
+fragment LOW_LINE				: '_' ;
+fragment LEFT_CURLY_BRACKET		: '{' ;
+LEFT_CURLY_BRACKET_TK			: '{' ;
+VERTICAL_LINE_TK				: '|' ;
+fragment RIGHT_CURLY_BRACKET	: '}' ;
+RIGHT_CURLY_BRACKET_TK			: '}' ;
+fragment NON_BREAKING_HYPHEN	: '\u2011' ;
+// X.680 11.8
+fragment HYPHEN					: ( HYPHEN_MINUS | NON_BREAKING_HYPHEN ) ;
+HYPHEN_TK						: ( HYPHEN_MINUS | NON_BREAKING_HYPHEN ) ;
+// 12.1.6
+fragment HORIZONTAL_TABULATION	: '\t' ;
+fragment LINE_FEED				: '\n' ;
+fragment VERTICAL_TABULATION		: '\u000b' ;
+fragment FORM_FEED				: '\u000c' ;
+fragment CARRIAGE_RETURN			: '\r' ;
+fragment SPACE					: ' ' ;
+fragment NO_BREAK_SPACE			: '\u00a0' ;
+fragment WHITE_SPACE
+	: HORIZONTAL_TABULATION
+	| LINE_FEED
+	| VERTICAL_TABULATION
+	| FORM_FEED
+	| CARRIAGE_RETURN
+	| SPACE
+	| NO_BREAK_SPACE
+	;
+//NEW_LINE
+//	: LINE_FEED
+//	| VERTICAL_TABULATION
+//	| FORM_FEED
+//	| CARRIAGE_RETURN
+//	;
+WS : WHITE_SPACE+ -> channel(HIDDEN) ; // tell ANTLR to ignore white space
+
+// 12.2 & 12.5
+TYPE_REFERENCE_OR_MODULE_REFERENCE
+	: LATIN_CAPITAL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
+	;
+
+// 12.3 & 12.4 (IDENTIFIER and VALUE_REFERENCE are gramatically the same
+IDENTIFIER
+	: LATIN_SMALL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
+	;
+
+// shared for 12.2 and 12.3
+fragment TYPE_REFERENCE_OR_IDENTIFIER_CHUNK
+	: (LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT)+
+	;
+
+TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT
+	: ( HYPHEN TYPE_REFERENCE_OR_IDENTIFIER_CHUNK )+
+	;
+
+// 12.8
+NUMBER
+	: '0'
+	| DIGIT+ // validation that it doesn't start with 0 will be done in code
+	;
+
+// 12.9
+REAL_NUMBER
+	: NUMBER FULL_STOP NUMBER ( 'e' | 'E' ) NUMBER
+	| NUMBER FULL_STOP NUMBER
+	| NUMBER ( 'e' | 'E' ) NUMBER
+	| NUMBER
+	;
+
+// 12.10
+BSTRING
+	: APOSTROPHE ( '0' | '1' | WHITE_SPACE )* '\'B'
+	;
+
+// 12.12
+HSTRING
+	: APOSTROPHE ( '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | WHITE_SPACE )* '\'H'
+	;
+
+// 12.14
+CSTRING
+	: QUOTATION_MARK ( ( QUOTATION_MARK QUOTATION_MARK ) | . )*? QUOTATION_MARK
+	;
+
+// 12.16 is not implemented in the grammar: the interpreter will have to verify
+//	   the validity of the string. Here, we just say that a SIMPLE_STRING is a string
+SIMPLE_STRING : CSTRING ;
+
+// 12.17
+TSTRING
+	: QUOTATION_MARK ( DIGIT | '+' | '-' | ':' | '.' | ',' | '/' | 'C' | 'D' | 'H' | 'M' | 'R' | 'P' | 'S' | 'T' | 'W' | 'Y' | 'Z' )* QUOTATION_MARK
+	;
+
+// 12.19
+PS_NAME : TYPE_REFERENCE_OR_MODULE_REFERENCE ; // the grammer is identical
+
+// 12.20 - 12.24
+ASSIGNMENT				: '::=' ;
+RANGE_SEPARATOR			: '..' ;
+ELLIPSIS				: '...' ;
+LEFT_VERSION_BRACKETS	: '[[' ;
+RIGHT_VERSION_BRACKETS	: ']]' ;
+
+// 12.26
+INTEGER_UNICODE_LABEL
+	: NUMBER
+	;
+
+// 12.27
+NON_INTEGER_UNICODE_LABEL
+	: ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+
+	| ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+ WHITE_SPACE* LEFT_PARENTHESIS WHITE_SPACE* DIGIT+ WHITE_SPACE* RIGHT_PARENTHESIS
+	;
+
 // section 13
 module_definition
 	: module_identifier DEFINITIONS_RW encoding_reference_default? tag_default? extension_default? ASSIGNMENT BEGIN_RW module_body encoding_control_sections? END_RW
 	;
 
 module_identifier
-	: MODULE_REFERENCE definitive_identification?
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE definitive_identification?
 	;
 
 definitive_identification
@@ -228,13 +226,13 @@ definitive_identification
 	;
 
 definitive_oid
-	: LEFT_CURLY_BRACKET definitive_object_id_component_list RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK definitive_object_id_component_list RIGHT_CURLY_BRACKET_TK
 	;
-	
+
 definitive_oid_and_iri
 	: definitive_oid iri_value
 	;
-	
+
 definitive_object_id_component_list
 	: definitive_object_id_component+
 	;
@@ -244,50 +242,50 @@ definitive_object_id_component
 	| definitive_number_form
 	| definitive_name_and_number_form
 	;
-	
+
 definitive_number_form
 	: NUMBER
 	;
-	
+
 definitive_name_and_number_form
-	: IDENTIFIER_RW LEFT_PARENTHESIS definitive_number_form RIGHT_PARENTHESIS
+	: IDENTIFIER LEFT_PARENTHESIS_TK definitive_number_form RIGHT_PARENTHESIS_TK
+	| NON_INTEGER_UNICODE_LABEL // though not the way it's specified in X.680, gramatically this is the same thing if there are no hyphens in the identifier part
 	;
 
 encoding_reference_default
-	: ( ( encoding_reference COLON )? INSTRUCTIONS_RW)
+	: ( ( ENCODING_REFERENCE COLON_TK )? INSTRUCTIONS_RW)
 	;
 
 tag_default
 	: (EXPLICIT_RW TAGS_RW  | IMPLICIT_RW TAGS_RW  | AUTOMATIC_RW TAGS_RW)
 	;
-	
+
 extension_default
 	: (EXTENSIBILITY_RW IMPLIED_RW)
 	;
 
 module_body
-	: (exports imports assignment_list)?
+	: exports imports assignment_list?
 	;
-	
+
 exports
-	: (EXPORTS_RW symbols_exported SEMICOLON | EXPORTS_RW ALL_RW SEMICOLON)?
+	: (EXPORTS_RW symbols_exported SEMICOLON_TK | EXPORTS_RW ALL_RW SEMICOLON_TK)?
 	;
-	
+
 symbols_exported
 	: symbol_list?
 	;
 
 imports
-	: (IMPORTS_RW symbols_imported SEMICOLON)?
+	: (IMPORTS_RW symbols_imported SEMICOLON_TK)?
 	;
-	
+
 symbols_imported
 	: symbols_from_module_list?
 	;
 
 symbols_from_module_list
-	: symbols_from_module
-	| symbols_from_module_list symbols_from_module
+	: symbols_from_module+
 	;
 
 symbols_from_module
@@ -295,7 +293,7 @@ symbols_from_module
 	;
 
 global_module_reference
-	: MODULE_REFERENCE assigned_identifier
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE assigned_identifier
 	;
 
 assigned_identifier
@@ -303,8 +301,7 @@ assigned_identifier
 	;
 
 symbol_list
-	: symbol 
-	| symbol_list COMMA symbol
+	: symbol (COMMA_TK symbol)*
 	;
 
 symbol
@@ -312,13 +309,12 @@ symbol
 	;
 
 reference
-	: TYPE_REFERENCE
-	| VALUE_REFERENCE
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE
+	| IDENTIFIER
 	;
 
 assignment_list
-	: assignment
-	| assignment_list assignment
+	: assignment+
 	;
 
 assignment
@@ -330,57 +326,57 @@ assignment
 // section 14
 defined_type
 	: external_type_reference
-	| TYPE_REFERENCE
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE
 	;
-	
+
 defined_value
 	: external_value_reference
-	| VALUE_REFERENCE
+	| IDENTIFIER
 	;
 
 non_parameterized_type_name
 	: external_type_reference
-	| TYPE_REFERENCE 
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE
 	;
-	
+
 external_type_reference
-	: MODULE_REFERENCE FULL_STOP TYPE_REFERENCE
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE FULL_STOP_TK TYPE_REFERENCE_OR_MODULE_REFERENCE
 	;
 
 external_value_reference
-	: MODULE_REFERENCE FULL_STOP VALUE_REFERENCE
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE FULL_STOP_TK IDENTIFIER
 	;
 
 // section 15
 absolute_reference
-	: COMMERCIAL_AT module_identifier FULL_STOP item_spec
+	: COMMERCIAL_AT_TK module_identifier FULL_STOP_TK item_spec
 	;
 
 item_spec
-	: TYPE_REFERENCE
-	| item_spec FULL_STOP component_id
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE
+	| item_spec FULL_STOP_TK component_id
 	;
 
 component_id
 	: IDENTIFIER
 	| NUMBER
-	| ASTERISK
+	| ASTERISK_TK
 	;
 
 // section 16
 type_assignment
-	: TYPE_REFERENCE ASSIGNMENT type
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE ASSIGNMENT type
 	;
 	
 value_assignment
-	: VALUE_REFERENCE type ASSIGNMENT value
+	: IDENTIFIER type ASSIGNMENT value
 	;
 	
 value_set_type_assignment
-	: TYPE_REFERENCE type ASSIGNMENT value_set
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE type ASSIGNMENT value_set
 	;
 value_set
-	: LEFT_CURLY_BRACKET element_set_specs RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK element_set_specs RIGHT_CURLY_BRACKET_TK
 	;
 
 // section 17
@@ -474,22 +470,24 @@ boolean_value
 
 integer_type
 	: INTEGER_RW
-	| INTEGER_RW LEFT_CURLY_BRACKET named_number_list RIGHT_CURLY_BRACKET
+	| INTEGER_RW LEFT_CURLY_BRACKET_TK named_number_list RIGHT_CURLY_BRACKET_TK
 	;
 
 named_number_list
-	: named_number
-	| named_number_list COMMA named_number
+	: named_number (COMMA_TK named_number)*
 	;
 
 named_number
-	: IDENTIFIER LEFT_PARENTHESIS signed_number RIGHT_PARENTHESIS
-	| IDENTIFIER LEFT_PARENTHESIS defined_value RIGHT_PARENTHESIS
+	: IDENTIFIER LEFT_PARENTHESIS_TK signed_number RIGHT_PARENTHESIS_TK
+	| IDENTIFIER LEFT_PARENTHESIS_TK defined_value RIGHT_PARENTHESIS_TK
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK signed_number RIGHT_PARENTHESIS_TK // in this context, we don't care if it starts with an uppercase letter (but the lexer does)
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK defined_value RIGHT_PARENTHESIS_TK
+	| NON_INTEGER_UNICODE_LABEL // gramatically the same as above
 	;
 
 signed_number
 	: NUMBER
-	| HYPHEN NUMBER
+	| HYPHEN_TK NUMBER
 	;
 
 integer_value
@@ -498,13 +496,13 @@ integer_value
 	;
 
 enumerated_type
-	: ENUMERATED_RW LEFT_CURLY_BRACKET enumerations RIGHT_CURLY_BRACKET
+	: ENUMERATED_RW LEFT_CURLY_BRACKET_TK enumerations RIGHT_CURLY_BRACKET_TK
 	;
 
 enumerations
 	: root_enumeration
-	| root_enumeration COMMA ELLIPSIS exception_spec?
-	| root_enumeration COMMA ELLIPSIS exception_spec? COMMA additional_enumeration
+	| root_enumeration COMMA_TK ELLIPSIS exception_spec?
+	| root_enumeration COMMA_TK ELLIPSIS exception_spec? COMMA_TK additional_enumeration
 	;
 
 root_enumeration
@@ -516,8 +514,7 @@ additional_enumeration
 	;
 
 enumeration
-	: enumeration_item
-	| enumeration_item COMMA enumeration
+	: enumeration_item (COMMA_TK enumeration_item)*
 	;
 
 enumeration_item
@@ -540,7 +537,7 @@ real_value
 
 numeric_real_value
 	: REAL_NUMBER
-	| HYPHEN REAL_NUMBER
+	| HYPHEN_TK REAL_NUMBER
 	| sequence_value
 	;
 
@@ -552,30 +549,28 @@ special_real_value
 
 bit_string_type
 	: BIT_RW STRING_RW
-	| BIT_RW STRING_RW LEFT_CURLY_BRACKET named_bit_list RIGHT_CURLY_BRACKET
+	| BIT_RW STRING_RW LEFT_CURLY_BRACKET_TK named_bit_list RIGHT_CURLY_BRACKET_TK
 	;
 
 named_bit_list
-	: named_bit
-	| named_bit_list COMMA named_bit
+	: named_bit (COMMA_TK named_bit)*
 	;
 
 named_bit
-	: IDENTIFIER LEFT_PARENTHESIS NUMBER RIGHT_PARENTHESIS
-	| IDENTIFIER LEFT_PARENTHESIS defined_value RIGHT_PARENTHESIS
+	: IDENTIFIER LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
+	| IDENTIFIER LEFT_PARENTHESIS_TK defined_value RIGHT_PARENTHESIS_TK
 	;
 
 bit_string_value
 	: BSTRING
 	| HSTRING
-	| LEFT_CURLY_BRACKET identifier_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+	| LEFT_CURLY_BRACKET_TK identifier_list RIGHT_CURLY_BRACKET_TK
+	| LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
 	| CONTAINING_RW value
 	;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list COMMA IDENTIFIER
+	: IDENTIFIER (COMMA_TK IDENTIFIER)*
 	;
 
 octet_string_type
@@ -597,40 +592,35 @@ null_value
 	;
 
 sequence_type
-	: SEQUENCE_RW LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
-	| SEQUENCE_RW LEFT_CURLY_BRACKET extension_and_exception optional_extension_marker? RIGHT_CURLY_BRACKET
-	| SEQUENCE_RW LEFT_CURLY_BRACKET component_type_lists RIGHT_CURLY_BRACKET
+	: SEQUENCE_RW LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
+	| SEQUENCE_RW LEFT_CURLY_BRACKET_TK extension_and_exception optional_extension_marker? RIGHT_CURLY_BRACKET_TK
+	| SEQUENCE_RW LEFT_CURLY_BRACKET_TK component_type_lists RIGHT_CURLY_BRACKET_TK
 	;
 sequence_of_type
 	: SEQUENCE_RW OF_RW type
 	| SEQUENCE_RW OF_RW named_type
 	;
 extension_and_exception
-	: ELLIPSIS
-	| ELLIPSIS exception_spec?
+	: ELLIPSIS exception_spec?
 	;
 optional_extension_marker
-	: COMMA ELLIPSIS
+	: COMMA_TK ELLIPSIS
 	;
 component_type_lists
-	: root_component_type_list
-	| root_component_type_list COMMA extension_and_exception extension_additions? optional_extension_marker
-	| root_component_type_list COMMA extension_and_exception extension_additions? extension_end_marker COMMA root_component_type_list
-	| extension_and_exception extension_additions? extension_end_marker COMMA root_component_type_list
+	: component_type_list
+	| component_type_list COMMA_TK extension_and_exception extension_additions? optional_extension_marker
+	| component_type_list COMMA_TK extension_and_exception extension_additions? extension_end_marker COMMA_TK component_type_list
+	| extension_and_exception extension_additions? extension_end_marker COMMA_TK component_type_list
 	| extension_and_exception extension_additions? optional_extension_marker
 	;
-root_component_type_list
-	: component_type_list
-	;
 extension_end_marker
-	: COMMA ELLIPSIS
+	: COMMA_TK ELLIPSIS
 	;
 extension_additions
-	: COMMA extension_addition_list
+	: COMMA_TK extension_addition_list
 	;
 extension_addition_list
-	: extension_addition
-	| extension_addition_list COMMA extension_addition
+	: extension_addition (COMMA_TK extension_addition)*
 	;
 extension_addition
 	: component_type
@@ -640,11 +630,10 @@ extension_addition_group
 	: LEFT_VERSION_BRACKETS version_number? component_type_list RIGHT_VERSION_BRACKETS
 	;
 version_number
-	: NUMBER COLON
+	: NUMBER COLON_TK
 	;
 component_type_list
-	: component_type
-	| component_type_list COMMA component_type
+	: component_type (COMMA_TK component_type)*
 	;
 component_type
 	: named_type
@@ -654,63 +643,59 @@ component_type
 	;
 
 sequence_value
-	: LEFT_CURLY_BRACKET component_value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK component_value_list? RIGHT_CURLY_BRACKET_TK
 	;
 
 component_value_list
-	: named_value
-	| component_value_list COMMA named_value
+	: named_value (COMMA_TK named_value)*
 	;
 
 sequence_of_value
-	: LEFT_CURLY_BRACKET value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET named_value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK value_list RIGHT_CURLY_BRACKET_TK
+	| LEFT_CURLY_BRACKET_TK named_value_list RIGHT_CURLY_BRACKET_TK
+	| LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
 	;
 value_list
 	: value
-	| value_list COMMA value
+	| value_list COMMA_TK value
 	;
 named_value_list
 	: named_value
-	| named_value_list COMMA named_value
+	| named_value_list COMMA_TK named_value
 	;
 
 set_type
-	: SET_RW LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET 
-	| SET_RW LEFT_CURLY_BRACKET extension_and_exception optional_extension_marker RIGHT_CURLY_BRACKET
-	| SET_RW LEFT_CURLY_BRACKET component_type_lists RIGHT_CURLY_BRACKET 
+	: SET_RW LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
+	| SET_RW LEFT_CURLY_BRACKET_TK extension_and_exception optional_extension_marker RIGHT_CURLY_BRACKET_TK
+	| SET_RW LEFT_CURLY_BRACKET_TK component_type_lists RIGHT_CURLY_BRACKET_TK
 	;
 set_value
-	: LEFT_CURLY_BRACKET component_value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK component_value_list? RIGHT_CURLY_BRACKET_TK
 	;
 set_of_type
 	: SET_RW OF_RW type
 	| SET_RW OF_RW named_type
 	;
 set_of_value
-	: LEFT_CURLY_BRACKET value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET named_value_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK value_list RIGHT_CURLY_BRACKET_TK
+	| LEFT_CURLY_BRACKET_TK named_value_list RIGHT_CURLY_BRACKET_TK
+	| LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
 	;
 choice_type
-	: CHOICE_RW LEFT_CURLY_BRACKET alternative_type_lists RIGHT_CURLY_BRACKET
+	: CHOICE_RW LEFT_CURLY_BRACKET_TK alternative_type_lists RIGHT_CURLY_BRACKET_TK
 	;
 alternative_type_lists
 	: root_alternative_type_list
-	| root_alternative_type_list COMMA extension_and_exception extension_addition_alternatives? optional_extension_marker
+	| root_alternative_type_list COMMA_TK extension_and_exception extension_addition_alternatives? optional_extension_marker
 	;
 root_alternative_type_list
 	: alternative_type_list
 	;
 extension_addition_alternatives
-	: COMMA extension_addition_alternatives_list
+	: COMMA_TK extension_addition_alternatives_list
 	;
 extension_addition_alternatives_list
-	: extension_addition_alternative
-	| extension_addition_alternatives_list COMMA extension_addition_alternative
+	: extension_addition_alternative (COMMA_TK extension_addition_alternative)*
 	;
 extension_addition_alternative
 	: extension_addition_alternatives_group
@@ -720,14 +705,13 @@ extension_addition_alternatives_group
 	: LEFT_VERSION_BRACKETS version_number alternative_type_list RIGHT_VERSION_BRACKETS
 	;
 alternative_type_list
-	: named_type
-	| alternative_type_list COMMA named_type
+	: named_type (COMMA_TK named_type)*
 	;
 choice_value
-	: IDENTIFIER COLON value
+	: IDENTIFIER COLON_TK value
 	;
 selection_type
-	: IDENTIFIER LESS_THAN_SIGN type
+	: IDENTIFIER LESS_THAN_SIGN_TK type
 	;
 prefixed_type
 	: tagged_type
@@ -739,9 +723,9 @@ tagged_type
 	| tag EXPLICIT_RW type
 	;
 tag
-	: LEFT_SQUARE_BRACKET ( encoding_reference COLON )? category? class_number RIGHT_SQUARE_BRACKET
+	: LEFT_SQUARE_BRACKET_TK ( ENCODING_REFERENCE COLON_TK )? category? class_number RIGHT_SQUARE_BRACKET_TK
 	;
-encoding_reference
+ENCODING_REFERENCE
 	: LATIN_SMALL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
 	;
 class_number
@@ -757,18 +741,16 @@ encoding_prefixed_type
 	: encoding_prefix type
 	;
 encoding_prefix
-	: LEFT_SQUARE_BRACKET ( encoding_reference COLON )? encoding_reference RIGHT_SQUARE_BRACKET
+	: LEFT_SQUARE_BRACKET_TK ( ENCODING_REFERENCE COLON_TK )? ENCODING_REFERENCE RIGHT_SQUARE_BRACKET_TK
 	;
 object_identifier_type
 	: OBJECT_RW IDENTIFIER_RW
 	;
 object_identifier_value
-	: LEFT_CURLY_BRACKET obj_id_components_list RIGHT_CURLY_BRACKET
-	| LEFT_CURLY_BRACKET defined_value obj_id_components_list RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK obj_id_components_list RIGHT_CURLY_BRACKET_TK
 	;
 obj_id_components_list
-	: obj_id_components
-	| obj_id_components obj_id_components_list
+	: obj_id_components+
 	;
 obj_id_components
 	: name_form
@@ -784,17 +766,18 @@ number_form
 	| defined_value
 	;
 name_and_number_form
-	: IDENTIFIER LEFT_PARENTHESIS number_form RIGHT_PARENTHESIS
+	: IDENTIFIER LEFT_PARENTHESIS_TK number_form RIGHT_PARENTHESIS_TK
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK number_form RIGHT_PARENTHESIS_TK // in this context, we don't care if it starts with an uppercase
+	| NON_INTEGER_UNICODE_LABEL // gramatically the same thing
 	;
 relative_oid_type
 	: RELATIVE_OID_RW
 	;
 relative_oid_value
-	: LEFT_CURLY_BRACKET relative_oid_components_list RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK relative_oid_components_list RIGHT_CURLY_BRACKET_TK
 	;
 relative_oid_components_list
-	: relative_oid_components
-	| relative_oid_components relative_oid_components_list
+	: relative_oid_components+
 	;
 relative_oid_components
 	: number_form
@@ -805,13 +788,13 @@ iri_type
 	: OID_IRI_RW
 	;
 iri_value
-	: QUOTATION_MARK first_arc_identifier subsequent_arc_identifier? QUOTATION_MARK
+	: QUOTATION_MARK_TK first_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
 	;
 first_arc_identifier
-	: SOLIDUS arc_identifier
+	: SOLIDUS_TK arc_identifier
 	;
 subsequent_arc_identifier
-	: SOLIDUS arc_identifier subsequent_arc_identifier
+	: (SOLIDUS_TK arc_identifier)+
 	;
 arc_identifier
 	: INTEGER_UNICODE_LABEL
@@ -821,7 +804,7 @@ relative_iri_type
 	: RELATIVE_OID_IRI_RW
 	;
 relative_iri_value
-	: QUOTATION_MARK first_relative_arc_identifier subsequent_arc_identifier? QUOTATION_MARK
+	: QUOTATION_MARK_TK first_relative_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
 	;
 first_relative_arc_identifier
 	: arc_identifier
@@ -877,11 +860,11 @@ restricted_character_string_value
 	| tuple
 	;
 character_string_list
-	: LEFT_CURLY_BRACKET char_syms RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK char_syms RIGHT_CURLY_BRACKET_TK
 	;
 char_syms
 	: chars_defn
-	| char_syms COMMA chars_defn
+	| char_syms COMMA_TK chars_defn
 	;
 chars_defn
 	: CSTRING
@@ -890,7 +873,7 @@ chars_defn
 	| defined_value
 	;
 quadruple
-	: LEFT_CURLY_BRACKET group COMMA plane COMMA row COMMA cell RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK group COMMA_TK plane COMMA_TK row COMMA_TK cell RIGHT_CURLY_BRACKET_TK
 	;
 group
 	: NUMBER
@@ -905,7 +888,7 @@ cell
 	: NUMBER
 	;
 tuple
-	: LEFT_CURLY_BRACKET table_column COMMA table_row RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK table_column COMMA_TK table_row RIGHT_CURLY_BRACKET_TK
 	;
 table_column
 	: NUMBER
@@ -920,7 +903,7 @@ unrestricted_character_string_value
 	: sequence_value
 	;
 useful_type
-	: TYPE_REFERENCE
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE
 	;
 constrained_type
 	: ( builtin_type | referenced_type ) constraint
@@ -934,7 +917,7 @@ type_with_constraint
 	| SEQUENCE_RW constraint OF_RW named_type
 	;
 constraint
-	: LEFT_PARENTHESIS constraint_spec exception_spec? RIGHT_PARENTHESIS
+	: LEFT_PARENTHESIS_TK constraint_spec exception_spec? RIGHT_PARENTHESIS_TK
 	;
 constraint_spec
 	: subtype_constraint
@@ -944,8 +927,8 @@ subtype_constraint
 	;
 element_set_specs
 	: root_element_set_spec
-	| root_element_set_spec COMMA ELLIPSIS
-	| root_element_set_spec COMMA ELLIPSIS COMMA additional_element_set_spec
+	| root_element_set_spec COMMA_TK ELLIPSIS
+	| root_element_set_spec COMMA_TK ELLIPSIS COMMA_TK additional_element_set_spec
 	;
 root_element_set_spec
 	: element_set_spec
@@ -976,16 +959,16 @@ exclusions
 	: EXCEPT_RW elements
 	;
 union_mark
-	: VERTICAL_LINE
+	: VERTICAL_LINE_TK
 	| UNION_RW
 	;
 intersection_mark
-	: CIRCUMFLEX_ACCENT
+	: CIRCUMFLEX_ACCENT_TK
 	| INTERSECTION_RW
 	;
 elements
 	: subtype_elements
-	| LEFT_PARENTHESIS element_set_spec RIGHT_PARENTHESIS
+	| LEFT_PARENTHESIS_TK element_set_spec RIGHT_PARENTHESIS_TK
 	;
 subtype_elements
 	: single_value
@@ -1014,11 +997,11 @@ value_range
 	;
 lower_endpoint
 	: lower_end_value
-	| lower_end_value LESS_THAN_SIGN
+	| lower_end_value LESS_THAN_SIGN_TK
 	;
 upper_endpoint
 	: upper_end_value
-	| LESS_THAN_SIGN upper_end_value
+	| LESS_THAN_SIGN_TK upper_end_value
 	;
 lower_end_value
 	: value
@@ -1046,14 +1029,14 @@ multiple_type_constraints
 	| partial_specification
 	;
 full_specification
-	: LEFT_CURLY_BRACKET type_constraints RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK type_constraints RIGHT_CURLY_BRACKET_TK
 	;
 partial_specification
-	: LEFT_CURLY_BRACKET ELLIPSIS COMMA type_constraints RIGHT_CURLY_BRACKET
+	: LEFT_CURLY_BRACKET_TK ELLIPSIS COMMA_TK type_constraints RIGHT_CURLY_BRACKET_TK
 	;
 type_constraints
 	: named_constraint
-	| named_constraint COMMA type_constraints
+	| named_constraint COMMA_TK type_constraints
 	;
 named_constraint
 	: IDENTIFIER component_constraint?
@@ -1083,7 +1066,7 @@ property_settings_list
 	| property_settings_list property_and_setting_pair
 	;
 property_and_setting_pair
-	: property_name EQUALS_SIGN setting_name
+	: property_name EQUALS_SIGN_TK setting_name
 	;
 property_name
 	: PS_NAME
@@ -1101,16 +1084,16 @@ recurrence_range
 	: value_range
 	;
 exception_spec
-	: EXCLAMATION_MARK exception_identification
+	: EXCLAMATION_MARK_TK exception_identification
 	;
 exception_identification
 	: signed_number
 	| defined_value
-	| type COLON value
+	| type COLON_TK value
 	;
 encoding_control_sections
 	: encoding_control_section encoding_control_sections
 	;
 encoding_control_section
-	: ENCODING_CONTROL_RW encoding_reference
+	: ENCODING_CONTROL_RW ENCODING_REFERENCE
 	;

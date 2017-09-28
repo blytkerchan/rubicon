@@ -19,7 +19,7 @@ add_custom_target(preproc-grammar
 	SOURCES preproc.g4
 	)
 add_custom_target(asn1-grammar
-	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated asn1.g4
+	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -visitor -Dlanguage=Cpp -o generated asn1.g4
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	SOURCES preproc.g4
 	)
