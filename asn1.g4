@@ -1,5 +1,7 @@
 grammar asn1;
 
+file : module_definition ;
+
 // 12.38 - reserved words
 // these have to come first so they take precedence over identifiers and somesuch
 ABSENT_RW				: 'ABSENT' ;
@@ -253,15 +255,17 @@ definitive_name_and_number_form
 	;
 
 encoding_reference_default
-	: ( ( ENCODING_REFERENCE COLON_TK )? INSTRUCTIONS_RW)
+	: ( ENCODING_REFERENCE COLON_TK )? INSTRUCTIONS_RW
 	;
 
 tag_default
-	: (EXPLICIT_RW TAGS_RW  | IMPLICIT_RW TAGS_RW  | AUTOMATIC_RW TAGS_RW)
+	: EXPLICIT_RW TAGS_RW	# explicit_tags
+	| IMPLICIT_RW TAGS_RW	# implicit_tags
+	| AUTOMATIC_RW TAGS_RW	# automatic_tags
 	;
 
 extension_default
-	: (EXTENSIBILITY_RW IMPLIED_RW)
+	: EXTENSIBILITY_RW IMPLIED_RW
 	;
 
 module_body
@@ -293,11 +297,12 @@ symbols_from_module
 	;
 
 global_module_reference
-	: TYPE_REFERENCE_OR_MODULE_REFERENCE assigned_identifier
+	: TYPE_REFERENCE_OR_MODULE_REFERENCE assigned_identifier?
 	;
 
 assigned_identifier
-	: (object_identifier_value | defined_value)?
+	: object_identifier_value
+	| defined_value
 	;
 
 symbol_list
@@ -726,7 +731,7 @@ tag
 	: LEFT_SQUARE_BRACKET_TK ( ENCODING_REFERENCE COLON_TK )? category? class_number RIGHT_SQUARE_BRACKET_TK
 	;
 ENCODING_REFERENCE
-	: LATIN_SMALL_LETTER TYPE_REFERENCE_OR_IDENTIFIER_CHUNK? TYPE_REFERENCE_OR_IDENTIFIER_HYPHENATED_LIST_OPT?
+	: LATIN_CAPITAL_LETTER+
 	;
 class_number
 	: NUMBER
@@ -1092,7 +1097,7 @@ exception_identification
 	| type COLON_TK value
 	;
 encoding_control_sections
-	: encoding_control_section encoding_control_sections
+	: encoding_control_section+
 	;
 encoding_control_section
 	: ENCODING_CONTROL_RW ENCODING_REFERENCE

@@ -12,8 +12,6 @@ using namespace antlr4;
 using namespace std;
 namespace po = boost::program_options;
 
-/* Hello, world! */
-
 int main(int argc, char const **argv)
 {
 	po::options_description opts("options");

@@ -4,3 +4,6 @@
 [submodule "exceptions"]
 	path = cmake
 	url = https://github.com/VlinderSoftware/exceptions.git
+[submodule "tracing"]
+	path = tracing
+	url = https://github.com/blytkerchan/tracing.git
