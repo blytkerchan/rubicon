@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(Rubicon)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(VLINDER_USING_CXX14 1)
 include(cmake/settings.cmake)
 include_directories(/usr/local/include)
@@ -79,6 +81,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/asn1c.cpp
 	${PROJECT_SOURCE_DIR}/compiler/listener.cpp
 	${PROJECT_SOURCE_DIR}/compiler/listener.hpp
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.hpp
 	${compiler-GENERATED_SRC}
 	)
 foreach(src_file ${compiler-SRC})

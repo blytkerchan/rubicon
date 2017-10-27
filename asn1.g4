@@ -113,9 +113,9 @@ HYPHEN_TK						: ( HYPHEN_MINUS | NON_BREAKING_HYPHEN ) ;
 // 12.1.6
 fragment HORIZONTAL_TABULATION	: '\t' ;
 fragment LINE_FEED				: '\n' ;
-fragment VERTICAL_TABULATION		: '\u000b' ;
+fragment VERTICAL_TABULATION	: '\u000b' ;
 fragment FORM_FEED				: '\u000c' ;
-fragment CARRIAGE_RETURN			: '\r' ;
+fragment CARRIAGE_RETURN		: '\r' ;
 fragment SPACE					: ' ' ;
 fragment NO_BREAK_SPACE			: '\u00a0' ;
 fragment WHITE_SPACE
@@ -207,12 +207,6 @@ INTEGER_UNICODE_LABEL
 	: NUMBER
 	;
 
-// 12.27
-NON_INTEGER_UNICODE_LABEL
-	: ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+
-	| ( LATIN_CAPITAL_LETTER | LATIN_SMALL_LETTER | DIGIT )+ WHITE_SPACE* LEFT_PARENTHESIS WHITE_SPACE* DIGIT+ WHITE_SPACE* RIGHT_PARENTHESIS
-	;
-
 // section 13
 module_definition
 	: module_identifier DEFINITIONS_RW encoding_reference_default? tag_default? extension_default? ASSIGNMENT BEGIN_RW module_body encoding_control_sections? END_RW
@@ -251,7 +245,6 @@ definitive_number_form
 
 definitive_name_and_number_form
 	: IDENTIFIER LEFT_PARENTHESIS_TK definitive_number_form RIGHT_PARENTHESIS_TK
-	| NON_INTEGER_UNICODE_LABEL // though not the way it's specified in X.680, gramatically this is the same thing if there are no hyphens in the identifier part
 	;
 
 encoding_reference_default
@@ -338,12 +331,6 @@ defined_value
 	: external_value_reference
 	| IDENTIFIER
 	;
-
-non_parameterized_type_name
-	: external_type_reference
-	| TYPE_REFERENCE_OR_MODULE_REFERENCE
-	;
-
 external_type_reference
 	: TYPE_REFERENCE_OR_MODULE_REFERENCE FULL_STOP_TK TYPE_REFERENCE_OR_MODULE_REFERENCE
 	;
@@ -396,35 +383,31 @@ builtin_type
 	| BOOLEAN_RW
 	| character_string_type
 	| choice_type
-	| date_type
-	| date_time_type
-	| duration_type
+	| DATE_RW
+	| DATE_TIME_RW
+	| DURATION_RW
 	| EMBEDDED_RW PDV_RW
 	| enumerated_type
 	| EXTERNAL_RW
 	| integer_type
-	| iri_type
-	| null_type
-	| object_identifier_type
-	| octet_string_type
-	| real_type
-	| relative_iri_type
-	| relative_oid_type
-	| sequence_type
-	| sequence_of_type
-	| set_type
-	| set_of_type
+	| OID_IRI_RW
+	| NULL_RW
+	| OBJECT_RW IDENTIFIER_RW
+	| OCTET_RW STRING_RW
+	| REAL_RW
+	| RELATIVE_OID_IRI_RW
+	| RELATIVE_OID_RW
+	| sequence_or_set_type
+	| sequence_or_set_of_type
 	| prefixed_type
-	| time_type
-	| time_of_day_type
+	| TIME_RW
+	| TIME_OF_DAY_RW
 	;
 	
 referenced_type
 	: defined_type
 	| useful_type
 	| selection_type
-//	| TypeFromObject	// not implemented
-//	| ValueSetFromObjects // not implemented
 	;
 
 named_type
@@ -434,7 +417,6 @@ named_type
 value
 	: builtin_value
 	| referenced_value
-//	| ObjectClassFieldValue // not implemented
 	;
 
 builtin_value
@@ -487,7 +469,6 @@ named_number
 	| IDENTIFIER LEFT_PARENTHESIS_TK defined_value RIGHT_PARENTHESIS_TK
 	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK signed_number RIGHT_PARENTHESIS_TK // in this context, we don't care if it starts with an uppercase letter (but the lexer does)
 	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK defined_value RIGHT_PARENTHESIS_TK
-	| NON_INTEGER_UNICODE_LABEL // gramatically the same as above
 	;
 
 signed_number
@@ -529,10 +510,6 @@ enumeration_item
 
 enumerated_value
 	: IDENTIFIER
-	;
-
-real_type
-	: REAL_RW
 	;
 
 real_value
@@ -578,32 +555,25 @@ identifier_list
 	: IDENTIFIER (COMMA_TK IDENTIFIER)*
 	;
 
-octet_string_type
-	: OCTET_RW STRING_RW
-	;
-
 octet_string_value
 	: BSTRING
 	| HSTRING
 	| CONTAINING_RW value
 	;
 
-null_type
-	: NULL_RW
-	;
-
 null_value
 	: NULL_RW
 	;
 
-sequence_type
+sequence_or_set_type
 	: SEQUENCE_RW LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
-	| SEQUENCE_RW LEFT_CURLY_BRACKET_TK extension_and_exception optional_extension_marker? RIGHT_CURLY_BRACKET_TK
 	| SEQUENCE_RW LEFT_CURLY_BRACKET_TK component_type_lists RIGHT_CURLY_BRACKET_TK
 	;
-sequence_of_type
+sequence_or_set_of_type
 	: SEQUENCE_RW OF_RW type
 	| SEQUENCE_RW OF_RW named_type
+	| SET_RW OF_RW type
+	| SET_RW OF_RW named_type
 	;
 extension_and_exception
 	: ELLIPSIS exception_spec?
@@ -616,7 +586,7 @@ component_type_lists
 	| component_type_list COMMA_TK extension_and_exception extension_additions? optional_extension_marker
 	| component_type_list COMMA_TK extension_and_exception extension_additions? extension_end_marker COMMA_TK component_type_list
 	| extension_and_exception extension_additions? extension_end_marker COMMA_TK component_type_list
-	| extension_and_exception extension_additions? optional_extension_marker
+	| extension_and_exception extension_additions? optional_extension_marker?
 	;
 extension_end_marker
 	: COMMA_TK ELLIPSIS
@@ -668,18 +638,8 @@ named_value_list
 	: named_value
 	| named_value_list COMMA_TK named_value
 	;
-
-set_type
-	: SET_RW LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
-	| SET_RW LEFT_CURLY_BRACKET_TK extension_and_exception optional_extension_marker RIGHT_CURLY_BRACKET_TK
-	| SET_RW LEFT_CURLY_BRACKET_TK component_type_lists RIGHT_CURLY_BRACKET_TK
-	;
 set_value
 	: LEFT_CURLY_BRACKET_TK component_value_list? RIGHT_CURLY_BRACKET_TK
-	;
-set_of_type
-	: SET_RW OF_RW type
-	| SET_RW OF_RW named_type
 	;
 set_of_value
 	: LEFT_CURLY_BRACKET_TK value_list RIGHT_CURLY_BRACKET_TK
@@ -748,9 +708,6 @@ encoding_prefixed_type
 encoding_prefix
 	: LEFT_SQUARE_BRACKET_TK ( ENCODING_REFERENCE COLON_TK )? ENCODING_REFERENCE RIGHT_SQUARE_BRACKET_TK
 	;
-object_identifier_type
-	: OBJECT_RW IDENTIFIER_RW
-	;
 object_identifier_value
 	: LEFT_CURLY_BRACKET_TK obj_id_components_list RIGHT_CURLY_BRACKET_TK
 	;
@@ -773,10 +730,6 @@ number_form
 name_and_number_form
 	: IDENTIFIER LEFT_PARENTHESIS_TK number_form RIGHT_PARENTHESIS_TK
 	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK number_form RIGHT_PARENTHESIS_TK // in this context, we don't care if it starts with an uppercase
-	| NON_INTEGER_UNICODE_LABEL // gramatically the same thing
-	;
-relative_oid_type
-	: RELATIVE_OID_RW
 	;
 relative_oid_value
 	: LEFT_CURLY_BRACKET_TK relative_oid_components_list RIGHT_CURLY_BRACKET_TK
@@ -789,9 +742,6 @@ relative_oid_components
 	| name_and_number_form
 	| defined_value
 	;
-iri_type
-	: OID_IRI_RW
-	;
 iri_value
 	: QUOTATION_MARK_TK first_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
 	;
@@ -803,10 +753,8 @@ subsequent_arc_identifier
 	;
 arc_identifier
 	: INTEGER_UNICODE_LABEL
-	| NON_INTEGER_UNICODE_LABEL
-	;
-relative_iri_type
-	: RELATIVE_OID_IRI_RW
+	| IDENTIFIER LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
+	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
 	;
 relative_iri_value
 	: QUOTATION_MARK_TK first_relative_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
@@ -817,47 +765,32 @@ first_relative_arc_identifier
 embedded_pdv_value
 	: sequence_value
 	;
-time_type
-	: TIME_RW
-	;
 time_value
 	: TSTRING
 	;
-date_type
-	: DATE_RW
-	;
-time_of_day_type
-	: TIME_OF_DAY_RW
-	;
-date_time_type
-	: DATE_TIME_RW
-	;
-duration_type
-	: DURATION_RW
-	;
 character_string_type
-//	: restricted_character_string_type
-	: unrestricted_character_string_type
+	: restricted_character_string_type
+	| unrestricted_character_string_type
 	;
 character_string_value
 	: restricted_character_string_value
 	| unrestricted_character_string_value
 	;
-//restricted_character_string_type
-//	: BMPString 
-//	| GeneralString
-//	| GraphicString
-//	| IA5String
-//	| ISO646String
-//	| NumericString
-//	| PrintableString
-//	| TeletexString
-//	| T61String
-//	| UniversalString
-//	| UTF8String
-//	| VideotexString
-//	| VisibleString
-//	;
+restricted_character_string_type
+	: 'BMPString'
+	| 'GeneralString'
+	| 'GraphicString'
+	| 'IA5String'
+	| 'ISO646String'
+	| 'NumericString'
+	| 'PrintableString'
+	| 'TeletexString'
+	| 'T61String'
+	| 'UniversalString'
+	| 'UTF8String'
+	| 'VideotexString'
+	| 'VisibleString'
+	;
 restricted_character_string_value
 	: CSTRING
 	| character_string_list
@@ -908,7 +841,9 @@ unrestricted_character_string_value
 	: sequence_value
 	;
 useful_type
-	: TYPE_REFERENCE_OR_MODULE_REFERENCE
+	: 'GeneralizedTime'
+	| 'UTCTime'
+	| 'ObjectDescriptor'
 	;
 constrained_type
 	: ( builtin_type | referenced_type ) constraint
@@ -1102,3 +1037,4 @@ encoding_control_sections
 encoding_control_section
 	: ENCODING_CONTROL_RW ENCODING_REFERENCE
 	;
+
