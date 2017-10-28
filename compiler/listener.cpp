@@ -123,15 +123,17 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 		auto symbols_from_modules(ctx->symbols_imported()->symbols_from_module_list()->symbols_from_module());
 		for (auto symbols_from_module : symbols_from_modules)
 		{
-			// the module being referred to is known by two names: the TYPE_REFERENCE_OR_MODULE_REFERENCE,
-			// which is the name that will be used in this module, and the assigned_identifier, which is 
-			// optional and presumed to be the TYPE_REFERENCE_OR_MODULE_REFERENCE if absent. If it is not 
-			// absent, it is either an OID or a defined_value. If it's an OID, that OID will correspond 
-			// to the OID of the module being imported, which may have another name than what's given 
-			// here. If it's a defined_value, that will be the name we expect the module to have.
+			// the module being referred to is known by two names: the
+			// TYPE_REFERENCE_OR_MODULE_REFERENCE, which is the name that will be
+			// used in this module, and the assigned_identifier, which is  optional
+			// and presumed to be the TYPE_REFERENCE_OR_MODULE_REFERENCE if absent. If
+			// it is not absent, it is either an OID or a defined_value. If it's an OID,
+			// that OID will correspond to the OID of the module being imported, which
+			// may have another name than what's given here. If it's a defined_value,
+			// that will be the name we expect the module to have.
 			// In any case, symbols from this module will be referred to by the
-			// TYPE_REFERENCE_OR_MODULE_REFERENCE name in this module, not by whatever other name it 
-			// may have.
+			// TYPE_REFERENCE_OR_MODULE_REFERENCE name in this module, not by whatever
+			// other name it  may have.
 			assert(symbols_from_module);
 			assert(symbols_from_module->global_module_reference());
 			assert(symbols_from_module->global_module_reference()->TYPE_REFERENCE_OR_MODULE_REFERENCE());
