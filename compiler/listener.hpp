@@ -7,6 +7,7 @@
 #include "namednumber.hpp"
 #include "namedtype.hpp"
 #include "tag.hpp"
+#include "typeassignment.hpp"
 #include "typedescriptor.hpp"
 #include "value.hpp"
 #include <ostream>
@@ -36,16 +37,6 @@ private :
 		, automatic_tags__
 		};
 	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
-	struct TypeAssignment
-	{
-		TypeAssignment(std::string const &name, std::shared_ptr< TypeDescriptor > const &type_descriptor)
-			: name_(name)
-			, type_descriptor_(type_descriptor)
-		{ /* no-op */ }
-
-		std::string name_;
-		std::shared_ptr< TypeDescriptor > type_descriptor_;
-	};
 
 	ObjectIdentifier parseObjectIdentifier(asn1Parser::Object_identifier_valueContext *ctx);
 	DefinedValue parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
