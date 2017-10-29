@@ -246,30 +246,6 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 
 	return retval;
 }
-shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
-{
-	pre_condition(ctx);
-	string text(ctx->getText());
-	text.erase(
-		  remove_if(
-			  text.begin()
-			, text.end()
-			, [](unsigned char c) { 
-				return false
-					|| (c == '\t') 
-					|| (c == ' ')
-					|| (c == '\n')
-					|| (c == '\r')
-					|| (c == 0x0b)
-					|| (c == 0x0c)
-					|| (c == 0xa0)	//TODO if input is UTF-8, this is not codepoint \u00a0 -- or rather, this is not how that would be encooded.
-					;
-				}
-			)
-		, text.end()
-		);
-	return make_shared< DefinedValue >(text);
-}
 unsigned int Listener::parseNumber(antlr4::tree::TerminalNode *node)
 {
 	pre_condition(node);
@@ -801,8 +777,71 @@ shared_ptr< Value > Listener::parseValue(asn1Parser::ValueContext *ctx)
 
 shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx)
 {
-	return shared_ptr< Value >();
+	return
+		  ctx->bit_string_value()		? parseBitStringValue(ctx->bit_string_value())
+		: ctx->boolean_value()			? parseBooleanValue(ctx->boolean_value())
+		: ctx->character_string_value()		? parseCharacterStringValue(ctx->character_string_value())
+		: ctx->choice_value()			? parseChoiceValue(ctx->choice_value())
+		: ctx->embedded_pdv_value()		? parseEmbeddedPDVValue(ctx->embedded_pdv_value())
+		: ctx->enumerated_value()		? parseEnumeratedValue(ctx->enumerated_value())
+		: ctx->integer_value()			? parseIntegerValue(ctx->integer_value())
+		: ctx->iri_value()			? parseIRIValue(ctx->iri_value())
+		: ctx->null_value()			? parseNullValue(ctx->null_value())
+		: ctx->object_identifier_value()	? parseObjectIdentifierValue(ctx->object_identifier_value())
+		: ctx->octet_string_value()		? parseOctetStringValue(ctx->octet_string_value())
+		: ctx->real_value()			? parseRealValue(ctx->real_value())
+		: ctx->relative_iri_value()		? parseRelativeIRIValue(ctx->relative_iri_value())
+		: ctx->relative_oid_value()		? parseRelativeOIDValue(ctx->relative_oid_value())
+		: ctx->sequence_value()			? parseSequenceValue(ctx->sequence_value())
+		: ctx->sequence_of_value()		? parseSequenceOfValue(ctx->sequence_of_value())
+		: ctx->set_value()			? parseSetValue(ctx->set_value())
+		: ctx->set_of_value()			? parseSetOfValue(ctx->set_of_value())
+							: parseTimeValue(ctx->time_value())
+		;
 }
+shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
+{
+	pre_condition(ctx);
+	string text(ctx->getText());
+	text.erase(
+		  remove_if(
+			  text.begin()
+			, text.end()
+			, [](unsigned char c) { 
+				return false
+					|| (c == '\t') 
+					|| (c == ' ')
+					|| (c == '\n')
+					|| (c == '\r')
+					|| (c == 0x0b)
+					|| (c == 0x0c)
+					|| (c == 0xa0)	//TODO if input is UTF-8, this is not codepoint \u00a0 -- or rather, this is not how that would be encooded.
+					;
+				}
+			)
+		, text.end()
+		);
+	return make_shared< DefinedValue >(text);
+}
+shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)		{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)					{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseNullValue(asn1Parser::Null_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)	{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)					{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseTimeValue(asn1Parser::Time_valueContext *ctx)				{ return shared_ptr< Value >(); }
 
 /*static */void Listener::emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...)
 {

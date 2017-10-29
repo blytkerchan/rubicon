@@ -66,6 +66,25 @@ private :
 	std::shared_ptr< Value > parseValue(asn1Parser::ValueContext *ctx);
 	std::shared_ptr< Value > parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx);
 	std::shared_ptr< Value > parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
+	std::shared_ptr< Value > parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx);
+	std::shared_ptr< Value > parseBooleanValue(asn1Parser::Boolean_valueContext *ctx);
+	std::shared_ptr< Value > parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx);
+	std::shared_ptr< Value > parseChoiceValue(asn1Parser::Choice_valueContext *ctx);
+	std::shared_ptr< Value > parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx);
+	std::shared_ptr< Value > parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx);
+	std::shared_ptr< Value > parseIntegerValue(asn1Parser::Integer_valueContext *ctx);
+	std::shared_ptr< Value > parseIRIValue(asn1Parser::Iri_valueContext *ctx);
+	std::shared_ptr< Value > parseNullValue(asn1Parser::Null_valueContext *ctx);
+	std::shared_ptr< Value > parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx);
+	std::shared_ptr< Value > parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx);
+	std::shared_ptr< Value > parseRealValue(asn1Parser::Real_valueContext *ctx);
+	std::shared_ptr< Value > parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx);
+	std::shared_ptr< Value > parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx);
+	std::shared_ptr< Value > parseSequenceValue(asn1Parser::Sequence_valueContext *ctx);
+	std::shared_ptr< Value > parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx);
+	std::shared_ptr< Value > parseSetValue(asn1Parser::Set_valueContext *ctx);
+	std::shared_ptr< Value > parseSetOfValue(asn1Parser::Set_of_valueContext *ctx);
+	std::shared_ptr< Value > parseTimeValue(asn1Parser::Time_valueContext *ctx);
 
 	static void emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
 	static void emitWarning(antlr4::tree::TerminalNode *node, char const *fmt, ...);
