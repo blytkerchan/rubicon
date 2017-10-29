@@ -39,7 +39,6 @@ private :
 	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
 
 	ObjectIdentifier parseObjectIdentifier(asn1Parser::Object_identifier_valueContext *ctx);
-	DefinedValue parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
 	unsigned int parseNumber(antlr4::tree::TerminalNode *node);
 	TypeAssignment parseTypeAssignment(asn1Parser::Type_assignmentContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseType(asn1Parser::TypeContext *ctx);
@@ -65,6 +64,8 @@ private :
 	Tag parseTag(asn1Parser::TagContext *ctx);
 
 	std::shared_ptr< Value > parseValue(asn1Parser::ValueContext *ctx);
+	std::shared_ptr< Value > parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx);
+	std::shared_ptr< Value > parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
 
 	static void emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
 	static void emitWarning(antlr4::tree::TerminalNode *node, char const *fmt, ...);

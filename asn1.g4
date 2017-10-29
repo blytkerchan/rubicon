@@ -416,7 +416,7 @@ named_type
 
 value
 	: builtin_value
-	| referenced_value
+	| defined_value
 	;
 
 builtin_value
@@ -439,10 +439,6 @@ builtin_value
 	| set_value
 	| set_of_value
 	| time_value
-	;
-// 17.10 not implemented
-referenced_value
-	: defined_value
 	;
 
 named_value

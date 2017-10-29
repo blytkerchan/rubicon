@@ -233,7 +233,9 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 			else
 			{
 				assert(component->defined_value());
-				retval.push_back(parseDefinedValue(component->defined_value()));
+				auto parsed_defined_value(parseDefinedValue(component->defined_value()));
+				auto typed_parsed_defined_value(static_cast< DefinedValue const& >(*parsed_defined_value));
+				retval.push_back(typed_parsed_defined_value);
 			}
 		}
 	}
@@ -244,7 +246,7 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 
 	return retval;
 }
-DefinedValue Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
+shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
 {
 	pre_condition(ctx);
 	string text(ctx->getText());
@@ -266,7 +268,7 @@ DefinedValue Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
 			)
 		, text.end()
 		);
-	return DefinedValue(text);
+	return make_shared< DefinedValue >(text);
 }
 unsigned int Listener::parseNumber(antlr4::tree::TerminalNode *node)
 {
@@ -500,7 +502,7 @@ NamedNumber Listener::parseNamedNumber(asn1Parser::Named_numberContext *ctx)
 	{
 		assert(ctx->defined_value());
 		auto value(parseDefinedValue(ctx->defined_value()));
-		return NamedNumber(name, value);
+		return NamedNumber(name, static_cast< DefinedValue const& >(*value));
 	}
 }
 long Listener::parseSignedNumber(asn1Parser::Signed_numberContext *ctx)
@@ -783,11 +785,21 @@ Tag Listener::parseTag(asn1Parser::TagContext *ctx)
 	else
 	{
 		assert(ctx->class_number()->defined_value());
-		return Tag(the_class, parseDefinedValue(ctx->class_number()->defined_value()));
+		return Tag(the_class, static_cast< DefinedValue const& >(*parseDefinedValue(ctx->class_number()->defined_value())));
 	}
 }
 
 shared_ptr< Value > Listener::parseValue(asn1Parser::ValueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->builtin_value() || ctx->defined_value());
+	return ctx->builtin_value()
+		? parseBuiltinValue(ctx->builtin_value())
+		: parseDefinedValue(ctx->defined_value())
+		;
+}
+
+shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx)
 {
 	return shared_ptr< Value >();
 }

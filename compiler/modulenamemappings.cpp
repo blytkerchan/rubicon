@@ -1,5 +1,7 @@
 #include "modulenamemappings.hpp"
 
+using namespace std;
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 void ModuleNameMappings::insert(LocalName const &local_name, AssignedIdentifier const &assigned_identifier)
 {
@@ -10,7 +12,7 @@ void ModuleNameMappings::insert(LocalName const &local_name, ObjectIdentifier co
 {
 	insert(local_name, AssignedIdentifier(assigned_identifier));
 }
-void ModuleNameMappings::insert(LocalName const &local_name, DefinedValue const &assigned_identifier)
+void ModuleNameMappings::insert(LocalName const &local_name, shared_ptr< Value > const &assigned_identifier)
 {
 	insert(local_name, AssignedIdentifier(assigned_identifier));
 }
