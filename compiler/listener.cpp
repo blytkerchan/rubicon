@@ -1,6 +1,7 @@
 #include "listener.hpp"
 #include "bitstringtype.hpp"
 #include "bitstringvalue.hpp"
+#include "booleanvalue.hpp"
 #include "characterstringtype.hpp"
 #include "choicetype.hpp"
 #include "constrainedtype.hpp"
@@ -944,7 +945,14 @@ shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueCo
 	}
 }
 
-shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->TRUE_RW() || ctx->FALSE_RW());
+
+	return make_shared< BooleanValue >(ctx->TRUE_RW() != nullptr);
+}
+
 shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)		{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)			{ return shared_ptr< Value >(); }
