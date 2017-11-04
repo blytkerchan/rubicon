@@ -13,6 +13,7 @@
 #include "externaltypereference.hpp"
 #include "generalizedtimetype.hpp"
 #include "integertype.hpp"
+#include "integervalue.hpp"
 #include "objectdescriptortype.hpp"
 #include "primitivetype.hpp"
 #include "restrictedcharacterstringvalue.hpp"
@@ -1061,7 +1062,14 @@ shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueC
 {
 	return make_shared< EnumeratedValue >(ctx->IDENTIFIER()->getSymbol()->getText());
 }
-shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->signed_number() || ctx->IDENTIFIER());
+	return ctx->signed_number() ? make_shared< IntegerValue >(parseSignedNumber(ctx->signed_number()))
+		: make_shared< IntegerValue >(ctx->IDENTIFIER()->getSymbol()->getText())
+		;
+}
 shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)					{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseNullValue(asn1Parser::Null_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)	{ return shared_ptr< Value >(); }
