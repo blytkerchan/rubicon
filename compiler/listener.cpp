@@ -9,6 +9,7 @@
 #include "definedtype.hpp"
 #include "embeddedpdvvalue.hpp"
 #include "enumeratedtype.hpp"
+#include "enumeratedvalue.hpp"
 #include "externaltypereference.hpp"
 #include "generalizedtimetype.hpp"
 #include "integertype.hpp"
@@ -1056,7 +1057,10 @@ shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_val
 	//TODO: check that the sequence value corresponds to spec
 	return make_shared< EmbeddedPDVValue >(sequence_value);
 }
-shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)
+{
+	return make_shared< EnumeratedValue >(ctx->IDENTIFIER()->getSymbol()->getText());
+}
 shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)					{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseNullValue(asn1Parser::Null_valueContext *ctx)				{ return shared_ptr< Value >(); }
