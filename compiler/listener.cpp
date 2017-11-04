@@ -7,6 +7,7 @@
 #include "choicevalue.hpp"
 #include "constrainedtype.hpp"
 #include "definedtype.hpp"
+#include "embeddedpdvvalue.hpp"
 #include "enumeratedtype.hpp"
 #include "externaltypereference.hpp"
 #include "generalizedtimetype.hpp"
@@ -1047,7 +1048,14 @@ shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *
 	pre_condition(ctx);
 	return make_shared< ChoiceValue >(ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value()));
 }
-shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->sequence_value());
+	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
+	//TODO: check that the sequence value corresponds to spec
+	return make_shared< EmbeddedPDVValue >(sequence_value);
+}
 shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)					{ return shared_ptr< Value >(); }
