@@ -14,6 +14,7 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+struct RestrictedCharacterStringValue;
 class Listener : public ::asn1BaseListener
 {
 public :
@@ -69,6 +70,12 @@ private :
 	std::shared_ptr< Value > parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx);
 	std::shared_ptr< Value > parseBooleanValue(asn1Parser::Boolean_valueContext *ctx);
 	std::shared_ptr< Value > parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx);
+	std::shared_ptr< Value > parseRestrictedCharacterStringValue(asn1Parser::Restricted_character_string_valueContext *ctx);
+	void parseCharacterStringList(RestrictedCharacterStringValue &retval, asn1Parser::Character_string_listContext *ctx);
+	void parseQuadruple(RestrictedCharacterStringValue &retval, asn1Parser::QuadrupleContext *ctx);
+	void parseTuple(RestrictedCharacterStringValue &retval, asn1Parser::TupleContext *ctx);
+
+	std::shared_ptr< Value > parseUnrestrictedCharacterStringValue(asn1Parser::Unrestricted_character_string_valueContext *ctx);
 	std::shared_ptr< Value > parseChoiceValue(asn1Parser::Choice_valueContext *ctx);
 	std::shared_ptr< Value > parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx);
 	std::shared_ptr< Value > parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx);

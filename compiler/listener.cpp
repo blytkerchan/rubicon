@@ -12,12 +12,14 @@
 #include "integertype.hpp"
 #include "objectdescriptortype.hpp"
 #include "primitivetype.hpp"
+#include "restrictedcharacterstringvalue.hpp"
 #include "selectiontype.hpp"
 #include "sequenceorsetoftype.hpp"
 #include "sequenceorsettype.hpp"
 #include "taggedtype.hpp"
 #include "typewithconstraint.hpp"
 #include "unknowntype.hpp"
+#include "unrestrictedcharacterstringvalue.hpp"
 #include "utctimetype.hpp"
 #include "../exceptions.hpp"
 #include "../exceptions/contract.hpp"
@@ -953,7 +955,92 @@ shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext
 	return make_shared< BooleanValue >(ctx->TRUE_RW() != nullptr);
 }
 
-shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)		{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->restricted_character_string_value() || ctx->unrestricted_character_string_value());
+	return
+		  ctx->restricted_character_string_value()
+		? parseRestrictedCharacterStringValue(ctx->restricted_character_string_value())
+		: parseUnrestrictedCharacterStringValue(ctx->unrestricted_character_string_value())
+		;
+}
+
+shared_ptr< Value > Listener::parseRestrictedCharacterStringValue(asn1Parser::Restricted_character_string_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->CSTRING() || ctx->character_string_list() || ctx->quadruple() || ctx->tuple());
+	RestrictedCharacterStringValue retval;
+	if (ctx->CSTRING())
+	{
+		return make_shared< RestrictedCharacterStringValue >(ctx->CSTRING()->getSymbol()->getText());
+	}
+	else if (ctx->character_string_list())
+	{
+		parseCharacterStringList(retval, ctx->character_string_list());
+	}
+	else if (ctx->quadruple())
+	{
+		parseQuadruple(retval, ctx->quadruple());
+	}
+	else
+	{
+		parseTuple(retval, ctx->tuple());
+	}
+
+	return make_shared< RestrictedCharacterStringValue >(move(retval));
+}
+void Listener::parseCharacterStringList(RestrictedCharacterStringValue &retval, asn1Parser::Character_string_listContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->chars_defn().size() >= 1);
+	for (auto chars_defn : ctx->chars_defn())
+	{
+		assert(chars_defn);
+		if (chars_defn->CSTRING())
+		{
+			retval.add(chars_defn->CSTRING()->getSymbol()->getText());
+		}
+		else if (chars_defn->quadruple())
+		{
+			parseQuadruple(retval, chars_defn->quadruple());
+		}
+		else if (chars_defn->tuple())
+		{
+			parseTuple(retval, chars_defn->tuple());
+		}
+		else
+		{
+			assert(chars_defn->defined_value());
+			retval.add(parseDefinedValue(chars_defn->defined_value()));
+		}
+	}
+}
+
+void Listener::parseQuadruple(RestrictedCharacterStringValue &retval, asn1Parser::QuadrupleContext *ctx)
+{
+	Quadruple quadruple(
+		  parseNumber(ctx->group()->NUMBER())
+		, parseNumber(ctx->plane()->NUMBER())
+		, parseNumber(ctx->row()->NUMBER())
+		, parseNumber(ctx->cell()->NUMBER())
+		);
+	retval.add(quadruple);
+}
+void Listener::parseTuple(RestrictedCharacterStringValue &retval, asn1Parser::TupleContext *ctx)
+{
+	Tuple tuple(parseNumber(ctx->table_column()->NUMBER()), parseNumber(ctx->table_row()->NUMBER()));
+	retval.add(tuple);
+}
+
+shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::Unrestricted_character_string_valueContext *ctx)
+{
+	pre_condition(ctx);
+	assert(ctx->sequence_value());
+	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
+	//TODO: check that the sequence value corresponds to spec
+	return make_shared< UnrestrictedCharacterStringValue >(sequence_value);
+}
 shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)			{ return shared_ptr< Value >(); }

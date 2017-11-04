@@ -794,11 +794,7 @@ restricted_character_string_value
 	| tuple
 	;
 character_string_list
-	: LEFT_CURLY_BRACKET_TK char_syms RIGHT_CURLY_BRACKET_TK
-	;
-char_syms
-	: chars_defn
-	| char_syms COMMA_TK chars_defn
+	: LEFT_CURLY_BRACKET_TK chars_defn (COMMA_TK chars_defn)* RIGHT_CURLY_BRACKET_TK
 	;
 chars_defn
 	: CSTRING
