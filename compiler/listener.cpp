@@ -4,6 +4,7 @@
 #include "booleanvalue.hpp"
 #include "characterstringtype.hpp"
 #include "choicetype.hpp"
+#include "choicevalue.hpp"
 #include "constrainedtype.hpp"
 #include "definedtype.hpp"
 #include "enumeratedtype.hpp"
@@ -1041,7 +1042,11 @@ shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::
 	//TODO: check that the sequence value corresponds to spec
 	return make_shared< UnrestrictedCharacterStringValue >(sequence_value);
 }
-shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)
+{
+	pre_condition(ctx);
+	return make_shared< ChoiceValue >(ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value()));
+}
 shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)				{ return shared_ptr< Value >(); }
