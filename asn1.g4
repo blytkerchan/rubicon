@@ -202,11 +202,6 @@ ELLIPSIS				: '...' ;
 LEFT_VERSION_BRACKETS	: '[[' ;
 RIGHT_VERSION_BRACKETS	: ']]' ;
 
-// 12.26
-INTEGER_UNICODE_LABEL
-	: NUMBER
-	;
-
 // section 13
 module_definition
 	: module_identifier DEFINITIONS_RW encoding_reference_default? tag_default? extension_default? ASSIGNMENT BEGIN_RW module_body encoding_control_sections? END_RW
@@ -739,21 +734,15 @@ relative_oid_components
 	| defined_value
 	;
 iri_value
-	: QUOTATION_MARK_TK first_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
-	;
-first_arc_identifier
-	: SOLIDUS_TK arc_identifier
-	;
-subsequent_arc_identifier
-	: (SOLIDUS_TK arc_identifier)+
+	: QUOTATION_MARK_TK (SOLIDUS_TK arc_identifier)+ QUOTATION_MARK_TK
 	;
 arc_identifier
-	: INTEGER_UNICODE_LABEL
+	: NUMBER
 	| IDENTIFIER LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
 	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
 	;
 relative_iri_value
-	: QUOTATION_MARK_TK first_relative_arc_identifier subsequent_arc_identifier? QUOTATION_MARK_TK
+	: QUOTATION_MARK_TK first_relative_arc_identifier (SOLIDUS_TK arc_identifier)+ QUOTATION_MARK_TK
 	;
 first_relative_arc_identifier
 	: arc_identifier

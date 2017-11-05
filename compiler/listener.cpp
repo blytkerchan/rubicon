@@ -14,6 +14,7 @@
 #include "generalizedtimetype.hpp"
 #include "integertype.hpp"
 #include "integervalue.hpp"
+#include "irivalue.hpp"
 #include "objectdescriptortype.hpp"
 #include "primitivetype.hpp"
 #include "restrictedcharacterstringvalue.hpp"
@@ -1070,7 +1071,16 @@ shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext
 		: make_shared< IntegerValue >(ctx->IDENTIFIER()->getSymbol()->getText())
 		;
 }
-shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)					{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
+{
+	pre_condition(ctx);
+	auto retval(make_shared< IRIValue >());
+	for (auto arc_identifier : ctx->arc_identifier())
+	{
+		retval->add(parseArcIdentifier(arc_identifier));
+	}
+	return retval;
+}
 shared_ptr< Value > Listener::parseNullValue(asn1Parser::Null_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)	{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
@@ -1082,6 +1092,16 @@ shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_value
 shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)					{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseTimeValue(asn1Parser::Time_valueContext *ctx)				{ return shared_ptr< Value >(); }
+
+ArcIdentifier Listener::parseArcIdentifier(asn1Parser::Arc_identifierContext *ctx)
+{
+	return ctx->IDENTIFIER()
+		? ArcIdentifier(ctx->IDENTIFIER()->getSymbol()->getText(), parseNumber(ctx->NUMBER()))
+		: ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()
+		? ArcIdentifier(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getSymbol()->getText(), parseNumber(ctx->NUMBER()))
+		: ArcIdentifier(parseNumber(ctx->NUMBER()))
+		;
+}
 
 /*static */void Listener::emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...)
 {

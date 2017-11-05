@@ -2,6 +2,7 @@
 #define rubicon_compiler_listener_hpp
 
 #include "../generated/asn1BaseListener.h"
+#include "arcidentifier.hpp"
 #include "constraint.hpp"
 #include "modulenamemappings.hpp"
 #include "namednumber.hpp"
@@ -92,6 +93,8 @@ private :
 	std::shared_ptr< Value > parseSetValue(asn1Parser::Set_valueContext *ctx);
 	std::shared_ptr< Value > parseSetOfValue(asn1Parser::Set_of_valueContext *ctx);
 	std::shared_ptr< Value > parseTimeValue(asn1Parser::Time_valueContext *ctx);
+
+	ArcIdentifier parseArcIdentifier(asn1Parser::Arc_identifierContext *ctx);
 
 	static void emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
 	static void emitWarning(antlr4::tree::TerminalNode *node, char const *fmt, ...);
