@@ -82,7 +82,6 @@ private :
 	std::shared_ptr< Value > parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx);
 	std::shared_ptr< Value > parseIntegerValue(asn1Parser::Integer_valueContext *ctx);
 	std::shared_ptr< Value > parseIRIValue(asn1Parser::Iri_valueContext *ctx);
-	std::shared_ptr< Value > parseNullValue(asn1Parser::Null_valueContext *ctx);
 	std::shared_ptr< Value > parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx);
 	std::shared_ptr< Value > parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx);
 	std::shared_ptr< Value > parseRealValue(asn1Parser::Real_valueContext *ctx);

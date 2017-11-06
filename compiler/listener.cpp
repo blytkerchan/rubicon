@@ -15,6 +15,7 @@
 #include "integertype.hpp"
 #include "integervalue.hpp"
 #include "irivalue.hpp"
+#include "nullvalue.hpp"
 #include "objectdescriptortype.hpp"
 #include "primitivetype.hpp"
 #include "restrictedcharacterstringvalue.hpp"
@@ -795,7 +796,7 @@ shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext
 		: ctx->enumerated_value()		? parseEnumeratedValue(ctx->enumerated_value())
 		: ctx->integer_value()			? parseIntegerValue(ctx->integer_value())
 		: ctx->iri_value()			? parseIRIValue(ctx->iri_value())
-		: ctx->null_value()			? parseNullValue(ctx->null_value())
+		: ctx->NULL_RW()			? make_shared< NullValue >()
 		: ctx->object_identifier_value()	? parseObjectIdentifierValue(ctx->object_identifier_value())
 		: ctx->octet_string_value()		? parseOctetStringValue(ctx->octet_string_value())
 		: ctx->real_value()			? parseRealValue(ctx->real_value())
@@ -1081,7 +1082,6 @@ shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 	}
 	return retval;
 }
-shared_ptr< Value > Listener::parseNullValue(asn1Parser::Null_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)	{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)				{ return shared_ptr< Value >(); }

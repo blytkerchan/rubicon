@@ -423,7 +423,7 @@ builtin_value
 	| enumerated_value
 	| integer_value
 	| iri_value
-	| null_value
+	| NULL_RW
 	| object_identifier_value
 	| octet_string_value
 	| real_value
@@ -550,10 +550,6 @@ octet_string_value
 	: BSTRING
 	| HSTRING
 	| CONTAINING_RW value
-	;
-
-null_value
-	: NULL_RW
 	;
 
 sequence_or_set_type
