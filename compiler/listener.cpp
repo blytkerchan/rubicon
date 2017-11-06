@@ -18,6 +18,7 @@
 #include "nullvalue.hpp"
 #include "objectdescriptortype.hpp"
 #include "objectidentifiervalue.hpp"
+#include "octetstringvalue.hpp"
 #include "primitivetype.hpp"
 #include "restrictedcharacterstringvalue.hpp"
 #include "selectiontype.hpp"
@@ -831,103 +832,14 @@ shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueCo
 	pre_condition(ctx);
 	if (ctx->BSTRING())
 	{
-		assert(ctx->BSTRING()->getSymbol());
-		auto bstring_text(ctx->BSTRING()->getSymbol()->getText());
-		unsigned char char_value(0);
-		unsigned char bits_remaining(8);
-		vector< unsigned char > bstring_value;
-		for (auto bstring_char : bstring_text)
-		{
-			char_value <<= 1;
-			switch (bstring_char)
-			{
-			case '1' :
-				char_value |= 1;
-				--bits_remaining;
-				break;
-			case '0' :
-				--bits_remaining;
-				break;
-			default :
-				// no-op
-				break;
-			}
-			if (!bits_remaining)
-			{
-				bstring_value.push_back(char_value);
-				char_value = 0;
-				bits_remaining = 8;
-			}
-			else
-			{ /* still remaining */ }
-		}
-		if (bits_remaining < 8)
-		{
-			char_value <<= bits_remaining;
-			bstring_value.push_back(char_value);
-			return make_shared< BitStringValue >(bstring_value, bits_remaining);
-		}
-		else
-		{
-			return make_shared< BitStringValue >(bstring_value, 0);
-		}
+		auto bstring(parseBString(ctx->BSTRING()));
+		return make_shared< BitStringValue >(bstring.first, bstring.second);
 	}
 	else if (ctx->HSTRING())
 	{
-		assert(ctx->HSTRING()->getSymbol());
-		auto hstring_text(ctx->HSTRING()->getSymbol()->getText());
-		unsigned char char_value(0);
-		unsigned char bits_remaining(8);
-		vector< unsigned char > bstring_value;
-		for (auto hstring_char : hstring_text)
-		{
-			char_value <<= 4;
-			switch (hstring_char)
-			{
-			case '0' : char_value |= 0x0; bits_remaining -= 4; break;
-			case '1' : char_value |= 0x1; bits_remaining -= 4; break;
-			case '2' : char_value |= 0x2; bits_remaining -= 4; break;
-			case '3' : char_value |= 0x3; bits_remaining -= 4; break;
-			case '4' : char_value |= 0x4; bits_remaining -= 4; break;
-			case '5' : char_value |= 0x5; bits_remaining -= 4; break;
-			case '6' : char_value |= 0x6; bits_remaining -= 4; break;
-			case '7' : char_value |= 0x7; bits_remaining -= 4; break;
-			case '8' : char_value |= 0x8; bits_remaining -= 4; break;
-			case '9' : char_value |= 0x9; bits_remaining -= 4; break;
-			case 'a' : char_value |= 0xA; bits_remaining -= 4; break;
-			case 'A' : char_value |= 0xA; bits_remaining -= 4; break;
-			case 'b' : char_value |= 0xB; bits_remaining -= 4; break;
-			case 'B' : char_value |= 0xB; bits_remaining -= 4; break;
-			case 'c' : char_value |= 0xC; bits_remaining -= 4; break;
-			case 'C' : char_value |= 0xC; bits_remaining -= 4; break;
-			case 'd' : char_value |= 0xD; bits_remaining -= 4; break;
-			case 'D' : char_value |= 0xD; bits_remaining -= 4; break;
-			case 'e' : char_value |= 0xE; bits_remaining -= 4; break;
-			case 'E' : char_value |= 0xE; bits_remaining -= 4; break;
-			case 'f' : char_value |= 0xF; bits_remaining -= 4; break;
-			case 'F' : char_value |= 0xF; bits_remaining -= 4; break;
-			}
-			
-			if (!bits_remaining)
-			{
-				bstring_value.push_back(char_value);
-				char_value = 0;
-				bits_remaining = 8;
-			}
-			else
-			{ /* still remaining */ }
-		}
-		if (bits_remaining < 8)
-		{
-			assert(bits_remaining == 4);
-			char_value <<= bits_remaining;
-			bstring_value.push_back(char_value);
-			return make_shared< BitStringValue >(bstring_value, bits_remaining);
-		}
-		else
-		{
-			return make_shared< BitStringValue >(bstring_value, 0);
-		}
+		auto hstring(parseHString(ctx->HSTRING()));
+		return make_shared< BitStringValue >(hstring.first, hstring.second);
+
 	}
 	else if (ctx->CONTAINING_RW())
 	{
@@ -944,6 +856,102 @@ shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueCo
 	{
 		return make_shared< BitStringValue >();
 	}
+}
+pair< vector< unsigned char >, unsigned int > Listener::parseBString(antlr4::tree::TerminalNode *bstring)
+{
+	assert(bstring->getSymbol());
+	auto bstring_text(bstring->getSymbol()->getText());
+	unsigned char char_value(0);
+	unsigned char bits_remaining(8);
+	vector< unsigned char > bstring_value;
+	for (auto bstring_char : bstring_text)
+	{
+		char_value <<= 1;
+		switch (bstring_char)
+		{
+		case '1' :
+			char_value |= 1;
+			--bits_remaining;
+			break;
+		case '0' :
+			--bits_remaining;
+			break;
+		default :
+			// no-op
+			break;
+		}
+		if (!bits_remaining)
+		{
+			bstring_value.push_back(char_value);
+			char_value = 0;
+			bits_remaining = 8;
+		}
+		else
+		{ /* still remaining */ }
+	}
+	if (bits_remaining < 8)
+	{
+		char_value <<= bits_remaining;
+		bstring_value.push_back(char_value);
+	}
+	else
+	{ /* no-op */ }
+	return make_pair(bstring_value, bits_remaining % 8);
+}
+pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tree::TerminalNode *hstring)
+{
+	assert(hstring->getSymbol());
+	auto hstring_text(hstring->getSymbol()->getText());
+	unsigned char char_value(0);
+	unsigned char bits_remaining(8);
+	vector< unsigned char > bstring_value;
+	for (auto hstring_char : hstring_text)
+	{
+		char_value <<= 4;
+		switch (hstring_char)
+		{
+		case '0' : char_value |= 0x0; bits_remaining -= 4; break;
+		case '1' : char_value |= 0x1; bits_remaining -= 4; break;
+		case '2' : char_value |= 0x2; bits_remaining -= 4; break;
+		case '3' : char_value |= 0x3; bits_remaining -= 4; break;
+		case '4' : char_value |= 0x4; bits_remaining -= 4; break;
+		case '5' : char_value |= 0x5; bits_remaining -= 4; break;
+		case '6' : char_value |= 0x6; bits_remaining -= 4; break;
+		case '7' : char_value |= 0x7; bits_remaining -= 4; break;
+		case '8' : char_value |= 0x8; bits_remaining -= 4; break;
+		case '9' : char_value |= 0x9; bits_remaining -= 4; break;
+		case 'a' : char_value |= 0xA; bits_remaining -= 4; break;
+		case 'A' : char_value |= 0xA; bits_remaining -= 4; break;
+		case 'b' : char_value |= 0xB; bits_remaining -= 4; break;
+		case 'B' : char_value |= 0xB; bits_remaining -= 4; break;
+		case 'c' : char_value |= 0xC; bits_remaining -= 4; break;
+		case 'C' : char_value |= 0xC; bits_remaining -= 4; break;
+		case 'd' : char_value |= 0xD; bits_remaining -= 4; break;
+		case 'D' : char_value |= 0xD; bits_remaining -= 4; break;
+		case 'e' : char_value |= 0xE; bits_remaining -= 4; break;
+		case 'E' : char_value |= 0xE; bits_remaining -= 4; break;
+		case 'f' : char_value |= 0xF; bits_remaining -= 4; break;
+		case 'F' : char_value |= 0xF; bits_remaining -= 4; break;
+		}
+		
+		if (!bits_remaining)
+		{
+			bstring_value.push_back(char_value);
+			char_value = 0;
+			bits_remaining = 8;
+		}
+		else
+		{ /* still remaining */ }
+	}
+	if (bits_remaining < 8)
+	{
+		assert(bits_remaining == 4);
+		char_value <<= bits_remaining;
+		bstring_value.push_back(char_value);
+	}
+	else
+	{ /* no-op */ }
+	return make_pair(bstring_value, bits_remaining);
 }
 
 shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)
@@ -1079,7 +1087,25 @@ shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_iden
 {
 	return make_shared< ObjectIdentifierValue >(parseObjectIdentifier(ctx));
 }
-shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)
+{
+	if (ctx->BSTRING())
+	{
+		auto bstring(parseBString(ctx->BSTRING()));
+		return make_shared< OctetStringValue >(bstring.first, bstring.second);
+	}
+	else if (ctx->HSTRING())
+	{
+		auto hstring(parseHString(ctx->HSTRING()));
+		return make_shared< OctetStringValue >(hstring.first, hstring.second);
+	}
+	else
+	{
+		assert(ctx->CONTAINING_RW());
+		return make_shared< OctetStringValue >(parseValue(ctx->value()));
+	}
+	return shared_ptr< Value >();
+}
 shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)			{ return shared_ptr< Value >(); }

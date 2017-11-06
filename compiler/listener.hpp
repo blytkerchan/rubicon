@@ -69,6 +69,9 @@ private :
 	std::shared_ptr< Value > parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx);
 	std::shared_ptr< Value > parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
 	std::shared_ptr< Value > parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx);
+	std::pair< std::vector< unsigned char >, unsigned int > parseBString(antlr4::tree::TerminalNode *bstring);
+	std::pair< std::vector< unsigned char >, unsigned int > parseHString(antlr4::tree::TerminalNode *hstring);
+
 	std::shared_ptr< Value > parseBooleanValue(asn1Parser::Boolean_valueContext *ctx);
 	std::shared_ptr< Value > parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx);
 	std::shared_ptr< Value > parseRestrictedCharacterStringValue(asn1Parser::Restricted_character_string_valueContext *ctx);
