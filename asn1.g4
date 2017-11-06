@@ -696,10 +696,7 @@ encoding_prefix
 	: LEFT_SQUARE_BRACKET_TK ( ENCODING_REFERENCE COLON_TK )? ENCODING_REFERENCE RIGHT_SQUARE_BRACKET_TK
 	;
 object_identifier_value
-	: LEFT_CURLY_BRACKET_TK obj_id_components_list RIGHT_CURLY_BRACKET_TK
-	;
-obj_id_components_list
-	: obj_id_components+
+	: LEFT_CURLY_BRACKET_TK obj_id_components+ RIGHT_CURLY_BRACKET_TK
 	;
 obj_id_components
 	: name_form

@@ -17,6 +17,7 @@
 #include "irivalue.hpp"
 #include "nullvalue.hpp"
 #include "objectdescriptortype.hpp"
+#include "objectidentifiervalue.hpp"
 #include "primitivetype.hpp"
 #include "restrictedcharacterstringvalue.hpp"
 #include "selectiontype.hpp"
@@ -207,51 +208,43 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 	pre_condition(ctx);
 
 	ObjectIdentifier retval;
-	auto list(ctx->obj_id_components_list());
-	if (list)
-	{
-		auto components(list->obj_id_components());
-		if (components.empty())
-		{
-			emitWarning(ctx, "empty OID");
-		}
-		else
-		{ /* nothing to warn about */ }
-		for (auto component : components)
-		{
-			assert(component);
-			if (component->name_form())
-			{
-				retval.push_back(component->name_form()->getText());
-			}
-			else if (component->number_form())
-			{
-				retval.push_back(parseNumber(component->number_form()->NUMBER()));
-			}
-			else if (component->name_and_number_form())
-			{
-				assert(component->name_and_number_form()->number_form());
-				assert(component->name_and_number_form()->number_form()->NUMBER());
-				assert(component->name_and_number_form()->IDENTIFIER() || component->name_and_number_form()->TYPE_REFERENCE_OR_MODULE_REFERENCE());
-				string identifier(
-					  component->name_and_number_form()->IDENTIFIER()
-					? component->name_and_number_form()->IDENTIFIER()->getText()
-					: component->name_and_number_form()->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText()
-					);
-				retval.push_back(make_pair(identifier, parseNumber(component->name_and_number_form()->number_form()->NUMBER())));
-			}
-			else
-			{
-				assert(component->defined_value());
-				auto parsed_defined_value(parseDefinedValue(component->defined_value()));
-				auto typed_parsed_defined_value(static_cast< DefinedValue const& >(*parsed_defined_value));
-				retval.push_back(typed_parsed_defined_value);
-			}
-		}
-	}
-	else
+	auto components(ctx->obj_id_components());
+	if (components.empty())
 	{
 		emitWarning(ctx, "empty OID");
+	}
+	else
+	{ /* nothing to warn about */ }
+	for (auto component : components)
+	{
+		assert(component);
+		if (component->name_form())
+		{
+			retval.push_back(component->name_form()->getText());
+		}
+		else if (component->number_form())
+		{
+			retval.push_back(parseNumber(component->number_form()->NUMBER()));
+		}
+		else if (component->name_and_number_form())
+		{
+			assert(component->name_and_number_form()->number_form());
+			assert(component->name_and_number_form()->number_form()->NUMBER());
+			assert(component->name_and_number_form()->IDENTIFIER() || component->name_and_number_form()->TYPE_REFERENCE_OR_MODULE_REFERENCE());
+			string identifier(
+				  component->name_and_number_form()->IDENTIFIER()
+				? component->name_and_number_form()->IDENTIFIER()->getText()
+				: component->name_and_number_form()->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText()
+				);
+			retval.push_back(make_pair(identifier, parseNumber(component->name_and_number_form()->number_form()->NUMBER())));
+		}
+		else
+		{
+			assert(component->defined_value());
+			auto parsed_defined_value(parseDefinedValue(component->defined_value()));
+			auto typed_parsed_defined_value(static_cast< DefinedValue const& >(*parsed_defined_value));
+			retval.push_back(typed_parsed_defined_value);
+		}
 	}
 
 	return retval;
@@ -1082,7 +1075,10 @@ shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 	}
 	return retval;
 }
-shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)	{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)
+{
+	return make_shared< ObjectIdentifierValue >(parseObjectIdentifier(ctx));
+}
 shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)				{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)			{ return shared_ptr< Value >(); }
