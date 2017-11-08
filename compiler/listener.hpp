@@ -83,6 +83,7 @@ private :
 	std::vector< std::string > symbols_to_export_;
 	ModuleNameMappings module_name_mappings_;
 	ImportedSymbols imported_symbols_;
+	std::vector< TypeAssignment > type_assignments_;
 };
 }}}
 

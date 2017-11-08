@@ -181,7 +181,7 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 		if (assignment->type_assignment())
 		{
 			auto type_assignment(parseTypeAssignment(assignment->type_assignment()));
-			//TODO add to register
+			type_assignments_.push_back(type_assignment);
 		}
 		else if (assignment->value_assignment())
 		{
