@@ -20,6 +20,7 @@
 #include "objectidentifiervalue.hpp"
 #include "octetstringvalue.hpp"
 #include "primitivetype.hpp"
+#include "realvalue.hpp"
 #include "restrictedcharacterstringvalue.hpp"
 #include "selectiontype.hpp"
 #include "sequenceorsetoftype.hpp"
@@ -33,6 +34,7 @@
 #include "../exceptions/contract.hpp"
 #include "../tracing.hpp"
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 using namespace std;
@@ -1106,7 +1108,70 @@ shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_val
 	}
 	return shared_ptr< Value >();
 }
-shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)				{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
+{
+	pre_condition(ctx);
+	if (ctx->REAL_NUMBER())
+	{
+		unsigned int whole_part(0);
+		unsigned int whole_part_character_count(0);
+		unsigned int fractional_part(0);
+		unsigned int fractional_part_character_count(0);
+		unsigned int exponent(0);
+		unsigned int exponent_character_count(0);
+		bool negative_exponent(true);
+		unsigned int *curr_part(&whole_part);
+		unsigned int *curr_counter(&whole_part_character_count);
+		auto const symbol_text(ctx->REAL_NUMBER()->getSymbol()->getText());
+		for (auto symbol_character : symbol_text)
+		{
+			if ('.' == symbol_character)
+			{
+				curr_part = &fractional_part;
+				curr_counter = &fractional_part_character_count;
+
+			}
+			else if (('e' == symbol_character) || ('E' == symbol_character))
+			{
+				curr_part = &exponent;
+				curr_counter = &exponent_character_count;
+			}
+			else if((symbol_character >= '0') && (symbol_character <= '9'))
+			{
+				*curr_part *= 10;
+				*curr_part += (symbol_character - '0');
+				++(*curr_counter);
+			}
+			else if (symbol_character == '-')// || (symbol_character == '\u2011'))
+			{
+				negative_exponent = true;
+			}
+			else
+			{ /* something else, which is odd */ }
+		}
+		double value(fractional_part);
+		for (unsigned int i(0); i < fractional_part_character_count; ++i)
+		{
+			value /= 10;
+		}
+		value += whole_part;
+		double const e(std::pow(10, negative_exponent ? -((int)exponent) : (int)exponent));
+		value *= e;
+		return make_shared< RealValue >(value);
+	}
+	else if (ctx->sequence_value())
+	{
+		return make_shared< RealValue >(parseSequenceValue(ctx->sequence_value()));
+	}
+	else
+	{
+		return make_shared< RealValue >(
+				  ctx->PLUS_INFINITY_RW() ? RealValue::plus_infinity__
+				: ctx->MINUS_INFINITY_RW() ? RealValue::minus_infinity__
+				: RealValue::not_a_number__
+			);
+	}
+}
 shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueContext *ctx)			{ return shared_ptr< Value >(); }

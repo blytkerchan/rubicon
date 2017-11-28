@@ -165,6 +165,7 @@ REAL_NUMBER
 	: NUMBER FULL_STOP NUMBER ( 'e' | 'E' ) NUMBER
 	| NUMBER FULL_STOP NUMBER
 	| NUMBER ( 'e' | 'E' ) NUMBER
+	| NUMBER ( 'e' | 'E' ) HYPHEN_TK NUMBER
 	| NUMBER
 	;
 
@@ -504,18 +505,10 @@ enumerated_value
 	;
 
 real_value
-	: numeric_real_value
-	| special_real_value
-	;
-
-numeric_real_value
 	: REAL_NUMBER
 	| HYPHEN_TK REAL_NUMBER
 	| sequence_value
-	;
-
-special_real_value
-	: PLUS_INFINITY_RW
+	| PLUS_INFINITY_RW
 	| MINUS_INFINITY_RW
 	| NOT_A_NUMBER_RW
 	;
