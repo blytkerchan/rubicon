@@ -728,10 +728,7 @@ arc_identifier
 	| TYPE_REFERENCE_OR_MODULE_REFERENCE LEFT_PARENTHESIS_TK NUMBER RIGHT_PARENTHESIS_TK
 	;
 relative_iri_value
-	: QUOTATION_MARK_TK first_relative_arc_identifier (SOLIDUS_TK arc_identifier)+ QUOTATION_MARK_TK
-	;
-first_relative_arc_identifier
-	: arc_identifier
+	: QUOTATION_MARK_TK arc_identifier (SOLIDUS_TK arc_identifier)+ QUOTATION_MARK_TK
 	;
 embedded_pdv_value
 	: sequence_value

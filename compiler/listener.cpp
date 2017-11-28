@@ -1172,8 +1172,20 @@ shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
 			);
 	}
 }
-shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)			{ return shared_ptr< Value >(); }
-shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)			{ return shared_ptr< Value >(); }
+shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)
+{
+	pre_condition(ctx);
+	auto retval(make_shared< IRIValue >(true));
+	for (auto arc_identifier : ctx->arc_identifier())
+	{
+		retval->add(parseArcIdentifier(arc_identifier));
+	}
+	return retval;
+}
+shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)
+{
+	return shared_ptr< Value >();
+}
 shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx)			{ return shared_ptr< Value >(); }
 shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)					{ return shared_ptr< Value >(); }

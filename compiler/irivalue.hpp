@@ -7,7 +7,8 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct IRIValue : Value
 {
-	IRIValue()
+	IRIValue(bool relative = false)
+		: relative_(relative)
 	{ /* no-op */ }
 
 	void add(ArcIdentifier const &arc_identifier)
@@ -15,6 +16,7 @@ struct IRIValue : Value
 		arc_identifiers_.push_back(arc_identifier);
 	}
 
+	bool relative_;
 	std::vector< ArcIdentifier > arc_identifiers_;
 };
 }}}
