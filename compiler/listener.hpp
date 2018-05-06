@@ -7,6 +7,7 @@
 #include "modulenamemappings.hpp"
 #include "namednumber.hpp"
 #include "namedtype.hpp"
+#include "oidcomponent.hpp"
 #include "tag.hpp"
 #include "typeassignment.hpp"
 #include "typedescriptor.hpp"
@@ -90,6 +91,8 @@ private :
 	std::shared_ptr< Value > parseRealValue(asn1Parser::Real_valueContext *ctx);
 	std::shared_ptr< Value > parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx);
 	std::shared_ptr< Value > parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx);
+	OIDComponent parseOIDComponent(asn1Parser::Relative_oid_componentsContext *ctx);
+
 	std::shared_ptr< Value > parseSequenceValue(asn1Parser::Sequence_valueContext *ctx);
 	std::shared_ptr< Value > parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx);
 	std::shared_ptr< Value > parseSetValue(asn1Parser::Set_valueContext *ctx);

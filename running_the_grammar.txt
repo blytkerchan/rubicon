@@ -1,0 +1,3 @@
+antlr asn1.g4
+javac *.java
+grun asn1 <filename>
