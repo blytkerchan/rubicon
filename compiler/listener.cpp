@@ -292,7 +292,7 @@ unsigned int Listener::parseNumber(antlr4::tree::TerminalNode *node)
 	return retval;
 }
 
-Listener::TypeAssignment Listener::parseTypeAssignment(asn1Parser::Type_assignmentContext *ctx)
+TypeAssignment Listener::parseTypeAssignment(asn1Parser::Type_assignmentContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
