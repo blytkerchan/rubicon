@@ -15,6 +15,7 @@
 #include "integertype.hpp"
 #include "integervalue.hpp"
 #include "irivalue.hpp"
+#include "namedvalue.hpp"
 #include "nullvalue.hpp"
 #include "objectdescriptortype.hpp"
 #include "objectidentifiervalue.hpp"
@@ -24,8 +25,12 @@
 #include "realvalue.hpp"
 #include "restrictedcharacterstringvalue.hpp"
 #include "selectiontype.hpp"
+#include "sequenceofvalue.hpp"
 #include "sequenceorsetoftype.hpp"
 #include "sequenceorsettype.hpp"
+#include "sequencevalue.hpp"
+#include "setofvalue.hpp"
+#include "setvalue.hpp"
 #include "taggedtype.hpp"
 #include "typewithconstraint.hpp"
 #include "unknowntype.hpp"
@@ -1284,29 +1289,88 @@ shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueConte
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-//TODO
-	return shared_ptr< Value >();
+	
+	auto retval(make_shared< SequenceValue >());
+	if (ctx->component_value_list())
+	{
+		for (auto value : ctx->component_value_list()->named_value())
+		{
+			retval->add(parseNamedValue(value));
+		}
+	}
+	else
+	{ /* no values */ }
+
+	return retval;
+}
+shared_ptr< Value > Listener::parseNamedValue(asn1Parser::Named_valueContext *ctx)
+{
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
+	pre_condition(ctx);
+	auto retval(make_shared< NamedValue >(ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value())));
+	return retval;
 }
 shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-//TODO
-	return shared_ptr< Value >();
+	auto retval(make_shared< SequenceOfValue >());
+	if (ctx->value_list())
+	{
+		for (auto value : ctx->value_list()->value())
+		{
+			retval->add(parseValue(value));
+		}
+	}
+	else if (ctx->named_value_list())
+	{
+		for (auto value : ctx->named_value_list()->named_value())
+		{
+			retval->add(parseNamedValue(value));
+		}
+	}
+	else
+	{ /* nothing here */ }
+	return retval;
 }
 shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-//TODO
-	return shared_ptr< Value >();
+	auto retval(make_shared< SetValue >());
+	if (ctx->component_value_list())
+	{
+		for (auto value : ctx->component_value_list()->named_value())
+		{
+			retval->add(parseNamedValue(value));
+		}
+	}
+	else
+	{ /* nothing here */ }
+	return retval;
 }
 shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-//TODO
-	return shared_ptr< Value >();
+	auto retval(make_shared< SetOfValue >());
+	if (ctx->value_list())
+	{
+		for (auto value : ctx->value_list()->value())
+		{
+			retval->add(parseValue(value));
+		}
+	}
+	else if (ctx->named_value_list())
+	{
+		for (auto value : ctx->named_value_list()->named_value())
+		{
+			retval->add(parseNamedValue(value));
+		}
+	}
+	else
+	{ /* nothing here */ }
+	return retval;
 }
 shared_ptr< Value > Listener::parseTimeValue(asn1Parser::Time_valueContext *ctx)
 {

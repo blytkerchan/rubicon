@@ -94,6 +94,7 @@ private :
 	OIDComponent parseOIDComponent(asn1Parser::Relative_oid_componentsContext *ctx);
 
 	std::shared_ptr< Value > parseSequenceValue(asn1Parser::Sequence_valueContext *ctx);
+	std::shared_ptr< Value > parseNamedValue(asn1Parser::Named_valueContext *ctx);
 	std::shared_ptr< Value > parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx);
 	std::shared_ptr< Value > parseSetValue(asn1Parser::Set_valueContext *ctx);
 	std::shared_ptr< Value > parseSetOfValue(asn1Parser::Set_of_valueContext *ctx);

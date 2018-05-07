@@ -611,12 +611,10 @@ sequence_of_value
 	| LEFT_CURLY_BRACKET_TK RIGHT_CURLY_BRACKET_TK
 	;
 value_list
-	: value
-	| value_list COMMA_TK value
+	: value (COMMA_TK value)*
 	;
 named_value_list
-	: named_value
-	| named_value_list COMMA_TK named_value
+	: named_value (COMMA_TK named_value)*
 	;
 set_value
 	: LEFT_CURLY_BRACKET_TK component_value_list? RIGHT_CURLY_BRACKET_TK
