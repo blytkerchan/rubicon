@@ -61,6 +61,7 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	module_namespace_ = namespace_prefix_ + ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText() + namespace_suffix_;
 	tracer__->trace(1, TRACE_INFO, "Will be using namespace name %s\n", module_namespace_.c_str());
 	module_definitive_identification_ = ctx->definitive_identification();
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 
 /*virtual */void Listener::exitEncoding_reference_default(asn1Parser::Encoding_reference_defaultContext *ctx)/* override*/
@@ -78,28 +79,33 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	}
 	else
 	{ /* definitely nothing to warn about */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 
 /*virtual */void Listener::exitExplicit_tags(asn1Parser::Explicit_tagsContext *ctx)/* override*/
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	tag_default_ = TagDefault::explicit_tags__;
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitImplicit_tags(asn1Parser::Implicit_tagsContext *ctx)/* override*/
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	tag_default_ = TagDefault::implicit_tags__;
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitAutomatic_tags(asn1Parser::Automatic_tagsContext *ctx)/* overrid*/
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	tag_default_ = TagDefault::automatic_tags__;
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitExtension_default(asn1Parser::Extension_defaultContext *ctx)/* override*/
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	module_types_extensibility_implied_ = (ctx->EXTENSIBILITY_RW() && ctx->IMPLIED_RW());
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitEncoding_control_section(asn1Parser::Encoding_control_sectionContext *ctx)/* override*/
 {
@@ -114,6 +120,7 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	{
 		emitWarning(ctx->ENCODING_REFERENCE(), "encoding reference \"TAG\" specified. According to X.680-201508 this is not allowed in this context.");
 	}
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitExports(asn1Parser::ExportsContext *ctx)/* override*/
 {
@@ -144,6 +151,7 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	//TODO when done parsing, make sure all of these symbols are defined in this module.
 	//     also generate a header file with the exported symbols
 	//     also tag the classes for export (so they'll be visible from a DLL or DSO)
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitImports(asn1Parser::ImportsContext *ctx)/* override*/
 {
@@ -202,6 +210,7 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	}
 	else
 	{ /* no imports clause */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 /*virtual */void Listener::exitAssignment_list(asn1Parser::Assignment_listContext *ctx)/* override*/
 {
@@ -217,12 +226,16 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 		}
 		else if (assignment->value_assignment())
 		{
+			auto value_assignment(parseValueAssignment(assignment->value_assignment()));
+			value_assignments_.push_back(value_assignment);
 		}
 		else
 		{
 			assert(assignment->value_set_type_assignment());
+			//TODO
 		}
 	}
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_valueContext *ctx)
 {
@@ -269,6 +282,7 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 		}
 	}
 
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 unsigned int Listener::parseNumber(antlr4::tree::TerminalNode *node)
@@ -289,6 +303,7 @@ unsigned int Listener::parseNumber(antlr4::tree::TerminalNode *node)
 		retval += (c - '0');
 	}
 
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 
@@ -300,6 +315,7 @@ TypeAssignment Listener::parseTypeAssignment(asn1Parser::Type_assignmentContext 
 	pre_condition(ctx->type());
 	string name(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText());
 	auto type(parseType(ctx->type()));
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return TypeAssignment(name, type);
 }
 
@@ -379,6 +395,7 @@ shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string
 	}
 	else
 	{ /* no named bits */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< BitStringType >(named_bits);
 }
 std::shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser::Character_string_typeContext *ctx)
@@ -438,6 +455,7 @@ std::shared_ptr< TypeDescriptor > Listener::parseChoiceType(asn1Parser::Choice_t
 	else
 	{ /* no extension addition alternatives */ }
 
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< ChoiceType >(alternative_type_list, extensible);
 }
 NamedType Listener::parseNamedType(asn1Parser::Named_typeContext *ctx)
@@ -496,6 +514,7 @@ std::shared_ptr< TypeDescriptor > Listener::parseEnumeratedType(asn1Parser::Enum
 	else
 	{ /* no exceptions */ }
 
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< EnumeratedType >(enumeration_values, extensible);
 }
 NamedNumber Listener::parseNamedNumber(asn1Parser::Named_numberContext *ctx)
@@ -598,10 +617,12 @@ shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetType(asn1Parser::Sequen
 			}
 			root = false;
 		}
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return make_shared< SequenceOrSetType >(is_set, component_types);
 	}
 	else
 	{
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return make_shared< SequenceOrSetType >();
 	}
 }
@@ -644,6 +665,7 @@ shared_ptr< TypeDescriptor > Listener::parsePrefixedType(asn1Parser::Prefixed_ty
 		else
 		{ /* ok */ }
 		
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return make_shared< TaggedType >(tag, explicit_tagging, force_implicit_tagging, type);
 	}
 	else
@@ -653,6 +675,7 @@ shared_ptr< TypeDescriptor > Listener::parsePrefixedType(asn1Parser::Prefixed_ty
 		assert(ctx->encoding_prefixed_type()->type());
 		emitWarning(ctx->encoding_prefixed_type()->encoding_prefix(), "encoding prefix ignored.");
 		auto type(parseType(ctx->encoding_prefixed_type()->type()));
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return type;
 	}
 }
@@ -734,12 +757,14 @@ shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrain
 			? make_shared< TypeWithConstraint >(is_set, constraint, parseType(ctx->type_with_constraint()->type()))
 			: make_shared< TypeWithConstraint >(is_set, constraint, parseNamedType(ctx->type_with_constraint()->named_type())))
 			;
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return retval;
 	}
 	else
 	{
 		assert(ctx->builtin_type()) && parseReferencedType(ctx->referenced_type());
 		auto type(ctx->builtin_type() ? parseBuiltinType(ctx->builtin_type()) : parseReferencedType(ctx->referenced_type()));
+		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return make_shared< ConstrainedType >(type, constraint);
 	}
 }
@@ -944,6 +969,7 @@ pair< vector< unsigned char >, unsigned int > Listener::parseBString(antlr4::tre
 	}
 	else
 	{ /* no-op */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_pair(bstring_value, bits_remaining % 8);
 }
 pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tree::TerminalNode *hstring)
@@ -1000,6 +1026,7 @@ pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tre
 	}
 	else
 	{ /* no-op */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_pair(bstring_value, bits_remaining);
 }
 
@@ -1087,12 +1114,14 @@ void Listener::parseQuadruple(RestrictedCharacterStringValue &retval, asn1Parser
 		, parseNumber(ctx->cell()->NUMBER())
 		);
 	retval.add(quadruple);
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 void Listener::parseTuple(RestrictedCharacterStringValue &retval, asn1Parser::TupleContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	Tuple tuple(parseNumber(ctx->table_column()->NUMBER()), parseNumber(ctx->table_row()->NUMBER()));
 	retval.add(tuple);
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 
 shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::Unrestricted_character_string_valueContext *ctx)
@@ -1102,6 +1131,7 @@ shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::
 	assert(ctx->sequence_value());
 	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
 	//TODO: check that the sequence value corresponds to spec
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< UnrestrictedCharacterStringValue >(sequence_value);
 }
 shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)
@@ -1117,6 +1147,7 @@ shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_val
 	assert(ctx->sequence_value());
 	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
 	//TODO: check that the sequence value corresponds to spec
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< EmbeddedPDVValue >(sequence_value);
 }
 shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)
@@ -1142,6 +1173,7 @@ shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 	{
 		retval->add(parseArcIdentifier(arc_identifier));
 	}
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)
@@ -1243,6 +1275,7 @@ shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_val
 	{
 		retval->add(parseArcIdentifier(arc_identifier));
 	}
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)
@@ -1254,6 +1287,7 @@ shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_val
 	{
 		retval->add(parseOIDComponent(oid_component));
 	}
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 OIDComponent Listener::parseOIDComponent(asn1Parser::Relative_oid_componentsContext *ctx)
@@ -1282,7 +1316,7 @@ OIDComponent Listener::parseOIDComponent(asn1Parser::Relative_oid_componentsCont
 		retval.variant_ = OIDComponent::name_and_number__;
 	}
 
-
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueContext *ctx)
@@ -1300,6 +1334,7 @@ shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueConte
 	}
 	else
 	{ /* no values */ }
+
 
 	return retval;
 }
@@ -1331,6 +1366,8 @@ shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_value
 	}
 	else
 	{ /* nothing here */ }
+
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
@@ -1347,6 +1384,7 @@ shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
 	}
 	else
 	{ /* nothing here */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *ctx)
@@ -1370,6 +1408,7 @@ shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *c
 	}
 	else
 	{ /* nothing here */ }
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
 shared_ptr< Value > Listener::parseTimeValue(asn1Parser::Time_valueContext *ctx)
@@ -1389,6 +1428,17 @@ ArcIdentifier Listener::parseArcIdentifier(asn1Parser::Arc_identifierContext *ct
 		? ArcIdentifier(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getSymbol()->getText(), parseNumber(ctx->NUMBER()))
 		: ArcIdentifier(parseNumber(ctx->NUMBER()))
 		;
+}
+
+ValueAssignment Listener::parseValueAssignment(asn1Parser::Value_assignmentContext *ctx)
+{
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
+	pre_condition(ctx);
+	pre_condition(ctx->IDENTIFIER());
+	pre_condition(ctx->value());
+	string name(ctx->IDENTIFIER()->getText());
+	auto value(parseValue(ctx->value()));
+	return ValueAssignment(name, value);
 }
 
 /*static */void Listener::emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...)

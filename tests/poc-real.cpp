@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 using namespace Vlinder::Rubicon;
@@ -144,7 +145,8 @@ int main()
 	dissectDouble(buildDouble(-1, Details::Integer<>(4), 2, 1, 12), category, sign, mantissa, base, scale_factor, exponent);
 	assert(category == DoubleValueCategory::normal__);
 	assert(sign == -1);
-	assert(mantissa == Details::Integer<>(1));
+	auto int_(make_unique< Details::Integer<> >(1));
+	assert(mantissa == *int_);
 	assert(base == 2);
 	assert(scale_factor == 2);
 	assert(exponent == 7);

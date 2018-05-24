@@ -51,14 +51,14 @@ struct Integer
 	{
 		while (size_ && (value_[0] == 0) && ((size_ == 1) || ((value_[1] & 0x80) == 0)))
 		{
-			std::copy_backward(value_ + 1, value_ + size_, value_);
+			std::copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
 			--size_;
 		}
 		if (signed_)
 		{
 			while ((size_ > 1) && (value_[0] == 0xFF) && ((value_[1] & 0x80) == 0x80))
 			{
-				std::copy_backward(value_ + 1, value_ + size_, value_);
+				std::copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
 				--size_;
 			}
 		}

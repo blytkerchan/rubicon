@@ -12,6 +12,7 @@
 #include "typeassignment.hpp"
 #include "typedescriptor.hpp"
 #include "value.hpp"
+#include "valueassignment.hpp"
 #include <ostream>
 #include <memory>
 
@@ -102,6 +103,8 @@ private :
 
 	ArcIdentifier parseArcIdentifier(asn1Parser::Arc_identifierContext *ctx);
 
+	ValueAssignment parseValueAssignment(asn1Parser::Value_assignmentContext *ctx);
+
 	static void emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
 	static void emitWarning(antlr4::tree::TerminalNode *node, char const *fmt, ...);
 	static void emitError(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
@@ -120,6 +123,7 @@ private :
 	ModuleNameMappings module_name_mappings_;
 	ImportedSymbols imported_symbols_;
 	std::vector< TypeAssignment > type_assignments_;
+	std::vector< ValueAssignment > value_assignments_;
 };
 }}}
 
