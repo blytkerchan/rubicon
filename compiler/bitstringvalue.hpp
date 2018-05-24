@@ -1,6 +1,9 @@
 #ifndef rubicon_compiler_bitstringvalue_hpp
 #define rubicon_compiler_bitstringvalue_hpp
 
+#include "value.hpp"
+#include <memory>
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct BitStringValue : Value
 {

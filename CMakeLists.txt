@@ -79,6 +79,8 @@ foreach(src_file ${preproc-SRC})
 endforeach()
 set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/asn1c.cpp
+	${PROJECT_SOURCE_DIR}/compiler/builder.cpp
+	${PROJECT_SOURCE_DIR}/compiler/builder.hpp
 	${PROJECT_SOURCE_DIR}/compiler/listener.cpp
 	${PROJECT_SOURCE_DIR}/compiler/listener.hpp
 	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp

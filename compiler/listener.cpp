@@ -1,4 +1,6 @@
-#include "listener.hpp"
+#include "../exceptions.hpp"
+#include "../exceptions/contract.hpp"
+#include "../tracing.hpp"
 #include "bitstringtype.hpp"
 #include "bitstringvalue.hpp"
 #include "booleanvalue.hpp"
@@ -15,6 +17,7 @@
 #include "integertype.hpp"
 #include "integervalue.hpp"
 #include "irivalue.hpp"
+#include "listener.hpp"
 #include "namedvalue.hpp"
 #include "nullvalue.hpp"
 #include "objectdescriptortype.hpp"
@@ -36,9 +39,6 @@
 #include "unknowntype.hpp"
 #include "unrestrictedcharacterstringvalue.hpp"
 #include "utctimetype.hpp"
-#include "../exceptions.hpp"
-#include "../exceptions/contract.hpp"
-#include "../tracing.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -762,7 +762,7 @@ shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrain
 	}
 	else
 	{
-		assert(ctx->builtin_type()) && parseReferencedType(ctx->referenced_type());
+		assert(ctx->builtin_type() || parseReferencedType(ctx->referenced_type()));
 		auto type(ctx->builtin_type() ? parseBuiltinType(ctx->builtin_type()) : parseReferencedType(ctx->referenced_type()));
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return make_shared< ConstrainedType >(type, constraint);

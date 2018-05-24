@@ -1,18 +1,16 @@
-#include "generated/asn1Lexer.h"
-#include "generated/asn1Parser.h"
-#include "compiler/listener.hpp"
+#include "compiler/builder.hpp"
 #include "exceptions/contract.hpp"
 #include "tracing.hpp"
 #include "tracing/stderrtracer.hpp"
-#include <iostream>
-#include <string>
-#include <memory>
 #include <boost/program_options.hpp>
-#include <antlr4-runtime/antlr4-runtime.h>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
 
-using namespace antlr4;
 using namespace std;
 namespace po = boost::program_options;
+namespace cpl = Vlinder::Rubicon::Compiler;
 
 int main(int argc, char const **argv)
 {
@@ -68,15 +66,10 @@ int main(int argc, char const **argv)
 	{ /* use stdout */ }
 	string const namespace_prefix(vm.count("namespace-prefix") == 0 ? string() : vm["namespace-prefix"].as< string >());
 	string const namespace_suffix(vm.count("namespace-suffix") == 0 ? string("::ASN1") : vm["namespace-suffix"].as< string >());
+	string const input_filename(vm["input-file"].as< string >());
 
-	ANTLRFileStream input(vm["input-file"].as< string >());
-	asn1Lexer lexer(&input);
-	CommonTokenStream tokens(&lexer);
-	asn1Parser parser(&tokens);
-	auto the_tree(parser.file());
-	tree::ParseTreeWalker walker;
-	Vlinder::Rubicon::Compiler::Listener listener(namespace_prefix, namespace_suffix);
-	walker.walk(&listener, the_tree);
+	cpl::Builder builder(out, input_filename, namespace_prefix, namespace_suffix);
+	builder();
 }
 
 

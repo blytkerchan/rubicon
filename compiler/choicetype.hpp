@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <boost/variant.hpp>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct ChoiceType : TypeDescriptor

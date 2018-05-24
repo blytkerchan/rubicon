@@ -21,6 +21,13 @@ struct RestrictedCharacterStringValue;
 class Listener : public ::asn1BaseListener
 {
 public :
+	enum struct TagDefault {
+		  explicit_tags__
+		, implicit_tags__
+		, automatic_tags__
+		};
+	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
+
 	Listener(std::string const &namespace_prefix, std::string const &namespace_suffix);
 
 	virtual void exitModule_identifier(asn1Parser::Module_identifierContext *ctx) override;
@@ -34,14 +41,17 @@ public :
 	virtual void exitImports(asn1Parser::ImportsContext *ctx) override;
 	virtual void exitAssignment_list(asn1Parser::Assignment_listContext *ctx) override;
 
-private :
-	enum struct TagDefault {
-		  explicit_tags__
-		, implicit_tags__
-		, automatic_tags__
-		};
-	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
+	std::string getModuleNamespace() const { return module_namespace_; }
+	TagDefault getTagDefault() const { return tag_default_; }
+	bool isModuleTypesExtensibilityImplies() const { return module_types_extensibility_implied_; }
+	bool exportAll() const { return export_all_; }
+	std::vector< std::string > getSymbolsToExport() const { return symbols_to_export_; }
+	ModuleNameMappings getModuleNameMappings() const { return module_name_mappings_; }
+	ImportedSymbols getImportedSymbols() const { return imported_symbols_; }
+	std::vector< TypeAssignment > getTypeAssignments() const { return type_assignments_; }
+	std::vector< ValueAssignment > getValueAssignments() const { return value_assignments_; }
 
+private :
 	ObjectIdentifier parseObjectIdentifier(asn1Parser::Object_identifier_valueContext *ctx);
 	unsigned int parseNumber(antlr4::tree::TerminalNode *node);
 	TypeAssignment parseTypeAssignment(asn1Parser::Type_assignmentContext *ctx);
