@@ -30,6 +30,7 @@ public :
 
 	Listener(std::string const &namespace_prefix, std::string const &namespace_suffix);
 
+protected :
 	virtual void exitModule_identifier(asn1Parser::Module_identifierContext *ctx) override;
 	virtual void exitEncoding_reference_default(asn1Parser::Encoding_reference_defaultContext *ctx) override;
 	virtual void exitExplicit_tags(asn1Parser::Explicit_tagsContext *ctx) override;
@@ -41,6 +42,7 @@ public :
 	virtual void exitImports(asn1Parser::ImportsContext *ctx) override;
 	virtual void exitAssignment_list(asn1Parser::Assignment_listContext *ctx) override;
 
+public :
 	std::string getModuleNamespace() const { return module_namespace_; }
 	TagDefault getTagDefault() const { return tag_default_; }
 	bool isModuleTypesExtensibilityImplies() const { return module_types_extensibility_implied_; }

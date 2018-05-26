@@ -1,6 +1,8 @@
 #ifndef rubicon_compiler_sequenceorsettype_hpp
 #define rubicon_compiler_sequenceorsettype_hpp
 
+#include "typedescriptor.hpp"
+#include "namedtype.hpp"
 #include "value.hpp"
 #include <memory>
 #include <vector>
@@ -59,6 +61,7 @@ public :
 		: is_set_(is_set)
 		, component_types_(component_types)
 	{ /* no-op */ }
+	virtual std::vector< std::string > getDependencies() const;
 
 private :
 	bool is_set_ = false;

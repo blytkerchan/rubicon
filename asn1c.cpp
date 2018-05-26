@@ -1,3 +1,4 @@
+#include "preprocessor/preprocessor.hpp"
 #include "compiler/builder.hpp"
 #include "exceptions/contract.hpp"
 #include "tracing.hpp"
@@ -10,6 +11,7 @@
 
 using namespace std;
 namespace po = boost::program_options;
+namespace pre = Vlinder::Rubicon::Preprocessor;
 namespace cpl = Vlinder::Rubicon::Compiler;
 
 int main(int argc, char const **argv)
@@ -23,6 +25,7 @@ int main(int argc, char const **argv)
 		("output,o", po::value< string >(), "output file (defaults to stdout)")
 		("namespace-prefix,n", po::value< string >(), "prefix to prepend to the namespace (defaults to none)")
 		("namespace-suffix,s", po::value< string >(), "suffix to append to the namespace (defaults to \"::ASN1\")")
+		("output-dependencies,h", "output dependencies in dot format")
 		;
 	po::options_description hidden_options("Hidden options");
 	hidden_options.add_options()
@@ -68,8 +71,14 @@ int main(int argc, char const **argv)
 	string const namespace_suffix(vm.count("namespace-suffix") == 0 ? string("::ASN1") : vm["namespace-suffix"].as< string >());
 	string const input_filename(vm["input-file"].as< string >());
 
-	cpl::Builder builder(out, input_filename, namespace_prefix, namespace_suffix);
-	builder();
+	pre::Preprocessor preprocessor(input_filename);
+	stringstream ss;
+	if (preprocessor(&ss))
+	{
+		cpl::Builder builder(out, input_filename, namespace_prefix, namespace_suffix);
+		return builder(ss, vm.count("output") != 0) ? 0 : 1;
+	}
+	else return 1;
 }
 
 

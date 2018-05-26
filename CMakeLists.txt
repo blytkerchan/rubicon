@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(Rubicon)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(VLINDER_USING_CXX14 1)
 include(cmake/settings.cmake)
 include_directories(/usr/local/include)
 include_directories(/usr/local/include/antlr4-runtime)
@@ -16,16 +15,22 @@ target_link_libraries(poc-real exceptions)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
-add_custom_target(preproc-grammar
+add_custom_command(OUTPUT preproc-grammar-tag
 	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
+	COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/preproc-grammar-tag
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	SOURCES preproc.g4
+	MAIN_DEPENDENCY preproc.g4
+	VERBATIM
 	)
-add_custom_target(compiler-grammar
+add_custom_target(preproc-grammar DEPENDS preproc-grammar-tag)
+add_custom_command(OUTPUT compiler-grammar-tag
 	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -visitor -Dlanguage=Cpp -o generated asn1.g4
+	COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/compiler-grammar-tag
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	SOURCES preproc.g4
+	MAIN_DEPENDENCY asn1.g4
+	VERBATIM
 	)
+add_custom_target(compiler-grammar DEPENDS compiler-grammar-tag)
 
 set(preproc-GENERATED_SRC 
 	${PROJECT_SOURCE_DIR}/generated/preprocBaseListener.cpp
@@ -66,9 +71,10 @@ foreach(src_file ${compiler-GENERATED_SRC})
 endforeach()
 
 set(preproc-SRC
-	${PROJECT_SOURCE_DIR}/asn1p.cpp
 	${PROJECT_SOURCE_DIR}/preprocessor/listener.cpp
 	${PROJECT_SOURCE_DIR}/preprocessor/listener.hpp
+	${PROJECT_SOURCE_DIR}/preprocessor/preprocessor.cpp
+	${PROJECT_SOURCE_DIR}/preprocessor/preprocessor.hpp
 	${preproc-GENERATED_SRC}
 	)
 foreach(src_file ${preproc-SRC})
@@ -78,13 +84,70 @@ foreach(src_file ${preproc-SRC})
 		)
 endforeach()
 set(compiler-SRC
-	${PROJECT_SOURCE_DIR}/asn1c.cpp
-	${PROJECT_SOURCE_DIR}/compiler/builder.cpp
-	${PROJECT_SOURCE_DIR}/compiler/builder.hpp
-	${PROJECT_SOURCE_DIR}/compiler/listener.cpp
-	${PROJECT_SOURCE_DIR}/compiler/listener.hpp
-	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp
-	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.hpp
+	${PROJECT_SOURCE_DIR}/compiler/arcidentifier.hpp        
+	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp        	
+	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.hpp       	
+	${PROJECT_SOURCE_DIR}/compiler/booleanvalue.hpp         	
+	${PROJECT_SOURCE_DIR}/compiler/builder.cpp              	
+	${PROJECT_SOURCE_DIR}/compiler/builder.hpp              	
+	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.hpp  	
+	${PROJECT_SOURCE_DIR}/compiler/choicetype.cpp           	
+	${PROJECT_SOURCE_DIR}/compiler/choicetype.hpp           	
+	${PROJECT_SOURCE_DIR}/compiler/choicevalue.hpp             
+	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.hpp        
+	${PROJECT_SOURCE_DIR}/compiler/constraint.hpp             
+	${PROJECT_SOURCE_DIR}/compiler/definedtype.hpp            
+	${PROJECT_SOURCE_DIR}/compiler/definedvalue.hpp           
+	${PROJECT_SOURCE_DIR}/compiler/dependencies.cpp           
+	${PROJECT_SOURCE_DIR}/compiler/dependencies.hpp           
+	${PROJECT_SOURCE_DIR}/compiler/embeddedpdvvalue.hpp       
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.hpp         
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedvalue.hpp        
+	${PROJECT_SOURCE_DIR}/compiler/errorlistener.cpp        
+	${PROJECT_SOURCE_DIR}/compiler/errorlistener.hpp        
+	${PROJECT_SOURCE_DIR}/compiler/externaltypereference.hpp  
+	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.hpp    
+	${PROJECT_SOURCE_DIR}/compiler/integertype.hpp            
+	${PROJECT_SOURCE_DIR}/compiler/integervalue.hpp       
+	${PROJECT_SOURCE_DIR}/compiler/irivalue.hpp           
+	${PROJECT_SOURCE_DIR}/compiler/listener.cpp           
+	${PROJECT_SOURCE_DIR}/compiler/listener.hpp           
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp 
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.hpp 
+	${PROJECT_SOURCE_DIR}/compiler/namednumber.hpp        
+	${PROJECT_SOURCE_DIR}/compiler/namedtype.hpp          
+	${PROJECT_SOURCE_DIR}/compiler/namedvalue.hpp         
+	${PROJECT_SOURCE_DIR}/compiler/nullvalue.hpp          
+	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.hpp          
+	${PROJECT_SOURCE_DIR}/compiler/objectidentifier.hpp              
+	${PROJECT_SOURCE_DIR}/compiler/objectidentifiervalue.hpp         
+	${PROJECT_SOURCE_DIR}/compiler/octetstringvalue.hpp              
+	${PROJECT_SOURCE_DIR}/compiler/oidcomponent.hpp                  
+	${PROJECT_SOURCE_DIR}/compiler/oidvalue.hpp                      
+	${PROJECT_SOURCE_DIR}/compiler/primitivetype.hpp                 
+	${PROJECT_SOURCE_DIR}/compiler/quadruple.hpp                     
+	${PROJECT_SOURCE_DIR}/compiler/realvalue.hpp                     
+	${PROJECT_SOURCE_DIR}/compiler/restrictedcharacterstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/selectiontype.hpp       
+	${PROJECT_SOURCE_DIR}/compiler/sequenceofvalue.hpp     
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsetoftype.hpp 
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.cpp   
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.hpp   
+	${PROJECT_SOURCE_DIR}/compiler/sequencevalue.hpp       
+	${PROJECT_SOURCE_DIR}/compiler/setofvalue.hpp          
+	${PROJECT_SOURCE_DIR}/compiler/setvalue.hpp            
+	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp          
+	${PROJECT_SOURCE_DIR}/compiler/tag.hpp                 
+	${PROJECT_SOURCE_DIR}/compiler/tuple.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typeassignment.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typedescriptor.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typewithconstraint.hpp
+	${PROJECT_SOURCE_DIR}/compiler/unknowntype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/unrestrictedcharacterstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/utctimetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/valueassignment.hpp
+	${PROJECT_SOURCE_DIR}/compiler/value.hpp
+	${PROJECT_SOURCE_DIR}/compiler/versionedtypelist.hpp
 	${compiler-GENERATED_SRC}
 	)
 foreach(src_file ${compiler-SRC})
@@ -94,12 +157,19 @@ foreach(src_file ${compiler-SRC})
 		)
 endforeach()
 
-add_executable(asn1p ${preproc-SRC})
+add_executable(asn1p 
+	${PROJECT_SOURCE_DIR}/asn1p.cpp
+	${preproc-SRC}
+	)
 add_dependencies(asn1p preproc-grammar)
 target_link_libraries(asn1p antlr4-runtime boost_program_options exceptions tracing)
 
-add_executable(asn1c ${compiler-SRC})
-add_dependencies(asn1c compiler-grammar)
+add_executable(asn1c
+	${PROJECT_SOURCE_DIR}/asn1c.cpp
+	${compiler-SRC}
+	${preproc-SRC}
+	)
+add_dependencies(asn1c compiler-grammar preproc-grammar)
 target_link_libraries(asn1c antlr4-runtime boost_program_options exceptions tracing)
 
 

@@ -1,16 +1,14 @@
-#include "generated/preprocLexer.h"
-#include "generated/preprocParser.h"
-#include "preprocessor/listener.hpp"
 #include "exceptions/contract.hpp"
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <memory>
 #include <boost/program_options.hpp>
-#include <antlr4-runtime/antlr4-runtime.h>
+#include "preprocessor/preprocessor.hpp"
 
-using namespace antlr4;
 using namespace std;
 namespace po = boost::program_options;
+using namespace Vlinder::Rubicon;
 
 int main(int argc, char const **argv)
 {
@@ -50,13 +48,7 @@ int main(int argc, char const **argv)
 	else
 	{ /* use stdout */ }
 
-	ANTLRFileStream input(vm["input-file"].as< string >());
-	preprocLexer lexer(&input);
-	CommonTokenStream tokens(&lexer);
-	preprocParser parser(&tokens);
-	auto the_tree(parser.file());
-	tree::ParseTreeWalker walker;
-	Vlinder::Rubicon::Preprocessor::Listener listener(*out);
-	walker.walk(&listener, the_tree);
+	Preprocessor::Preprocessor preprocessor(vm["input-file"].as< string >());
+	return preprocessor(out) ? 0 : 1;
 }
 
