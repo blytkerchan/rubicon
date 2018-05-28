@@ -25,7 +25,7 @@ int main(int argc, char const **argv)
 		("output,o", po::value< string >(), "output file (defaults to stdout)")
 		("namespace-prefix,n", po::value< string >(), "prefix to prepend to the namespace (defaults to none)")
 		("namespace-suffix,s", po::value< string >(), "suffix to append to the namespace (defaults to \"::ASN1\")")
-		("output-dependencies,h", "output dependencies in dot format")
+		("output-dependencies,g", "output dependencies in dot format")
 		;
 	po::options_description hidden_options("Hidden options");
 	hidden_options.add_options()
@@ -76,7 +76,7 @@ int main(int argc, char const **argv)
 	if (preprocessor(&ss))
 	{
 		cpl::Builder builder(out, input_filename, namespace_prefix, namespace_suffix);
-		return builder(ss, vm.count("output") != 0) ? 0 : 1;
+		return builder(ss, vm.count("output-dependencies") != 0) ? 0 : 1;
 	}
 	else return 1;
 }

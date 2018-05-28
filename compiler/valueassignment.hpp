@@ -9,6 +9,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 			, value_(value)
 		{ /* no-op */ }
 
+		std::string getName() const { return name_; }
+		std::set< std::string > getDependencies() const { return value_->getDependencies(); }
+
 		std::string name_;
 		std::shared_ptr< Value > value_;
 	};

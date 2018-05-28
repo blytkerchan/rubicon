@@ -18,6 +18,9 @@ struct TypeWithConstraint : TypeDescriptor
 		, named_type_(type)
 	{ /* no-op */ }
 
+	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
+	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+
 	bool is_set_;
 	Constraint constraint_;
 	std::shared_ptr< TypeDescriptor > type_;

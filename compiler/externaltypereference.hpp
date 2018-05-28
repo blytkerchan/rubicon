@@ -9,6 +9,9 @@ struct ExternalTypeReference : TypeDescriptor
 		, symbol_name_(symbol_name)
 	{ /* no-op */ }
 
+	virtual bool hasTypeName() const override { return true; }
+	virtual std::string getTypeName() const override { return module_name_ + "." + symbol_name_; }
+
 	std::string module_name_;
 	std::string symbol_name_;
 };

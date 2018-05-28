@@ -18,7 +18,7 @@ struct ChoiceType : TypeDescriptor
 		, extensible_(extensible)
 	{ /* no-op */ }
 	virtual bool requireExplicitTag() const override { return true; }
-	virtual std::vector< std::string > getWeakDependencies() const;
+	virtual std::set< std::string > getDependencies() const;
 
 	AlternativeTypes alternative_types_;
 	bool extensible_;

@@ -9,6 +9,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 			, type_descriptor_(type_descriptor)
 		{ /* no-op */ }
 
+		std::string getName() const { return name_; }
+		std::set< std::string > getDependencies() const { return type_descriptor_->getDependencies(); }
+
 		std::string name_;
 		std::shared_ptr< TypeDescriptor > type_descriptor_;
 	};

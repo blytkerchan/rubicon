@@ -1,14 +1,18 @@
 #include "builder.hpp"
-#include "listener.hpp"
-#include "errorlistener.hpp"
+#include "../exceptions/contract.hpp"
 #include "../generated/asn1Lexer.h"
 #include "../generated/asn1Parser.h"
+#include "dependencies.hpp"
+#include "errorlistener.hpp"
+#include "listener.hpp"
 #include <antlr4-runtime/antlr4-runtime.h>
+#include <fstream>
 #include <set>
-#include "../exceptions/contract.hpp"
+#include <boost/filesystem.hpp>
 
 using namespace antlr4;
 using namespace std;
+namespace bfs = boost::filesystem;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 Builder::Builder(std::ostream *out, std::string const &input_filename, string const &namespace_prefix, string const &namespace_suffix)
@@ -84,7 +88,32 @@ void Builder::postParseSanityCheck()
 void Builder::outputDependencies() const
 {
 	invariant(listener_);
-
+	{
+		Dependencies type_dependencies;
+		for (auto type_assignment : listener_->getTypeAssignments())
+		{
+			set< string > dependencies;
+			auto const &deps(type_assignment.getDependencies());
+			dependencies.insert(deps.begin(), deps.end());
+			type_dependencies.add(type_assignment.getName(), dependencies.begin(), dependencies.end());
+		}
+		string type_dependencies_filename = bfs::path(input_filename_).filename().string() + ".types.dot";
+		ofstream type_dependencies_file(type_dependencies_filename, ofstream::trunc);
+		type_dependencies_file << type_dependencies << endl;
+	}
+	{
+		Dependencies value_dependencies;
+		for (auto value_assignment : listener_->getValueAssignments())
+		{
+			set< string > dependencies;
+			auto const &deps(value_assignment.getDependencies());
+			dependencies.insert(deps.begin(), deps.end());
+			value_dependencies.add(value_assignment.getName(), dependencies.begin(), dependencies.end());
+		}
+		string value_dependencies_filename = bfs::path(input_filename_).filename().string() + ".values.dot";
+		ofstream value_dependencies_file(value_dependencies_filename, ofstream::trunc);
+		value_dependencies_file << value_dependencies << endl;
+	}
 }
 }}}
 

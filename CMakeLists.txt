@@ -13,7 +13,7 @@ add_executable(poc-real
 	)
 target_link_libraries(poc-real exceptions)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 
 add_custom_command(OUTPUT preproc-grammar-tag
 	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
@@ -162,7 +162,7 @@ add_executable(asn1p
 	${preproc-SRC}
 	)
 add_dependencies(asn1p preproc-grammar)
-target_link_libraries(asn1p antlr4-runtime boost_program_options exceptions tracing)
+target_link_libraries(asn1p antlr4-runtime ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 
 add_executable(asn1c
 	${PROJECT_SOURCE_DIR}/asn1c.cpp
@@ -170,6 +170,6 @@ add_executable(asn1c
 	${preproc-SRC}
 	)
 add_dependencies(asn1c compiler-grammar preproc-grammar)
-target_link_libraries(asn1c antlr4-runtime boost_program_options exceptions tracing)
+target_link_libraries(asn1c antlr4-runtime ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 
 

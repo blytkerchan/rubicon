@@ -8,6 +8,9 @@ struct DefinedType : TypeDescriptor
 		: type_name_(type_name)
 	{ /* no-op */ }
 
+	virtual bool hasTypeName() const override { return true; }
+	virtual std::string getTypeName() const override { return type_name_; }
+
 	std::string type_name_;
 };
 }}}

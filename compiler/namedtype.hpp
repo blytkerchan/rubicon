@@ -14,6 +14,9 @@ struct NamedType : TypeDescriptor
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
+	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+
 	std::string name_;
 	std::shared_ptr< TypeDescriptor > type_;
 };

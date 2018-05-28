@@ -9,6 +9,9 @@ struct SelectionType : TypeDescriptor
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
+	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+
 	std::string selection_;
 	std::shared_ptr< TypeDescriptor > type_;
 };

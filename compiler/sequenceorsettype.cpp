@@ -3,16 +3,23 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*virtual */vector< string > SequenceOrSetType::getDependencies() const
+/*virtual */set< string > SequenceOrSetType::getDependencies() const
 {
-	vector< string > retval;
+	set< string > retval;
 
 	for (auto type : component_types_)
 	{
 		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
 		if (named_component_type)
 		{
-			retval.push_back(named_component_type->named_type_.name_);
+			if (named_component_type->hasTypeName())
+			{
+				retval.insert(retval.end(), named_component_type->getTypeName());
+			}
+			else
+			{ /* this type has no name */ }
+			//auto deps(named_component_type->getDependencies());
+			//retval.insert(deps.begin(), deps.end());
 		}
 		else
 		{ /* not a named component */ }

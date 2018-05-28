@@ -6,6 +6,7 @@
 #include "value.hpp"
 #include <memory>
 #include <vector>
+#include <set>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class SequenceOrSetType : public TypeDescriptor
@@ -16,6 +17,9 @@ public :
 		virtual ~ComponentType() = default;
 
 		virtual bool root() const noexcept = 0;
+		virtual std::set< std::string > getDependencies() const = 0;
+		virtual bool hasTypeName() const = 0;
+		virtual std::string getTypeName() const = 0;
 	};
 	struct ComponentsOfType : ComponentType
 	{
@@ -25,6 +29,9 @@ public :
 			: type_(type)
 		{ /* no-op */ }
 		virtual bool root() const noexcept override { return false; }
+		virtual std::set< std::string > getDependencies() const { return type_->getDependencies(); }
+		virtual bool hasTypeName() const override { return type_->hasTypeName(); }
+		virtual std::string getTypeName() const override { return type_->getTypeName(); }
 
 		Type type_;
 	};
@@ -48,6 +55,9 @@ public :
 		NamedComponentType& operator=(NamedComponentType &&) = default;
 
 		virtual bool root() const noexcept override { return root_; }
+		virtual std::set< std::string > getDependencies() const { return named_type_.getDependencies(); }
+		virtual bool hasTypeName() const override { return named_type_.hasTypeName(); }
+		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
 
 		bool root_;
 		NamedType named_type_;
@@ -61,7 +71,7 @@ public :
 		: is_set_(is_set)
 		, component_types_(component_types)
 	{ /* no-op */ }
-	virtual std::vector< std::string > getDependencies() const;
+	virtual std::set< std::string > getDependencies() const override;
 
 private :
 	bool is_set_ = false;
