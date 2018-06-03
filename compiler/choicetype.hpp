@@ -20,6 +20,8 @@ struct ChoiceType : TypeDescriptor
 	virtual bool requireExplicitTag() const override { return true; }
 	virtual std::set< std::string > getDependencies() const;
 
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+
 	AlternativeTypes alternative_types_;
 	bool extensible_;
 };

@@ -13,6 +13,8 @@ struct TaggedType : TypeDescriptor
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+
 	Tag tag_;
 	bool explicit_tagging_;
 	bool force_implicit_tagging_;

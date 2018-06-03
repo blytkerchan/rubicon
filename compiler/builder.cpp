@@ -9,19 +9,21 @@
 #include <fstream>
 #include <set>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace antlr4;
 using namespace std;
 namespace bfs = boost::filesystem;
+namespace alg = boost::algorithm;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-Builder::Builder(std::ostream *out, std::string const &input_filename, string const &namespace_prefix, string const &namespace_suffix)
-	: out_(out)
-	, input_filename_(input_filename)
+Builder::Builder(string const &output_directory_name, string const &input_filename, string const &namespace_prefix, string const &namespace_suffix)
+	: input_filename_(input_filename)
 	, namespace_prefix_(namespace_prefix)
 	, namespace_suffix_(namespace_suffix)
+	, output_directory_name_(output_directory_name)
 {
-	pre_condition(out);
 }
 
 Builder::~Builder()
@@ -42,6 +44,8 @@ Builder& Builder::operator()(istream &is, bool output_dependencies)
 	}
 	else
 	{ /* don't output dependencies */ }
+	createOutputDirectory();
+	outputTypes();
 
 	return *this;
 }
@@ -70,7 +74,7 @@ void Builder::postParseSanityCheck()
 	// check for duplicate symbols
 	auto type_assignments(listener_->getTypeAssignments());
 	set< string > types;
-	transform(type_assignments.begin(), type_assignments.end(), inserter(types, types.end()), [](auto type){ return type.name_; });
+	transform(type_assignments.begin(), type_assignments.end(), inserter(types, types.end()), [](auto type){ return type.getName(); });
 	okay_ &= type_assignments.size() == types.size();
 	auto value_assignments(listener_->getValueAssignments());
 	set< string > values;
@@ -114,6 +118,78 @@ void Builder::outputDependencies() const
 		ofstream value_dependencies_file(value_dependencies_filename, ofstream::trunc);
 		value_dependencies_file << value_dependencies << endl;
 	}
+}
+void Builder::createOutputDirectory()
+{
+	if (output_directory_name_.empty())
+	{
+		output_directory_name_ = alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", "/");
+		cout << "Using output directory " << output_directory_name_ << endl;
+	}
+	else
+	{ /* already have a directory name */ }
+	bfs::create_directories(output_directory_name_);
+}
+
+void Builder::outputTypes()
+{
+	for (auto type_assignment : listener_->getTypeAssignments())
+	{
+		generateHeader(type_assignment);
+		generateImplementation(type_assignment);
+	}
+}
+void Builder::generateHeader(TypeAssignment const &type_assignment)
+{
+	bfs::path const directory(output_directory_name_);
+	bfs::path const filename(directory / (alg::to_lower_copy(type_assignment.getName()) + ".hpp"));
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	// output the re-include guards
+	string const guard(
+		  string("generated_")
+		+ alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", "_")
+		+ "_"
+		+ alg::to_lower_copy(type_assignment.getName())
+		+ "_hpp"
+		);
+	ofs << "#ifndef " << guard << "\n";
+	ofs << "#define " << guard << "\n\n";
+
+	string const namespace_declaration(
+		  string("namespace ")
+		+ alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", " { namespace ")
+		+ " {"
+		);
+	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
+
+	ofs << "/* GENERATED CODE, DO NOT EDIT */\n";
+	ofs << namespace_declaration << "\n";
+	type_assignment.generateHeader(ofs);
+	ofs << namespace_close << "\n";
+
+	ofs << "\n#endif\n";
+}
+void Builder::generateImplementation(TypeAssignment const &type_assignment)
+{
+	bfs::path const directory(output_directory_name_);
+	bfs::path const filename(directory / (alg::to_lower_copy(type_assignment.getName()) + ".cpp"));
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	string const namespace_declaration(
+		  string("namespace ")
+		+ alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", " { namespace ")
+		+ " {"
+		);
+	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
+
+	ofs << "/* GENERATED CODE, DO NOT EDIT */\n";
+	ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp" << "\"\n";
+	ofs << "\n";
+	ofs << namespace_declaration << "\n";
+	type_assignment.generateImplementation(ofs);
+	ofs << namespace_close << "\n";
+
 }
 }}}
 

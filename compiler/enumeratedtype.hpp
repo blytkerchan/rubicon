@@ -1,6 +1,9 @@
 #ifndef rubicon_compiler_enumeratedtype_hpp
 #define rubicon_compiler_enumeratedtype_hpp
 
+#include "typedescriptor.hpp"
+#include <iostream>
+#include <string>
 #include <vector>
 #include "namednumber.hpp"
 
@@ -14,6 +17,9 @@ public :
 		: values_(values)
 		, extensible_(extensible)
 	{ /* no-op */ }
+
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+
 private :
 	Values values_;
 	bool extensible_;

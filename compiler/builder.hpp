@@ -7,10 +7,11 @@
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class Listener;
+class TypeAssignment;
 class Builder
 {
 public :
-	Builder(std::ostream *out, std::string const &input_filename, std::string const &namespace_prefix, std::string const &namespace_suffix);
+	Builder(std::string const &output_directory_name, std::string const &input_filename, std::string const &namespace_prefix, std::string const &namespace_suffix);
 	~Builder();
 	Builder(Builder const&) = delete;
 	Builder& operator=(Builder const&) = delete;
@@ -22,13 +23,17 @@ private :
 	void parse(std::istream &is);
 	void postParseSanityCheck();
 	void outputDependencies() const;
+	void createOutputDirectory();
+	void outputTypes();
+	void generateHeader(TypeAssignment const &type_assignment);
+	void generateImplementation(TypeAssignment const &type_assignment);
 
 	bool okay_ = true;
-	std::ostream *out_ = nullptr;
 	std::string input_filename_;
 	std::string namespace_prefix_;
 	std::string namespace_suffix_;
 	Listener *listener_ = nullptr;
+	std::string output_directory_name_;
 };
 }}}
 

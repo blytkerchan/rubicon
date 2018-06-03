@@ -1,6 +1,12 @@
 #ifndef vlinder_rubicon_compiler_tag_hpp
 #define vlinder_rubicon_compiler_tag_hpp
 
+#include "typedescriptor.hpp"
+#include <iostream>
+#include <string>
+#include <boost/variant.hpp>
+#include "definedvalue.hpp"
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct Tag
 {

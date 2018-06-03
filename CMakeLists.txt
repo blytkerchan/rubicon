@@ -84,66 +84,85 @@ foreach(src_file ${preproc-SRC})
 		)
 endforeach()
 set(compiler-SRC
-	${PROJECT_SOURCE_DIR}/compiler/arcidentifier.hpp        
-	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp        	
-	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.hpp       	
-	${PROJECT_SOURCE_DIR}/compiler/booleanvalue.hpp         	
-	${PROJECT_SOURCE_DIR}/compiler/builder.cpp              	
-	${PROJECT_SOURCE_DIR}/compiler/builder.hpp              	
-	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.hpp  	
-	${PROJECT_SOURCE_DIR}/compiler/choicetype.cpp           	
-	${PROJECT_SOURCE_DIR}/compiler/choicetype.hpp           	
-	${PROJECT_SOURCE_DIR}/compiler/choicevalue.hpp             
-	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.hpp        
-	${PROJECT_SOURCE_DIR}/compiler/constraint.hpp             
-	${PROJECT_SOURCE_DIR}/compiler/definedtype.hpp            
-	${PROJECT_SOURCE_DIR}/compiler/definedvalue.hpp           
-	${PROJECT_SOURCE_DIR}/compiler/dependencies.cpp           
-	${PROJECT_SOURCE_DIR}/compiler/dependencies.hpp           
-	${PROJECT_SOURCE_DIR}/compiler/embeddedpdvvalue.hpp       
-	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.hpp         
-	${PROJECT_SOURCE_DIR}/compiler/enumeratedvalue.hpp        
-	${PROJECT_SOURCE_DIR}/compiler/errorlistener.cpp        
-	${PROJECT_SOURCE_DIR}/compiler/errorlistener.hpp        
-	${PROJECT_SOURCE_DIR}/compiler/externaltypereference.hpp  
-	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.hpp    
-	${PROJECT_SOURCE_DIR}/compiler/integertype.hpp            
-	${PROJECT_SOURCE_DIR}/compiler/integervalue.hpp       
-	${PROJECT_SOURCE_DIR}/compiler/irivalue.hpp           
-	${PROJECT_SOURCE_DIR}/compiler/listener.cpp           
-	${PROJECT_SOURCE_DIR}/compiler/listener.hpp           
-	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp 
-	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.hpp 
-	${PROJECT_SOURCE_DIR}/compiler/namednumber.hpp        
-	${PROJECT_SOURCE_DIR}/compiler/namedtype.hpp          
-	${PROJECT_SOURCE_DIR}/compiler/namedvalue.hpp         
-	${PROJECT_SOURCE_DIR}/compiler/nullvalue.hpp          
-	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.hpp          
-	${PROJECT_SOURCE_DIR}/compiler/objectidentifier.hpp              
-	${PROJECT_SOURCE_DIR}/compiler/objectidentifiervalue.hpp         
-	${PROJECT_SOURCE_DIR}/compiler/octetstringvalue.hpp              
-	${PROJECT_SOURCE_DIR}/compiler/oidcomponent.hpp                  
-	${PROJECT_SOURCE_DIR}/compiler/oidvalue.hpp                      
-	${PROJECT_SOURCE_DIR}/compiler/primitivetype.hpp                 
-	${PROJECT_SOURCE_DIR}/compiler/quadruple.hpp                     
-	${PROJECT_SOURCE_DIR}/compiler/realvalue.hpp                     
+	${PROJECT_SOURCE_DIR}/compiler/arcidentifier.hpp
+	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/booleanvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/builder.cpp
+	${PROJECT_SOURCE_DIR}/compiler/builder.hpp
+	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/choicetype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/choicetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/choicevalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/constraint.hpp
+	${PROJECT_SOURCE_DIR}/compiler/definedtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/definedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/definedvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/dependencies.cpp
+	${PROJECT_SOURCE_DIR}/compiler/dependencies.hpp
+	${PROJECT_SOURCE_DIR}/compiler/embeddedpdvvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/errorlistener.cpp
+	${PROJECT_SOURCE_DIR}/compiler/errorlistener.hpp
+	${PROJECT_SOURCE_DIR}/compiler/externaltypereference.cpp
+	${PROJECT_SOURCE_DIR}/compiler/externaltypereference.hpp
+	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/integertype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/integertype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/integervalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/irivalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/listener.cpp
+	${PROJECT_SOURCE_DIR}/compiler/listener.hpp
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.cpp
+	${PROJECT_SOURCE_DIR}/compiler/modulenamemappings.hpp
+	${PROJECT_SOURCE_DIR}/compiler/namednumber.hpp
+	${PROJECT_SOURCE_DIR}/compiler/namedtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/namedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/namedvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/nullvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/objectidentifier.hpp
+	${PROJECT_SOURCE_DIR}/compiler/objectidentifiervalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/octetstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/oidcomponent.hpp
+	${PROJECT_SOURCE_DIR}/compiler/oidvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/primitivetype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/primitivetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/quadruple.hpp
+	${PROJECT_SOURCE_DIR}/compiler/realvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/restrictedcharacterstringvalue.hpp
-	${PROJECT_SOURCE_DIR}/compiler/selectiontype.hpp       
-	${PROJECT_SOURCE_DIR}/compiler/sequenceofvalue.hpp     
-	${PROJECT_SOURCE_DIR}/compiler/sequenceorsetoftype.hpp 
-	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.cpp   
-	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.hpp   
-	${PROJECT_SOURCE_DIR}/compiler/sequencevalue.hpp       
-	${PROJECT_SOURCE_DIR}/compiler/setofvalue.hpp          
-	${PROJECT_SOURCE_DIR}/compiler/setvalue.hpp            
-	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp          
-	${PROJECT_SOURCE_DIR}/compiler/tag.hpp                 
+	${PROJECT_SOURCE_DIR}/compiler/selectiontype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/selectiontype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/sequenceofvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsetoftype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsetoftype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/sequenceorsettype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/sequencevalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/setofvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/setvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/taggedtype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/tag.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tuple.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typeassignment.cpp
 	${PROJECT_SOURCE_DIR}/compiler/typeassignment.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typedescriptor.cpp
 	${PROJECT_SOURCE_DIR}/compiler/typedescriptor.hpp
+	${PROJECT_SOURCE_DIR}/compiler/typewithconstraint.cpp
 	${PROJECT_SOURCE_DIR}/compiler/typewithconstraint.hpp
+	${PROJECT_SOURCE_DIR}/compiler/unknowntype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/unknowntype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/unrestrictedcharacterstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/utctimetype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/utctimetype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/valueassignment.hpp
 	${PROJECT_SOURCE_DIR}/compiler/value.hpp

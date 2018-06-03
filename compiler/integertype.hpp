@@ -12,6 +12,8 @@ struct IntegerType : EnumeratedType
 	IntegerType(Values const &values)
 		: EnumeratedType(values, false)
 	{ /* no-op */ }
+
+	virtual void generateEncodeImplementation(std::ostream &os, std::string const &instance_name) const override;
 };
 }}}
 

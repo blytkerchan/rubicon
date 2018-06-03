@@ -5,8 +5,6 @@ using namespace std;
 using namespace boost;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-	typedef std::vector< boost::variant< NamedType, VersionedTypeList > > AlternativeTypes;
-
 /*virtual */set< string > ChoiceType::getDependencies() const
 {
 	struct TypeVisitor : static_visitor<>
@@ -35,7 +33,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	return retval;
 }
 
-	AlternativeTypes alternative_types_;
+/*virtual */void ChoiceType::generateEncodeImplementation(std::ostream &os) const/* override*/
+{
+	os << "//TODO" << endl;
+}
 }}}
 
 

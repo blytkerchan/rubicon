@@ -10,6 +10,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct BitStringType : TypeDescriptor
 {
 	typedef std::vector< std::pair< std::string, unsigned int > > NamedBits;
+
 	BitStringType() = default;
 	BitStringType(NamedBits const &named_bits)
 		: named_bits_(named_bits)

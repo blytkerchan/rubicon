@@ -22,7 +22,7 @@ int main(int argc, char const **argv)
 	po::options_description opts("options");
 	opts.add_options()
 		("help,h", "Display this help screen")
-		("output,o", po::value< string >(), "output file (defaults to stdout)")
+		("output,o", po::value< string >(), "output directory (defaults to namespace name, lowercased)")
 		("namespace-prefix,n", po::value< string >(), "prefix to prepend to the namespace (defaults to none)")
 		("namespace-suffix,s", po::value< string >(), "suffix to append to the namespace (defaults to \"::ASN1\")")
 		("output-dependencies,g", "output dependencies in dot format")
@@ -58,15 +58,6 @@ int main(int argc, char const **argv)
 	}
 	else
 	{ /* all is well */ }
-	ostream *out(&cout);
-	unique_ptr< ofstream > output_file;
-	if (vm.count("output"))
-	{
-		output_file = move(make_unique< ofstream >(vm["output"].as< string >()));
-		out = output_file.get();
-	}
-	else
-	{ /* use stdout */ }
 	string const namespace_prefix(vm.count("namespace-prefix") == 0 ? string() : vm["namespace-prefix"].as< string >());
 	string const namespace_suffix(vm.count("namespace-suffix") == 0 ? string("::ASN1") : vm["namespace-suffix"].as< string >());
 	string const input_filename(vm["input-file"].as< string >());
@@ -75,7 +66,7 @@ int main(int argc, char const **argv)
 	stringstream ss;
 	if (preprocessor(&ss))
 	{
-		cpl::Builder builder(out, input_filename, namespace_prefix, namespace_suffix);
+		cpl::Builder builder(vm.count("output") ? vm["output"].as< string >() : string(), input_filename, namespace_prefix, namespace_suffix);
 		return builder(ss, vm.count("output-dependencies") != 0) ? 0 : 1;
 	}
 	else return 1;

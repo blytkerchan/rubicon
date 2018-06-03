@@ -1,6 +1,12 @@
 #ifndef rubicon_compiler_sequenceorsetoftype_hpp
 #define rubicon_compiler_sequenceorsetoftype_hpp
 
+#include "typedescriptor.hpp"
+#include <iostream>
+#include <string>
+#include <memory>
+#include "namedtype.hpp"
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct SequenceOrSetOfType : TypeDescriptor
 {
@@ -20,6 +26,9 @@ struct SequenceOrSetOfType : TypeDescriptor
 		: is_set_(is_set)
 		, named_type_(std::move(type))
 	{ /* no-op */ }
+
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+
 	bool is_set_ = false;
 	std::shared_ptr< TypeDescriptor > type_;
 	NamedType named_type_;

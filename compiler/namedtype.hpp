@@ -16,6 +16,10 @@ struct NamedType : TypeDescriptor
 
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+	std::string getName() const { return name_; }
+
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const override;
 
 	std::string name_;
 	std::shared_ptr< TypeDescriptor > type_;

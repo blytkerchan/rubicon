@@ -1,6 +1,10 @@
 #ifndef rubicon_compiler_primitivetype_hpp
 #define rubicon_compiler_primitivetype_hpp
 
+#include "typedescriptor.hpp"
+#include <iostream>
+#include <string>
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class PrimitiveType : public TypeDescriptor
 {
@@ -24,6 +28,8 @@ public :
 	PrimitiveType(Primitive primitive)
 		: primitive_(primitive)
 	{ /* no-op */ }
+
+	virtual void generateDataMembers(std::ostream &os) const override;
 
 private :
 	Primitive primitive_;

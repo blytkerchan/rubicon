@@ -20,6 +20,8 @@ public :
 		virtual std::set< std::string > getDependencies() const = 0;
 		virtual bool hasTypeName() const = 0;
 		virtual std::string getTypeName() const = 0;
+		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
+		virtual bool isOptional() const = 0;
 	};
 	struct ComponentsOfType : ComponentType
 	{
@@ -32,6 +34,7 @@ public :
 		virtual std::set< std::string > getDependencies() const { return type_->getDependencies(); }
 		virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 		virtual std::string getTypeName() const override { return type_->getTypeName(); }
+		virtual bool isOptional() const override { return false; };
 
 		Type type_;
 	};
@@ -58,6 +61,9 @@ public :
 		virtual std::set< std::string > getDependencies() const { return named_type_.getDependencies(); }
 		virtual bool hasTypeName() const override { return named_type_.hasTypeName(); }
 		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
+		std::string getName() const { return named_type_.getName(); }
+		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { named_type_.generateEncodeImplementation(os, member_name); }
+		virtual bool isOptional() const override { return optional_; };
 
 		bool root_;
 		NamedType named_type_;
@@ -71,9 +77,15 @@ public :
 		: is_set_(is_set)
 		, component_types_(component_types)
 	{ /* no-op */ }
+
 	virtual std::set< std::string > getDependencies() const override;
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual void generateEventHandlers(std::ostream &os) const override;
+	virtual void generateDataMembers(std::ostream &os) const override;
 
 private :
+	static std::string toMemberName(std::string const &name);
+
 	bool is_set_ = false;
 	ComponentTypes component_types_;
 };

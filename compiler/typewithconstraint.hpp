@@ -1,7 +1,12 @@
 #ifndef rubicon_compiler_typewithconstraint_hpp
 #define rubicon_compiler_typewithconstraint_hpp
 
+#include "typedescriptor.hpp"
 #include "constraint.hpp"
+#include "namedtype.hpp"
+#include <string>
+#include <iostream>
+#include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct TypeWithConstraint : TypeDescriptor
@@ -20,6 +25,8 @@ struct TypeWithConstraint : TypeDescriptor
 
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
 	bool is_set_;
 	Constraint constraint_;
