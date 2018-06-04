@@ -1,6 +1,8 @@
 #ifndef vlinder_rubicon_compiler_valueassignment_hpp
 #define vlinder_rubicon_compiler_valueassignment_hpp
 
+#include "value.hpp"
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 	struct ValueAssignment
 	{

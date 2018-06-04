@@ -29,8 +29,6 @@ public :
 		: primitive_(primitive)
 	{ /* no-op */ }
 
-	virtual void generateDataMembers(std::ostream &os) const override;
-
 private :
 	Primitive primitive_;
 };

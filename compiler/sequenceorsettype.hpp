@@ -18,6 +18,8 @@ public :
 
 		virtual bool root() const noexcept = 0;
 		virtual std::set< std::string > getDependencies() const = 0;
+		virtual std::set< std::string > getStrongDependencies() const = 0;
+		virtual std::set< std::string > getWeakDependencies() const = 0;
 		virtual bool hasTypeName() const = 0;
 		virtual std::string getTypeName() const = 0;
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
@@ -31,7 +33,9 @@ public :
 			: type_(type)
 		{ /* no-op */ }
 		virtual bool root() const noexcept override { return false; }
-		virtual std::set< std::string > getDependencies() const { return type_->getDependencies(); }
+		virtual std::set< std::string > getDependencies() const override { return hasTypeName() ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getStrongDependencies() const override { return (!isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getWeakDependencies() const override { return (isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
 		virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 		virtual std::string getTypeName() const override { return type_->getTypeName(); }
 		virtual bool isOptional() const override { return false; };
@@ -58,7 +62,9 @@ public :
 		NamedComponentType& operator=(NamedComponentType &&) = default;
 
 		virtual bool root() const noexcept override { return root_; }
-		virtual std::set< std::string > getDependencies() const { return named_type_.getDependencies(); }
+		virtual std::set< std::string > getDependencies() const override { return hasTypeName() ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getStrongDependencies() const override { return (!isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getWeakDependencies() const override { return (isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
 		virtual bool hasTypeName() const override { return named_type_.hasTypeName(); }
 		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
 		std::string getName() const { return named_type_.getName(); }
@@ -79,6 +85,8 @@ public :
 	{ /* no-op */ }
 
 	virtual std::set< std::string > getDependencies() const override;
+	virtual std::set< std::string > getStrongDependencies() const override;
+	virtual std::set< std::string > getWeakDependencies() const override;
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateEventHandlers(std::ostream &os) const override;
 	virtual void generateDataMembers(std::ostream &os) const override;

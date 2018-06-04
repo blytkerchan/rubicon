@@ -28,7 +28,7 @@ public :
 		};
 	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
 
-	Listener(std::string const &namespace_prefix, std::string const &namespace_suffix);
+	Listener();
 
 protected :
 	virtual void exitModule_identifier(asn1Parser::Module_identifierContext *ctx) override;
@@ -43,7 +43,7 @@ protected :
 	virtual void exitAssignment_list(asn1Parser::Assignment_listContext *ctx) override;
 
 public :
-	std::string getModuleNamespace() const { return module_namespace_; }
+	std::string getModuleName() const { return module_name_; }
 	TagDefault getTagDefault() const { return tag_default_; }
 	bool isModuleTypesExtensibilityImplies() const { return module_types_extensibility_implied_; }
 	bool exportAll() const { return export_all_; }
@@ -122,11 +122,8 @@ private :
 	static void emitError(antlr4::ParserRuleContext *ctx, char const *fmt, ...);
 	static void emitError(antlr4::tree::TerminalNode *node, char const *fmt, ...);
 
-	std::string namespace_prefix_;
-	std::string namespace_suffix_;
-
 	// from parsing
-	std::string module_namespace_;
+	std::string module_name_;
 	asn1Parser::Definitive_identificationContext *module_definitive_identification_ = nullptr;
 	TagDefault tag_default_ = TagDefault::explicit_tags__;
 	bool module_types_extensibility_implied_ = false;

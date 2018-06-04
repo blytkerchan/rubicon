@@ -21,6 +21,7 @@ public :
 	Map::const_iterator begin() const { return entries_.begin(); }
 	Map::const_iterator end() const { return entries_.end(); }
 
+	void clear() { entries_.clear(); }
 
 private :
 	Map entries_;

@@ -14,18 +14,32 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 
 	for (auto type : component_types_)
 	{
-		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
-		if (named_component_type)
-		{
-			if (named_component_type->hasTypeName())
-			{
-				retval.insert(retval.end(), named_component_type->getTypeName());
-			}
-			else
-			{ /* this type has no name */ }
-		}
-		else
-		{ /* not a named component */ }
+		auto deps(type->getDependencies());
+		retval.insert(deps.begin(), deps.end());
+	}
+
+	return retval;
+}
+/*virtual */set< string > SequenceOrSetType::getStrongDependencies() const
+{
+	set< string > retval;
+
+	for (auto type : component_types_)
+	{
+		auto deps(type->getStrongDependencies());
+		retval.insert(deps.begin(), deps.end());
+	}
+
+	return retval;
+}
+/*virtual */set< string > SequenceOrSetType::getWeakDependencies() const
+{
+	set< string > retval;
+
+	for (auto type : component_types_)
+	{
+		auto deps(type->getWeakDependencies());
+		retval.insert(deps.begin(), deps.end());
 	}
 
 	return retval;

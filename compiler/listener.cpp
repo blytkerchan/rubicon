@@ -46,9 +46,7 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-Listener::Listener(string const &namespace_prefix, string const &namespace_suffix)
-	: namespace_prefix_(namespace_prefix)
-	, namespace_suffix_(namespace_suffix)
+Listener::Listener()
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 }
@@ -58,8 +56,8 @@ Listener::Listener(string const &namespace_prefix, string const &namespace_suffi
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	pre_condition(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE());
-	module_namespace_ = namespace_prefix_ + ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText() + namespace_suffix_;
-	tracer__->trace(1, TRACE_INFO, "Will be using namespace name %s\n", module_namespace_.c_str());
+	module_name_ = ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText();
+	tracer__->trace(1, TRACE_INFO, "Module name: %s\n", module_name_.c_str());
 	module_definitive_identification_ = ctx->definitive_identification();
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }

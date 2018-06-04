@@ -1,0 +1,6 @@
+#ifndef version_hpp_in
+#define version_hpp_in
+
+#define DATECODE @DATECODE@
+
+#endif

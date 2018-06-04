@@ -1,5 +1,6 @@
 #include "preprocessor/preprocessor.hpp"
 #include "compiler/builder.hpp"
+#include "compiler/generator.hpp"
 #include "exceptions/contract.hpp"
 #include "tracing.hpp"
 #include "tracing/stderrtracer.hpp"
@@ -66,8 +67,9 @@ int main(int argc, char const **argv)
 	stringstream ss;
 	if (preprocessor(&ss))
 	{
-		cpl::Builder builder(vm.count("output") ? vm["output"].as< string >() : string(), input_filename, namespace_prefix, namespace_suffix);
-		return builder(ss, vm.count("output-dependencies") != 0) ? 0 : 1;
+		cpl::Builder builder(input_filename);
+		cpl::Generator generator(vm.count("output") ? vm["output"].as< string >() : string(), namespace_prefix, namespace_suffix);
+		return generator(builder(ss), vm.count("output-dependencies") != 0) ? 0 : 1;
 	}
 	else return 1;
 }

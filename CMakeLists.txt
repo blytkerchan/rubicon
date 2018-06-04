@@ -114,6 +114,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/externaltypereference.hpp
 	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/generator.cpp
+	${PROJECT_SOURCE_DIR}/compiler/generator.hpp
 	${PROJECT_SOURCE_DIR}/compiler/integertype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/integertype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/integervalue.hpp
@@ -191,4 +193,5 @@ add_executable(asn1c
 add_dependencies(asn1c compiler-grammar preproc-grammar)
 target_link_libraries(asn1c antlr4-runtime ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 
-
+string(TIMESTAMP DATECODE %Y%m%d)
+configure_file(version.hpp.in version.hpp)
