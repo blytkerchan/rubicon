@@ -21,7 +21,7 @@ struct TypeDescriptor
 	virtual bool hasOptionalMembers() const { return false; }
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const {}
 	virtual void generateMemberDeclarations(std::ostream &os) const {}
-	virtual void generateConstructorImplementations(std::ostream &os) const {}
+	virtual void generateCopyConstructorImplementation(std::ostream &os) const {}
 };
 }}}
 

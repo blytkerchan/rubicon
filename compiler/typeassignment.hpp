@@ -23,7 +23,7 @@ public :
 	bool hasOptionalMembers() const { return type_descriptor_->hasOptionalMembers(); }
 	void generateHeaderGettersAndSetters(std::ostream &os) const { type_descriptor_->generateHeaderGettersAndSetters(os); }
 	void generateMemberDeclarations(std::ostream &os) const { type_descriptor_->generateMemberDeclarations(os); }
-	void generateConstructorImplementations(std::ostream &os) const;
+	void generateCopyConstructorImplementation(std::ostream &os) const;
 
 private :
 	std::string name_;

@@ -31,7 +31,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	}
 	throw logic_error("Unknown primitive type");
 }
-/*virtual */void PrimitiveType::generateConstructorImplementations(std::ostream &os) const/* override*/
+/*virtual */void PrimitiveType::generateCopyConstructorImplementation(std::ostream &os) const/* override*/
 {
 	cout << "//TODO " << typeid(*this).name() << endl;
 }

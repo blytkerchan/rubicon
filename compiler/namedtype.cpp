@@ -11,7 +11,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	type_->generateEncodeImplementation(os, member_name);
 }
-/*virtual */void NamedType::generateConstructorImplementations(std::ostream &os) const/* override*/
+/*virtual */void NamedType::generateCopyConstructorImplementation(std::ostream &os) const/* override*/
 {
 	cout << "//TODO " << typeid(*this).name() << endl;
 }

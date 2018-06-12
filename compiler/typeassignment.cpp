@@ -1,12 +1,12 @@
 #include "typeassignment.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-void TypeAssignment::generateConstructorImplementations(std::ostream &os) const
+void TypeAssignment::generateCopyConstructorImplementation(std::ostream &os) const
 {
 	if (hasOptionalMembers())
 	{
 		os << getName() << "::" << getName() << "(" << getName() << " const &other)\n{\n";
-		type_descriptor_->generateConstructorImplementations(os);
+		type_descriptor_->generateCopyConstructorImplementation(os);
 		os << "}\n";
 	}
 	else

@@ -97,7 +97,7 @@ public :
 	virtual bool hasOptionalMembers() const override;
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
 	virtual void generateMemberDeclarations(std::ostream &os) const override;
-	virtual void generateConstructorImplementations(std::ostream &os) const override;
+	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
 private :
 	bool is_set_ = false;

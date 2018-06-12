@@ -28,7 +28,7 @@ struct SequenceOrSetOfType : TypeDescriptor
 	{ /* no-op */ }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
-	virtual void generateConstructorImplementations(std::ostream &os) const override;
+	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
 	bool is_set_ = false;
 	std::shared_ptr< TypeDescriptor > type_;

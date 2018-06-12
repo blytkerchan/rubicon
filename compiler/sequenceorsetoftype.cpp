@@ -7,7 +7,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }
-/*virtual */void SequenceOrSetOfType::generateConstructorImplementations(std::ostream &os) const/* override*/
+/*virtual */void SequenceOrSetOfType::generateCopyConstructorImplementation(std::ostream &os) const/* override*/
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }

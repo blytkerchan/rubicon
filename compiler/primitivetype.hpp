@@ -30,7 +30,7 @@ public :
 	{ /* no-op */ }
 
 	virtual std::string getTypeName() const override;
-	virtual void generateConstructorImplementations(std::ostream &os) const override;
+	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
 private :
 	Primitive primitive_;

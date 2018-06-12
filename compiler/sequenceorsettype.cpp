@@ -157,7 +157,7 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 		}
 	}
 }
-/*virtual */void SequenceOrSetType::generateConstructorImplementations(ostream &os) const/* override*/
+/*virtual */void SequenceOrSetType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	if (hasOptionalMembers())
 	{

@@ -108,7 +108,7 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 
 	openNamespace(ofs, type_assignment);
 
-	generateConstructorImplementations(ofs, type_assignment);
+	generateCopyConstructorImplementation(ofs, type_assignment);
 
 	closeNamespace(ofs, type_assignment);
 }
@@ -228,9 +228,9 @@ void Generator::generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignme
 		;
 	type_assignment.generateMemberDeclarations(ofs);
 }
-void Generator::generateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateCopyConstructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
 {
-	type_assignment.generateConstructorImplementations(ofs);
+	type_assignment.generateCopyConstructorImplementation(ofs);
 }
 
 
