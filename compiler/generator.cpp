@@ -83,21 +83,17 @@ void Generator::generateHeader(TypeAssignment const &type_assignment)
 
 	generatePreamble(ofs);
 	openIncludeGuard(ofs, type_assignment);
-	generateIncludeDirectives(ofs, type_assignment);
-//	// output the re-include guards
-//
-//	string const namespace_declaration(
-//		  string("namespace ")
-//		+ alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", " { namespace ")
-//		+ " {"
-//		);
-//	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
-//
-//	ofs << "/* GENERATED CODE, DO NOT EDIT */\n";
-//	ofs << namespace_declaration << "\n";
-//	type_assignment.generateHeader(ofs);
-//	ofs << namespace_close << "\n";
-//
+	generateHeaderIncludeDirectives(ofs, type_assignment);
+	openNamespace(ofs, type_assignment);
+
+	openClassDefinition(ofs, type_assignment);
+
+	generatePublicDefinitionSection(ofs, type_assignment);
+	generatePrivateDefinitionSection(ofs, type_assignment);
+
+	closeClassDefinition(ofs, type_assignment);
+
+	closeNamespace(ofs, type_assignment);
 	closeIncludeGuard(ofs);
 }
 void Generator::generateImplementation(TypeAssignment const &type_assignment)
@@ -108,22 +104,15 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 
 	generatePreamble(ofs);
 
-//	string const namespace_declaration(
-//		  string("namespace ")
-//		+ alg::replace_all_copy(alg::to_lower_copy(listener_->getModuleNamespace()), "::", " { namespace ")
-//		+ " {"
-//		);
-//	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
-//
-//	ofs << "/* GENERATED CODE, DO NOT EDIT */\n";
-//	ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp" << "\"\n";
-//	ofs << "\n";
-//	ofs << namespace_declaration << "\n";
-//	type_assignment.generateImplementation(ofs);
-//	ofs << namespace_close << "\n";
-//
+	generateImplementationIncludeDirectives(ofs, type_assignment);
+
+	openNamespace(ofs, type_assignment);
+
+	generateConstructorImplementations(ofs, type_assignment);
+
+	closeNamespace(ofs, type_assignment);
 }
-void Generator::generatePreamble(std::ostream &ofs)
+void Generator::generatePreamble(ostream &ofs)
 {
 	ofs <<
 		"/*\n"
@@ -133,7 +122,7 @@ void Generator::generatePreamble(std::ostream &ofs)
 		" */\n"
 		;
 }
-void Generator::openIncludeGuard(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assignment)
 {
 	string const guard(
 		  string("generated_")
@@ -145,17 +134,105 @@ void Generator::openIncludeGuard(std::ostream &ofs, TypeAssignment const &type_a
 	ofs << "#ifndef " << guard << "\n";
 	ofs << "#define " << guard << "\n\n";
 }
-void Generator::closeIncludeGuard(std::ostream &ofs)
+void Generator::closeIncludeGuard(ostream &ofs)
 {
 	ofs <<
 		"\n"
 		"#endif\n"
 		;
 }
-void Generator::generateIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment)
 {
-
+	for (auto dependency : type_assignment.getStrongDependencies())
+	{
+		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
+	}
+	ofs <<
+		"#include \"rubicon/derencoder.hpp\"\n"
+		"#include \"rubicon/derdecoder.hpp\"\n"
+		"#include \"rubicon/types.hpp\"\n"
+		;
+	ofs << "\n";
 }
+void Generator::generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp\"\n";
+	for (auto dependency : type_assignment.getWeakDependencies())
+	{
+		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
+	}
+	if (type_assignment.hasOptionalMembers())
+	{
+		ofs << "#include <memory>\n";
+	}
+	else
+	{ /* no optional members, no need for unique_ptr */ }
+	ofs << "\n";
+}
+void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignment)
+{
+	string const namespace_declaration(
+		  string("namespace ")
+		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", " { namespace ")
+		+ " {"
+		);
+	ofs << namespace_declaration << "\n";
+}
+void Generator::closeNamespace(ostream &ofs, TypeAssignment const &type_assignment)
+{
+	string const namespace_declaration(
+		  string("namespace ")
+		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", " { namespace ")
+		+ " {"
+		);
+	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
+	ofs << namespace_close << "\n";
+}
+void Generator::openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	ofs
+		<< "class " << type_assignment.getName() << "\n"
+		<< "{\n"
+		;
+}
+void Generator::closeClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	ofs << "};\n";
+}
+void Generator::generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	ofs <<
+		"public :\n"
+		"\t" << type_assignment.getName() << "() = default;\n"
+		"\t" << type_assignment.getName() << "(Vlinder::Rubicon::DERDecoder &der_decoder);\n"
+		"\tvirtual ~" << type_assignment.getName() << "() = default;\n"
+		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
+		"\t" << type_assignment.getName() << "& operator=(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
+		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " &&other) = default;\n"
+		"\t" << type_assignment.getName() << "& operator=(" << type_assignment.getName() << " &&other) = default;\n"
+		"\t" << type_assignment.getName() << "& swap(" << type_assignment.getName() << " &other);\n"
+		"\n"
+		;
+	type_assignment.generateHeaderGettersAndSetters(ofs);
+	ofs << "\n";
+
+	ofs <<
+		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder);\n"
+		"\n"
+		;
+}
+void Generator::generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	ofs <<
+		"private :\n"
+		;
+	type_assignment.generateMemberDeclarations(ofs);
+}
+void Generator::generateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	type_assignment.generateConstructorImplementations(ofs);
+}
+
 
 }}}
 

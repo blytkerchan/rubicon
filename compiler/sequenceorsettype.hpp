@@ -70,6 +70,11 @@ public :
 		std::string getName() const { return named_type_.getName(); }
 		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { named_type_.generateEncodeImplementation(os, member_name); }
 		virtual bool isOptional() const override { return optional_; };
+		void generateHeaderGettersAndSetters(std::ostream &os) const;
+		void generateMemberDeclarations(std::ostream &os) const;
+
+		static std::string toVariableName(std::string const &name);
+		static std::string toMemberName(std::string const &name);
 
 		bool root_;
 		NamedType named_type_;
@@ -89,11 +94,12 @@ public :
 	virtual std::set< std::string > getWeakDependencies() const override;
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateEventHandlers(std::ostream &os) const override;
-	virtual void generateDataMembers(std::ostream &os) const override;
+	virtual bool hasOptionalMembers() const override;
+	virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
+	virtual void generateMemberDeclarations(std::ostream &os) const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 
 private :
-	static std::string toMemberName(std::string const &name);
-
 	bool is_set_ = false;
 	ComponentTypes component_types_;
 };

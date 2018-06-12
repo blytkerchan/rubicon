@@ -20,6 +20,7 @@ struct NamedType : TypeDescriptor
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 
 	std::string name_;
 	std::shared_ptr< TypeDescriptor > type_;

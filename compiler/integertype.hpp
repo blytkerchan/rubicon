@@ -14,6 +14,7 @@ struct IntegerType : EnumeratedType
 	{ /* no-op */ }
 
 	virtual void generateEncodeImplementation(std::ostream &os, std::string const &instance_name) const override;
+	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::Integer"; }
 };
 }}}
 

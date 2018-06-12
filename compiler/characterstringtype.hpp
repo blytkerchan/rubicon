@@ -19,6 +19,7 @@ public :
 	bool restricted() const { return !character_class_.empty(); }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual std::string getTypeName() const override { return "std::string"; };
 
 private :
 	std::string character_class_;

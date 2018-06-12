@@ -29,6 +29,9 @@ public :
 		: primitive_(primitive)
 	{ /* no-op */ }
 
+	virtual std::string getTypeName() const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
+
 private :
 	Primitive primitive_;
 };

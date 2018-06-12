@@ -16,6 +16,8 @@ struct BitStringType : TypeDescriptor
 		: named_bits_(named_bits)
 	{ /* no-op */ }
 
+	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::BitString"; }
+
 	NamedBits named_bits_;
 };
 }}}

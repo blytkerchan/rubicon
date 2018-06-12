@@ -30,7 +30,15 @@ private :
 	void generatePreamble(std::ostream &ofs);
 	void openIncludeGuard(std::ostream &ofs, TypeAssignment const &type_assignment);
 	void closeIncludeGuard(std::ostream &ofs);
-	void generateIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generateHeaderIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void openNamespace(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void closeNamespace(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void closeClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment);
 
 	bool okay_ = true;
 	std::string output_directory_name_;

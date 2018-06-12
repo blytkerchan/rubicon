@@ -18,6 +18,7 @@ struct SelectionType : TypeDescriptor
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 
 	std::string selection_;
 	std::shared_ptr< TypeDescriptor > type_;

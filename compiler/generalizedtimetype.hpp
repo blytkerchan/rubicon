@@ -7,6 +7,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct GeneralizedTimeType : TypeDescriptor
 {
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::GeneralizedTime"; }
 };
 }}}
 

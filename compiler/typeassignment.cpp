@@ -1,35 +1,16 @@
 #include "typeassignment.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-void TypeAssignment::generateHeader(std::ostream &os) const
+void TypeAssignment::generateConstructorImplementations(std::ostream &os) const
 {
-	os <<
-		"class " << name_ << "\n"
-		"{\n"
-		"public :\n"
-		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder);\n"
-		"protected :\n"
-		;
-	type_descriptor_->generateEventHandlers(os);
-	os <<
-		"\n"
-		"private :\n"
-		;
-	type_descriptor_->generateDataMembers(os);
-	os <<
-		"};\n"
-		;
-}
-void TypeAssignment::generateImplementation(std::ostream &os) const
-{
-	os <<
-		"void " << name_ << "::encode(Vlinder::Rubicon::DEREncoder &der_encoder)\n"
-		"{\n"
-		;
-	type_descriptor_->generateEncodeImplementation(os);
-	os <<
-		"}\n"
-		;
+	if (hasOptionalMembers())
+	{
+		os << getName() << "::" << getName() << "(" << getName() << " const &other)\n{\n";
+		type_descriptor_->generateConstructorImplementations(os);
+		os << "}\n";
+	}
+	else
+	{ /* no optional members - default copy constructor */ }
 }
 }}}
 

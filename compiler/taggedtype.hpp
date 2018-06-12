@@ -14,6 +14,8 @@ struct TaggedType : TypeDescriptor
 	{ /* no-op */ }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual std::string getTypeName() const override { return type_->getTypeName(); }
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 
 	Tag tag_;
 	bool explicit_tagging_;

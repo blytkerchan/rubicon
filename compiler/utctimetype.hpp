@@ -7,6 +7,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct UTCTimeType : TypeDescriptor
 {
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 };
 }}}
 

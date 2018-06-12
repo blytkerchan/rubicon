@@ -1,11 +1,46 @@
 #include "sequenceorsettype.hpp"
+#include <algorithm>
+#include <stack>
 
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*virtual */void SequenceOrSetType::ComponentType::generateInstance(std::ostream &os, std::string const &instance_name) const
+/*virtual */void SequenceOrSetType::ComponentType::generateInstance(ostream &os, string const &instance_name) const
 {
 	os << "\t" << getTypeName() << " " << (isOptional() ? "*" : "") << instance_name << ";\n";
+}
+void SequenceOrSetType::NamedComponentType::generateHeaderGettersAndSetters(ostream &os) const
+{
+	string name(getName());
+	name[0] = toupper(name[0]);
+	os << "\t" << getTypeName() << (isOptional() ? "* " : " ") << "get" << name << "() const;\n";
+	os << "\t" << "void set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ");\n";
+}
+void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const
+{
+	os << "\t" << getTypeName() << (isOptional() ? " *" : " ") << toMemberName(getName()) << ";\n";
+}
+/*static */string SequenceOrSetType::NamedComponentType::toVariableName(string const &name)
+{
+	string retval;
+	for (char c : name)
+	{
+		if (c == tolower(c))
+		{
+			retval.append(1, c);
+		}
+		else
+		{
+			retval.append("_");
+			retval.append(1, tolower(c));
+		}
+	}
+
+	return retval;
+}
+/*static */string SequenceOrSetType::NamedComponentType::toMemberName(string const &name)
+{
+	return toVariableName(name) + "_";
 }
 
 /*virtual */set< string > SequenceOrSetType::getDependencies() const
@@ -44,34 +79,34 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 
 	return retval;
 }
-/*virtual */void SequenceOrSetType::generateEncodeImplementation(std::ostream &os) const/* override*/
+/*virtual */void SequenceOrSetType::generateEncodeImplementation(ostream &os) const/* override*/
 {
-	os <<
-		"\tonStartEncoding(der_encoder);\n"
-		;
-	for (auto type : component_types_)
-	{
-		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
-		if (named_component_type)
-		{
-			os <<
-				"\tonEncode(der_encoder, false, \"" << named_component_type->getName() << "\");\n"
-				;
-			named_component_type->generateEncodeImplementation(os, toMemberName(named_component_type->getName()));
-			os <<
-				"\tonEncode(der_encoder, true, \"" << named_component_type->getName() << "\");\n"
-				;
-		}
-		else
-		{
-			throw std::logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
-		}
-	}
-	os <<
-		"\tonFinishEncoding(der_encoder);\n"
-		;
+//	os <<
+//		"\tonStartEncoding(der_encoder);\n"
+//		;
+//	for (auto type : component_types_)
+//	{
+//		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
+//		if (named_component_type)
+//		{
+//			os <<
+//				"\tonEncode(der_encoder, false, \"" << named_component_type->getName() << "\");\n"
+//				;
+//			named_component_type->generateEncodeImplementation(os, toMemberName(named_component_type->getName()));
+//			os <<
+//				"\tonEncode(der_encoder, true, \"" << named_component_type->getName() << "\");\n"
+//				;
+//		}
+//		else
+//		{
+//			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+//		}
+//	}
+//	os <<
+//		"\tonFinishEncoding(der_encoder);\n"
+//		;
 }
-/*virtual */void SequenceOrSetType::generateEventHandlers(std::ostream &os) const/* override*/
+/*virtual */void SequenceOrSetType::generateEventHandlers(ostream &os) const/* override*/
 {
 	os <<
 		"\t// called at the start of encoding this instance, before any members have been encoded\n"
@@ -82,41 +117,79 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 		"\tvirtual void onEncode(Vlinder::Rubicon::DEREncoder &der_encoder, bool encoded, std::string const &name) {}\n"
 		;
 }
-/*virtual */void SequenceOrSetType::generateDataMembers(std::ostream &os) const/* override*/
+/*virtual */bool SequenceOrSetType::hasOptionalMembers() const/* override*/
+{
+	bool retval(false);
+	for (auto component_type : component_types_)
+	{
+		retval |= component_type->isOptional();
+	}	
+
+	return retval;
+}
+/*virtual */void SequenceOrSetType::generateHeaderGettersAndSetters(ostream &os) const/* override*/
 {
 	for (auto type : component_types_)
 	{
 		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
 		if (named_component_type)
 		{
-			named_component_type->generateInstance(os, toMemberName(named_component_type->getName()));
+			named_component_type->generateHeaderGettersAndSetters(os);
 		}
 		else
 		{
-			throw std::logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
 		}
 	}
-	
 }
-/*static */string SequenceOrSetType::toMemberName(string const &name)
+/*virtual */void SequenceOrSetType::generateMemberDeclarations(ostream &os) const/* override*/
 {
-	string retval;
-	for (char c : name)
+	for (auto type : component_types_)
 	{
-		if (c == tolower(c))
+		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
+		if (named_component_type)
 		{
-			retval.append(1, c);
+			named_component_type->generateMemberDeclarations(os);
 		}
 		else
 		{
-			retval.append("_");
-			retval.append(1, tolower(c));
+			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
 		}
 	}
-	retval.append("_");
-
-	return retval;
 }
+/*virtual */void SequenceOrSetType::generateConstructorImplementations(ostream &os) const/* override*/
+{
+	if (hasOptionalMembers())
+	{
+		os << "\tusing namespace std;\n";
+		stack< string > optional_members;
+		for (auto component_type : component_types_)
+		{
+			if (component_type->isOptional())
+			{
+				auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
+				if (named_component_type)
+				{
+					os << "\tauto " << NamedComponentType::toVariableName(named_component_type->getName()) << "(make_unique< " << named_component_type->getTypeName() << " >(*other." << NamedComponentType::toMemberName(named_component_type->getName()) << "));\n";
+					optional_members.push(named_component_type->getName());
+				}
+				else
+				{
+					throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+				}
+			}
+		}	
+
+		while (!optional_members.empty())
+		{
+			os << "\t" << NamedComponentType::toMemberName(optional_members.top()) << " = " << NamedComponentType::toVariableName(optional_members.top())<< ".release();\n";
+			optional_members.pop();
+		}
+	}
+	else
+	{ /* no-op */ }
+}
+
 }}}
 
 

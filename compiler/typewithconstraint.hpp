@@ -27,6 +27,7 @@ struct TypeWithConstraint : TypeDescriptor
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+	virtual void generateConstructorImplementations(std::ostream &os) const override;
 
 	bool is_set_;
 	Constraint constraint_;
