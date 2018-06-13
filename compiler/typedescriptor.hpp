@@ -22,6 +22,7 @@ struct TypeDescriptor
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const {}
 	virtual void generateMemberDeclarations(std::ostream &os) const {}
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const {}
+	virtual void generateDestructorImplementation(std::ostream &os) const {}
 };
 }}}
 

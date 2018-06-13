@@ -39,6 +39,8 @@ private :
 	void generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment);
 	void generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment);
 	void generateCopyConstructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generateDestructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment);
+	void generateAssignmentOperatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment);
 
 	bool okay_ = true;
 	std::string output_directory_name_;

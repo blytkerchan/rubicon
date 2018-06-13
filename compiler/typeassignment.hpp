@@ -24,6 +24,8 @@ public :
 	void generateHeaderGettersAndSetters(std::ostream &os) const { type_descriptor_->generateHeaderGettersAndSetters(os); }
 	void generateMemberDeclarations(std::ostream &os) const { type_descriptor_->generateMemberDeclarations(os); }
 	void generateCopyConstructorImplementation(std::ostream &os) const;
+	void generateDestructorImplementation(std::ostream &os) const;
+	void generateAssignmentOperatorImplementation(std::ostream &os) const;
 
 private :
 	std::string name_;

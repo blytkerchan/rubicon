@@ -189,6 +189,36 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	else
 	{ /* no-op */ }
 }
+/*virtual */void SequenceOrSetType::generateDestructorImplementation(ostream &os) const/* override*/
+{
+	if (hasOptionalMembers())
+	{
+		stack< string > optional_members;
+		for (auto component_type : component_types_)
+		{
+			if (component_type->isOptional())
+			{
+				auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
+				if (named_component_type)
+				{
+					optional_members.push(named_component_type->getName());
+				}
+				else
+				{
+					throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+				}
+			}
+		}	
+
+		while (!optional_members.empty())
+		{
+			os << "\tdelete " << NamedComponentType::toMemberName(optional_members.top()) << ";\n";
+			optional_members.pop();
+		}
+	}
+	else
+	{ /* no-op */ }
+}
 
 }}}
 

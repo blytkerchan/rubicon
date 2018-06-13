@@ -109,6 +109,8 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	openNamespace(ofs, type_assignment);
 
 	generateCopyConstructorImplementation(ofs, type_assignment);
+	generateDestructorImplementation(ofs, type_assignment);
+	generateAssignmentOperatorImplementation(ofs, type_assignment);
 
 	closeNamespace(ofs, type_assignment);
 }
@@ -205,7 +207,7 @@ void Generator::generatePublicDefinitionSection(std::ostream &ofs, TypeAssignmen
 		"public :\n"
 		"\t" << type_assignment.getName() << "() = default;\n"
 		"\t" << type_assignment.getName() << "(Vlinder::Rubicon::DERDecoder &der_decoder);\n"
-		"\tvirtual ~" << type_assignment.getName() << "() = default;\n"
+		"\tvirtual ~" << type_assignment.getName() << "()" <<  (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "& operator=(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " &&other) = default;\n"
@@ -231,6 +233,14 @@ void Generator::generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignme
 void Generator::generateCopyConstructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
 {
 	type_assignment.generateCopyConstructorImplementation(ofs);
+}
+void Generator::generateDestructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	type_assignment.generateDestructorImplementation(ofs);
+}
+void Generator::generateAssignmentOperatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
+{
+	type_assignment.generateAssignmentOperatorImplementation(ofs);
 }
 
 
