@@ -23,6 +23,8 @@ struct TypeDescriptor
 	virtual void generateMemberDeclarations(std::ostream &os) const {}
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const {}
 	virtual void generateDestructorImplementation(std::ostream &os) const {}
+	virtual void generateSwapparatorImplementation(std::ostream &os) const {}
+	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const {}
 };
 }}}
 

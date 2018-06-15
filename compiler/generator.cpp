@@ -44,7 +44,8 @@ void Generator::createOutputDirectory()
 {
 	if (output_directory_name_.empty())
 	{
-		output_directory_name_ = alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", "/");
+		string const namespace_name(getNamespaceName());
+		output_directory_name_ = alg::replace_all_copy(alg::to_lower_copy(namespace_name), "::", "/");
 		cout << "Using output directory " << output_directory_name_ << endl;
 	}
 	else
@@ -67,7 +68,7 @@ void Generator::outputDependencies() const
 		value_dependencies_file << value_dependencies << endl;
 	}
 }
-void Generator::outputTypes()
+void Generator::outputTypes() const
 {
 	for (auto type_assignment : builder_->getTypeAssignments())
 	{
@@ -75,7 +76,7 @@ void Generator::outputTypes()
 		generateImplementation(type_assignment);
 	}
 }
-void Generator::generateHeader(TypeAssignment const &type_assignment)
+void Generator::generateHeader(TypeAssignment const &type_assignment) const
 {
 	bfs::path const directory(getOutputDirectoryName());
 	bfs::path const filename(directory / (alg::to_lower_copy(type_assignment.getName()) + ".hpp"));
@@ -96,7 +97,7 @@ void Generator::generateHeader(TypeAssignment const &type_assignment)
 	closeNamespace(ofs, type_assignment);
 	closeIncludeGuard(ofs);
 }
-void Generator::generateImplementation(TypeAssignment const &type_assignment)
+void Generator::generateImplementation(TypeAssignment const &type_assignment) const
 {
 	bfs::path const directory(getOutputDirectoryName());
 	bfs::path const filename(directory / (alg::to_lower_copy(type_assignment.getName()) + ".cpp"));
@@ -111,10 +112,12 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	generateCopyConstructorImplementation(ofs, type_assignment);
 	generateDestructorImplementation(ofs, type_assignment);
 	generateAssignmentOperatorImplementation(ofs, type_assignment);
+	generateSwapparatorImplementation(ofs, type_assignment);
+	generateGetterAndSetterImplementations(ofs, type_assignment);
 
 	closeNamespace(ofs, type_assignment);
 }
-void Generator::generatePreamble(ostream &ofs)
+void Generator::generatePreamble(ostream &ofs) const
 {
 	ofs <<
 		"/*\n"
@@ -124,7 +127,7 @@ void Generator::generatePreamble(ostream &ofs)
 		" */\n"
 		;
 }
-void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	string const guard(
 		  string("generated_")
@@ -136,14 +139,14 @@ void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assign
 	ofs << "#ifndef " << guard << "\n";
 	ofs << "#define " << guard << "\n\n";
 }
-void Generator::closeIncludeGuard(ostream &ofs)
+void Generator::closeIncludeGuard(ostream &ofs) const
 {
 	ofs <<
 		"\n"
 		"#endif\n"
 		;
 }
-void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	for (auto dependency : type_assignment.getStrongDependencies())
 	{
@@ -156,7 +159,7 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment con
 		;
 	ofs << "\n";
 }
-void Generator::generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp\"\n";
 	for (auto dependency : type_assignment.getWeakDependencies())
@@ -171,7 +174,7 @@ void Generator::generateImplementationIncludeDirectives(std::ostream &ofs, TypeA
 	{ /* no optional members, no need for unique_ptr */ }
 	ofs << "\n";
 }
-void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
@@ -180,7 +183,7 @@ void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignmen
 		);
 	ofs << namespace_declaration << "\n";
 }
-void Generator::closeNamespace(ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::closeNamespace(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
@@ -190,18 +193,18 @@ void Generator::closeNamespace(ostream &ofs, TypeAssignment const &type_assignme
 	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
 	ofs << namespace_close << "\n";
 }
-void Generator::openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::openClassDefinition(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs
 		<< "class " << type_assignment.getName() << "\n"
 		<< "{\n"
 		;
 }
-void Generator::closeClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::closeClassDefinition(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs << "};\n";
 }
-void Generator::generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs <<
 		"public :\n"
@@ -223,24 +226,32 @@ void Generator::generatePublicDefinitionSection(std::ostream &ofs, TypeAssignmen
 		"\n"
 		;
 }
-void Generator::generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generatePrivateDefinitionSection(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs <<
 		"private :\n"
 		;
 	type_assignment.generateMemberDeclarations(ofs);
 }
-void Generator::generateCopyConstructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateCopyConstructorImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateCopyConstructorImplementation(ofs);
 }
-void Generator::generateDestructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateDestructorImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateDestructorImplementation(ofs);
 }
-void Generator::generateAssignmentOperatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment)
+void Generator::generateAssignmentOperatorImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateAssignmentOperatorImplementation(ofs);
+}
+void Generator::generateSwapparatorImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generateSwapparatorImplementation(ofs);
+}
+void Generator::generateGetterAndSetterImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generateGetterAndSetterImplementations(ofs);
 }
 
 

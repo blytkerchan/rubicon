@@ -37,6 +37,22 @@ void TypeAssignment::generateAssignmentOperatorImplementation(std::ostream &os) 
 	else
 	{ /* no optional members - default copy constructor */ }
 }
+void TypeAssignment::generateSwapparatorImplementation(std::ostream &os) const
+{
+	os <<
+		getName() << "& " << getName() << "::swap(" << getName() << " &other)\n"
+		"{\n"
+		;
+	type_descriptor_->generateSwapparatorImplementation(os);
+	os <<
+		"\treturn *this;\n"
+		"}\n"
+		;
+}
+void TypeAssignment::generateGetterAndSetterImplementations(std::ostream &ofs) const
+{
+	type_descriptor_->generateGetterAndSetterImplementations(getName(), ofs);
+}
 }}}
 
 

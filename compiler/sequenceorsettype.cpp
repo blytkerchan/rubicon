@@ -9,12 +9,55 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << "\t" << getTypeName() << " " << (isOptional() ? "*" : "") << instance_name << ";\n";
 }
-void SequenceOrSetType::NamedComponentType::generateHeaderGettersAndSetters(ostream &os) const
+void SequenceOrSetType::NamedComponentType::generateHeaderGetterAndSetter(ostream &os) const
 {
 	string name(getName());
 	name[0] = toupper(name[0]);
-	os << "\t" << getTypeName() << (isOptional() ? "* " : " ") << "get" << name << "() const;\n";
+	os << "\t" << getTypeName() << (isOptional() ? " const* " : " ") << "get" << name << "() const;\n";
 	os << "\t" << "void set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ");\n";
+}
+void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string const &type_name, ostream &os) const
+{
+	string name(getName());
+	name[0] = toupper(name[0]);
+	os <<
+		getTypeName() << (isOptional() ? " const* " : " ") << type_name <<  "::get" << name << "() const\n"
+		"{\n"
+		"\treturn " << toMemberName(getName()) << ";\n"
+		"}\n"
+		;
+}
+void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string const &type_name, ostream &os) const
+{
+	string name(getName());
+	name[0] = toupper(name[0]);
+	os <<
+		"void " << type_name <<  "::set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ")\n"
+		"{\n"
+		;
+	if (isOptional())
+	{
+		os <<
+			"\tusing namespace std;\n"
+			"\tif (" << toMemberName(getName()) << ")\n"
+			"\t{\n"
+			"\t\t*" << toMemberName(getName()) << " = " << toVariableName(getName()) << ";\n"
+			"\t}\n"
+			"\telse\n"
+			"\t{\n"
+			"\t\t" << toMemberName(getName()) << " = new " << getTypeName() << "(" << toVariableName(getName()) << ");\n"
+			"\t}\n"
+			;
+	}
+	else
+	{
+		os <<
+			"\t" << toMemberName(getName()) << " = " << toVariableName(getName()) << ";\n"
+			;
+	}
+	os <<
+		"}\n"
+		;
 }
 void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const
 {
@@ -134,7 +177,7 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
 		if (named_component_type)
 		{
-			named_component_type->generateHeaderGettersAndSetters(os);
+			named_component_type->generateHeaderGetterAndSetter(os);
 		}
 		else
 		{
@@ -218,6 +261,50 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	}
 	else
 	{ /* no-op */ }
+}
+/*virtual */void SequenceOrSetType::generateSwapparatorImplementation(ostream &os) const/* override*/
+{
+	if (hasOptionalMembers())
+	{
+		os << "\tusing namespace std;\n";
+	}
+	else
+	{ /* won't use std::swap */ }
+	for (auto component_type : component_types_)
+	{
+		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
+		if (named_component_type)
+		{
+			if (component_type->isOptional())
+			{
+				os << "\tswap(" << NamedComponentType::toMemberName(named_component_type->getName()) << ", other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
+			}
+			else
+			{
+				os << "\t" << NamedComponentType::toMemberName(named_component_type->getName()) << ".swap(other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
+			}
+		}
+		else
+		{
+			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+		}
+	}	
+}
+/*virtual */void SequenceOrSetType::generateGetterAndSetterImplementations(string const &type_name, ostream &ofs) const/* override*/
+{
+	for (auto type : component_types_)
+	{
+		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
+		if (named_component_type)
+		{
+			named_component_type->generateGetterImplementation(type_name, ofs);
+			named_component_type->generateSetterImplementation(type_name, ofs);
+		}
+		else
+		{
+			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+		}
+	}
 }
 
 }}}

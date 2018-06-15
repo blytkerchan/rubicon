@@ -26,6 +26,8 @@ public :
 	void generateCopyConstructorImplementation(std::ostream &os) const;
 	void generateDestructorImplementation(std::ostream &os) const;
 	void generateAssignmentOperatorImplementation(std::ostream &os) const;
+	void generateSwapparatorImplementation(std::ostream &os) const;
+	void generateGetterAndSetterImplementations(std::ostream &ofs) const;
 
 private :
 	std::string name_;

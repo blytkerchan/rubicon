@@ -70,8 +70,10 @@ public :
 		std::string getName() const { return named_type_.getName(); }
 		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { named_type_.generateEncodeImplementation(os, member_name); }
 		virtual bool isOptional() const override { return optional_; };
-		void generateHeaderGettersAndSetters(std::ostream &os) const;
+		void generateHeaderGetterAndSetter(std::ostream &os) const;
 		void generateMemberDeclarations(std::ostream &os) const;
+		void generateGetterImplementation(std::string const &type_name, std::ostream &os) const;
+		void generateSetterImplementation(std::string const &type_name, std::ostream &os) const;
 
 		static std::string toVariableName(std::string const &name);
 		static std::string toMemberName(std::string const &name);
@@ -99,6 +101,8 @@ public :
 	virtual void generateMemberDeclarations(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 	virtual void generateDestructorImplementation(std::ostream &os) const override;
+	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
+	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
 
 private :
 	bool is_set_ = false;
