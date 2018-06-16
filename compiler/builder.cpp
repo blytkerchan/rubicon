@@ -74,7 +74,7 @@ void Builder::postParseSanityCheck()
 	okay_ &= type_assignments.size() == types.size();
 	auto value_assignments(listener_->getValueAssignments());
 	set< string > values;
-	transform(value_assignments.begin(), value_assignments.end(), inserter(values, values.end()), [](auto value){ return value.name_; });
+	transform(value_assignments.begin(), value_assignments.end(), inserter(values, values.end()), [](auto value){ return value.getName(); });
 	okay_ &= value_assignments.size() == values.size();
 	// check that everything that was exported actually exists
 	for (auto symbol : listener_->getSymbolsToExport())

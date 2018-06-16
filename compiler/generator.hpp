@@ -6,6 +6,7 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class Builder;
 class TypeAssignment;
+class ValueAssignment;
 class Generator
 {
 public :
@@ -25,15 +26,20 @@ private :
 	void createOutputDirectory();
 	void outputDependencies() const;
 	void outputTypes() const;
+	void outputValues() const;
 	void generateHeader(TypeAssignment const &type_assignment) const;
+	void generateHeader(ValueAssignment const &value_assignment) const;
 	void generateImplementation(TypeAssignment const &type_assignment) const;
+	void generateImplementation(ValueAssignment const &value_assignment) const;
 	void generatePreamble(std::ostream &ofs) const;
 	void openIncludeGuard(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void openIncludeGuard(std::ostream &ofs, ValueAssignment const &value_assignment) const;
 	void closeIncludeGuard(std::ostream &ofs) const;
 	void generateHeaderIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;
 	void generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
-	void openNamespace(std::ostream &ofs, TypeAssignment const &type_assignment) const;
-	void closeNamespace(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void openNamespace(std::ostream &ofs) const;
+	void closeNamespace(std::ostream &ofs) const;
 	void openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void closeClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment) const;
@@ -43,6 +49,7 @@ private :
 	void generateAssignmentOperatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateSwapparatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateGetterAndSetterImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const;
 
 	bool okay_ = true;
 	std::string output_directory_name_;

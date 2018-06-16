@@ -6,8 +6,9 @@
 #include "value.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct RestrictedCharacterStringValue : Value
+class RestrictedCharacterStringValue : public Value
 {
+public :
 	RestrictedCharacterStringValue() = default;
 	RestrictedCharacterStringValue(RestrictedCharacterStringValue &&value)
 		: string_values_(std::move(value.string_values_))
@@ -51,6 +52,9 @@ struct RestrictedCharacterStringValue : Value
 		tuple_values_.push_back(std::make_pair(next_index_++, value));
 	}
 
+	std::string getTypeName() const override { return "RestrictedCharacterString"; }
+
+private :
 	std::vector< std::pair< unsigned int, std::string > > string_values_;
 	std::vector< std::pair< unsigned int, std::shared_ptr< Value > > > values_;
 	std::vector< std::pair< unsigned int, Quadruple > > quadruple_values_;

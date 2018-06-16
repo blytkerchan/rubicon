@@ -2,8 +2,9 @@
 #define rubicon_compiler_integervalue_hpp
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct IntegerValue : Value
+class IntegerValue : public Value
 {
+public :
 	IntegerValue(long value)
 		: value_(value)
 	{ /* no-op */ }
@@ -12,6 +13,9 @@ struct IntegerValue : Value
 		: identifier_(identifier)
 	{ /* no-op */ }
 
+	std::string getTypeName() const override { return "Integer"; }
+
+private :
 	long value_;
 	std::string identifier_;
 };

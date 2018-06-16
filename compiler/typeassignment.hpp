@@ -6,16 +6,19 @@
 #include <set>
 #include <string>
 #include "typedescriptor.hpp"
+#include "sourcelocation.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class TypeAssignment
 {
 public :
-	TypeAssignment(std::string const &name, std::shared_ptr< TypeDescriptor > const &type_descriptor)
-		: name_(name)
+	TypeAssignment(SourceLocation const &source_location, std::string const &name, std::shared_ptr< TypeDescriptor > const &type_descriptor)
+		: source_location_(source_location)
+		, name_(name)
 		, type_descriptor_(type_descriptor)
 	{ /* no-op */ }
 
+	SourceLocation getSourceLocation() const { return source_location_; }
 	std::string getName() const { return name_; }
 	std::set< std::string > getDependencies() const { return type_descriptor_->getDependencies(); }
 	std::set< std::string > getStrongDependencies() const { return type_descriptor_->getStrongDependencies(); }
@@ -30,6 +33,7 @@ public :
 	void generateGetterAndSetterImplementations(std::ostream &ofs) const;
 
 private :
+	SourceLocation source_location_;
 	std::string name_;
 	std::shared_ptr< TypeDescriptor > type_descriptor_;
 };

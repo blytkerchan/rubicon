@@ -5,8 +5,9 @@
 #include "oidcomponent.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct OIDValue : Value
+class OIDValue : public Value
 {
+public :
 	OIDValue(bool relative = false)
 		: relative_(relative)
 	{ /* no-op */ }
@@ -15,7 +16,9 @@ struct OIDValue : Value
 	{
 		oid_components_.push_back(oid_component);
 	}
+	std::string getTypeName() const override { return typeid(*this).name(); }
 
+private :
 	bool relative_;
 	std::vector< OIDComponent > oid_components_;
 };

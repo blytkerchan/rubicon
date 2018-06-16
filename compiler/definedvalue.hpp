@@ -4,12 +4,16 @@
 #include "value.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct DefinedValue : Value
+class DefinedValue : public Value
 {
+public :
 	DefinedValue(std::string const &name)
 		: name_(name)
 	{ /* no-op */ }
 
+	std::string getTypeName() const override { return typeid(*this).name(); }
+
+private :
 	std::string name_;
 };
 }}}

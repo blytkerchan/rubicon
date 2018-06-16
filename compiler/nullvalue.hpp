@@ -6,6 +6,7 @@ struct NullValue : Value
 {
 	NullValue()
 	{ /* no-op */ }
+	std::string getTypeName() const override { return "Null"; }
 };
 }}}
 

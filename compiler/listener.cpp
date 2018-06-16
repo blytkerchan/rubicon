@@ -314,7 +314,7 @@ TypeAssignment Listener::parseTypeAssignment(asn1Parser::Type_assignmentContext 
 	string name(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText());
 	auto type(parseType(ctx->type()));
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return TypeAssignment(name, type);
+	return TypeAssignment(ctx, name, type);
 }
 
 shared_ptr< TypeDescriptor > Listener::parseType(asn1Parser::TypeContext *ctx)
@@ -1436,7 +1436,7 @@ ValueAssignment Listener::parseValueAssignment(asn1Parser::Value_assignmentConte
 	pre_condition(ctx->value());
 	string name(ctx->IDENTIFIER()->getText());
 	auto value(parseValue(ctx->value()));
-	return ValueAssignment(name, value);
+	return ValueAssignment(ctx, name, value);
 }
 
 /*static */void Listener::emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...)

@@ -2,8 +2,9 @@
 #define rubicon_compiler_realvalue_hpp
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct RealValue : Value
+class RealValue : public Value
 {
+public :
 	enum ValueType {
 		  normal__
 		, plus_infinity__
@@ -21,6 +22,9 @@ struct RealValue : Value
 		: sequence_value_(value)
 	{ /* no-op */ }
 
+	std::string getTypeName() const override { return "Real"; }
+
+private :
 	double value_ = 0.0;
 	ValueType value_type_ = normal__;
 	std::shared_ptr< Value > sequence_value_;

@@ -22,16 +22,23 @@ Generator::~Generator()
 
 Generator& Generator::operator()(Builder const &builder, bool output_dependencies)
 {
-	builder_ = &builder;
-	setNamespaceName();
-	createOutputDirectory();
-	if (output_dependencies)
+	okay_ = (bool)builder;
+	if (okay_)
 	{
-		outputDependencies();
+		builder_ = &builder;
+		setNamespaceName();
+		createOutputDirectory();
+		if (output_dependencies)
+		{
+			outputDependencies();
+		}
+		else
+		{ /* don't output dependencies */ }
+		outputTypes();
+		outputValues();
 	}
 	else
-	{ /* don't output dependencies */ }
-	outputTypes();
+	{ /* not OK */ }
 	return *this;
 }
 
@@ -76,6 +83,14 @@ void Generator::outputTypes() const
 		generateImplementation(type_assignment);
 	}
 }
+void Generator::outputValues() const
+{
+	for (auto value_assignment : builder_->getValueAssignments())
+	{
+		generateHeader(value_assignment);
+		generateImplementation(value_assignment);
+	}
+}
 void Generator::generateHeader(TypeAssignment const &type_assignment) const
 {
 	bfs::path const directory(getOutputDirectoryName());
@@ -85,7 +100,7 @@ void Generator::generateHeader(TypeAssignment const &type_assignment) const
 	generatePreamble(ofs);
 	openIncludeGuard(ofs, type_assignment);
 	generateHeaderIncludeDirectives(ofs, type_assignment);
-	openNamespace(ofs, type_assignment);
+	openNamespace(ofs);
 
 	openClassDefinition(ofs, type_assignment);
 
@@ -94,7 +109,21 @@ void Generator::generateHeader(TypeAssignment const &type_assignment) const
 
 	closeClassDefinition(ofs, type_assignment);
 
-	closeNamespace(ofs, type_assignment);
+	closeNamespace(ofs);
+	closeIncludeGuard(ofs);
+}
+void Generator::generateHeader(ValueAssignment const &value_assignment) const
+{
+	bfs::path const directory(getOutputDirectoryName());
+	bfs::path const filename(directory / (alg::to_lower_copy(value_assignment.getName()) + ".hpp"));
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	generatePreamble(ofs);
+	openIncludeGuard(ofs, value_assignment);
+	generateHeaderIncludeDirectives(ofs, value_assignment);
+	openNamespace(ofs);
+	generateDeclaration(ofs, value_assignment);
+	closeNamespace(ofs);
 	closeIncludeGuard(ofs);
 }
 void Generator::generateImplementation(TypeAssignment const &type_assignment) const
@@ -107,7 +136,7 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment) co
 
 	generateImplementationIncludeDirectives(ofs, type_assignment);
 
-	openNamespace(ofs, type_assignment);
+	openNamespace(ofs);
 
 	generateCopyConstructorImplementation(ofs, type_assignment);
 	generateDestructorImplementation(ofs, type_assignment);
@@ -115,7 +144,27 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment) co
 	generateSwapparatorImplementation(ofs, type_assignment);
 	generateGetterAndSetterImplementations(ofs, type_assignment);
 
-	closeNamespace(ofs, type_assignment);
+	closeNamespace(ofs);
+}
+void Generator::generateImplementation(ValueAssignment const &value_assignment) const
+{
+	bfs::path const directory(getOutputDirectoryName());
+	bfs::path const filename(directory / (alg::to_lower_copy(value_assignment.getName()) + ".cpp"));
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	generatePreamble(ofs);
+
+//	generateImplementationIncludeDirectives(ofs, value_assignment);
+
+//	openNamespace(ofs);
+
+//	generateCopyConstructorImplementation(ofs, type_assignment);
+//	generateDestructorImplementation(ofs, type_assignment);
+//	generateAssignmentOperatorImplementation(ofs, type_assignment);
+//	generateSwapparatorImplementation(ofs, type_assignment);
+//	generateGetterAndSetterImplementations(ofs, type_assignment);
+
+//	closeNamespace(ofs);
 }
 void Generator::generatePreamble(ostream &ofs) const
 {
@@ -134,6 +183,18 @@ void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assign
 		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", "_")
 		+ "_"
 		+ alg::to_lower_copy(type_assignment.getName())
+		+ "_hpp"
+		);
+	ofs << "#ifndef " << guard << "\n";
+	ofs << "#define " << guard << "\n\n";
+}
+void Generator::openIncludeGuard(std::ostream &ofs, ValueAssignment const &value_assignment) const
+{
+	string const guard(
+		  string("generated_")
+		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", "_")
+		+ "_"
+		+ alg::replace_all_copy(alg::to_lower_copy(value_assignment.getName()), "-", "_")
 		+ "_hpp"
 		);
 	ofs << "#ifndef " << guard << "\n";
@@ -159,6 +220,17 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment con
 		;
 	ofs << "\n";
 }
+void Generator::generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const
+{
+	for (auto dependency : value_assignment.getDependencies())
+	{
+		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
+	}
+	ofs <<
+		"#include \"rubicon/types.hpp\"\n"
+		;
+	ofs << "\n";
+}
 void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp\"\n";
@@ -174,7 +246,7 @@ void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssign
 	{ /* no optional members, no need for unique_ptr */ }
 	ofs << "\n";
 }
-void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::openNamespace(ostream &ofs) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
@@ -183,7 +255,7 @@ void Generator::openNamespace(ostream &ofs, TypeAssignment const &type_assignmen
 		);
 	ofs << namespace_declaration << "\n";
 }
-void Generator::closeNamespace(ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::closeNamespace(ostream &ofs) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
@@ -253,7 +325,10 @@ void Generator::generateGetterAndSetterImplementations(std::ostream &ofs, TypeAs
 {
 	type_assignment.generateGetterAndSetterImplementations(ofs);
 }
-
+void Generator::generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const
+{
+	value_assignment.generateDeclaration(os);
+}
 
 }}}
 

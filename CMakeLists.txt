@@ -151,6 +151,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/sequencevalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/setofvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/setvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/sourcelocation.hpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tag.hpp
@@ -166,6 +167,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/unrestrictedcharacterstringvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/utctimetype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/utctimetype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/valueassignment.cpp
 	${PROJECT_SOURCE_DIR}/compiler/valueassignment.hpp
 	${PROJECT_SOURCE_DIR}/compiler/value.hpp
 	${PROJECT_SOURCE_DIR}/compiler/versionedtypelist.hpp
@@ -192,6 +194,8 @@ add_executable(asn1c
 	)
 add_dependencies(asn1c compiler-grammar preproc-grammar)
 target_link_libraries(asn1c antlr4-runtime ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
+set_source_files_properties(
+	${PROJECT_SOURCE_DIR}/asn1c.cpp
+	PROPERTIES COMPILE_FLAGS "-Wno-overloaded-virtual -Wno-shadow -Wno-unused-but-set-variable -Wno-attributes"
+	)
 
-string(TIMESTAMP DATECODE %Y%m%d)
-configure_file(version.hpp.in version.hpp)

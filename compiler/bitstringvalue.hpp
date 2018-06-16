@@ -5,8 +5,9 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct BitStringValue : Value
+class BitStringValue : public Value
 {
+public :
 	BitStringValue() = default;
 	BitStringValue(std::vector< unsigned char > const &bit_string, unsigned int trailing_bits)
 		: bit_string_(bit_string)
@@ -19,6 +20,9 @@ struct BitStringValue : Value
 		: identifiers_(std::move(identifiers))
 	{ /* no-op */ }
 
+	std::string getTypeName() const override { return "BitString"; }
+
+private :
 	std::vector< unsigned char > bit_string_;
 	unsigned int trailing_bits_ = 0;
 	std::shared_ptr< Value > value_;

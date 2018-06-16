@@ -5,14 +5,18 @@
 #include "objectidentifier.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-	struct ObjectIdentifierValue : Value
-	{
-		ObjectIdentifierValue(ObjectIdentifier const &oid)
-			: oid_(oid)
-		{ /* no-op */ }
+class ObjectIdentifierValue : public Value
+{
+public :
+	ObjectIdentifierValue(ObjectIdentifier const &oid)
+		: oid_(oid)
+	{ /* no-op */ }
 
-		ObjectIdentifier oid_;
-	};
+	std::string getTypeName() const override { return "ObjectIdentifier"; }
+
+private :
+	ObjectIdentifier oid_;
+};
 }}}
 
 #endif

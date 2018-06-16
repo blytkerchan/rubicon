@@ -4,8 +4,9 @@
 #include "value.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct SetOfValue : Value
+class SetOfValue : public Value
 {
+public :
 	SetOfValue()
 	{ /* no-op */ }
 
@@ -14,6 +15,9 @@ struct SetOfValue : Value
 		values_.push_back(value);
 	}
 
+	std::string getTypeName() const override { return typeid(*this).name(); }
+
+private :
 	std::vector< std::shared_ptr< Value > > values_;
 };
 }}}

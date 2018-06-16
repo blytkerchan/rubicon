@@ -5,8 +5,9 @@
 #include "arcidentifier.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct IRIValue : Value
+class IRIValue : public Value
 {
+public :
 	IRIValue(bool relative = false)
 		: relative_(relative)
 	{ /* no-op */ }
@@ -16,6 +17,9 @@ struct IRIValue : Value
 		arc_identifiers_.push_back(arc_identifier);
 	}
 
+	std::string getTypeName() const override { return "IRI"; }
+
+private :
 	bool relative_;
 	std::vector< ArcIdentifier > arc_identifiers_;
 };
