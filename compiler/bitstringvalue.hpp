@@ -8,16 +8,21 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class BitStringValue : public Value
 {
 public :
-	BitStringValue() = default;
-	BitStringValue(std::vector< unsigned char > const &bit_string, unsigned int trailing_bits)
-		: bit_string_(bit_string)
+	explicit BitStringValue(SourceLocation const &source_location)
+		: Value(source_location)
+	{ /* no-op */ }
+	BitStringValue(SourceLocation const &source_location, std::vector< unsigned char > const &bit_string, unsigned int trailing_bits)
+		: Value(source_location)
+		, bit_string_(bit_string)
 		, trailing_bits_(trailing_bits)
 	{ /* no-op */ }
-	BitStringValue(std::shared_ptr< Value > const &value)
-		: value_(value)
+	BitStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
-	BitStringValue(std::vector< std::string > &&identifiers)
-		: identifiers_(std::move(identifiers))
+	BitStringValue(SourceLocation const &source_location, std::vector< std::string > &&identifiers)
+		: Value(source_location)
+		, identifiers_(std::move(identifiers))
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "BitString"; }

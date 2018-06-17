@@ -5,15 +5,19 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class IntegerValue : public Value
 {
 public :
-	IntegerValue(long value)
-		: value_(value)
+	IntegerValue(SourceLocation const &source_location, long value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
 
-	IntegerValue(std::string const &identifier)
-		: identifier_(identifier)
+	IntegerValue(SourceLocation const &source_location, std::string const &identifier)
+		: Value(source_location)
+		, identifier_(identifier)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "Integer"; }
+	std::string getIdentifier() const { return identifier_; }
+	long getValue() const { return value_; }
 
 private :
 	long value_;

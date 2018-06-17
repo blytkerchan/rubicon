@@ -8,8 +8,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class IRIValue : public Value
 {
 public :
-	IRIValue(bool relative = false)
-		: relative_(relative)
+	IRIValue(SourceLocation const &source_location, bool relative = false)
+		: Value(source_location)
+		, relative_(relative)
 	{ /* no-op */ }
 
 	void add(ArcIdentifier const &arc_identifier)

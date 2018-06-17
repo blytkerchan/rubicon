@@ -5,8 +5,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class UnrestrictedCharacterStringValue : public Value
 {
 public :
-	UnrestrictedCharacterStringValue(std::shared_ptr< Value > const &value)
-		: value_(value)
+	UnrestrictedCharacterStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "UnrestrictedCharacterString"; }

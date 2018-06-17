@@ -6,13 +6,15 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct TaggedType : TypeDescriptor
 {
-	TaggedType(Tag const &tag, bool explicit_tagging, bool force_implicit_tagging, std::shared_ptr< TypeDescriptor > const &type)
-		: tag_(tag)
+	TaggedType(SourceLocation const &source_location, Tag const &tag, bool explicit_tagging, bool force_implicit_tagging, std::shared_ptr< TypeDescriptor > const &type)
+		: TypeDescriptor(source_location)
+		, tag_(tag)
 		, explicit_tagging_(explicit_tagging)
 		, force_implicit_tagging_(force_implicit_tagging)
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;

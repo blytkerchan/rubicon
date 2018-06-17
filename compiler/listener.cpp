@@ -329,36 +329,36 @@ shared_ptr< TypeDescriptor > Listener::parseType(asn1Parser::TypeContext *ctx)
 			: ctx->referenced_type()->selection_type()		? parseSelectionType(ctx->referenced_type()->selection_type())
 
 		: ctx->constrained_type()	? parseContrainedType(ctx->constrained_type())
-		: make_shared< UnknownType >()
-		: make_shared< UnknownType >()
+		: make_shared< UnknownType >(ctx)
+		: make_shared< UnknownType >(ctx)
 		;
 }
 shared_ptr< TypeDescriptor > Listener::parseBuiltinType(asn1Parser::Builtin_typeContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return ctx->bit_string_type()			? parseBitStringType(ctx->bit_string_type())
-		: ctx->BOOLEAN_RW()			? make_shared< PrimitiveType >(PrimitiveType::boolean__)
+		: ctx->BOOLEAN_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::boolean__)
 		: ctx->character_string_type()		? parseCharacterStringType(ctx->character_string_type())
 		: ctx->choice_type()			? parseChoiceType(ctx->choice_type())
-		: ctx->DATE_RW()			? make_shared< PrimitiveType >(PrimitiveType::date__)
-		: ctx->DATE_TIME_RW()			? make_shared< PrimitiveType >(PrimitiveType::date_time__)
-		: ctx->DURATION_RW()			? make_shared< PrimitiveType >(PrimitiveType::duration__)
-		: (ctx->EMBEDDED_RW() && ctx->PDV_RW()) ? make_shared< PrimitiveType >(PrimitiveType::embedded_pdv__)
+		: ctx->DATE_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::date__)
+		: ctx->DATE_TIME_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::date_time__)
+		: ctx->DURATION_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::duration__)
+		: (ctx->EMBEDDED_RW() && ctx->PDV_RW()) ? make_shared< PrimitiveType >(ctx, PrimitiveType::embedded_pdv__)
 		: ctx->enumerated_type()		? parseEnumeratedType(ctx->enumerated_type())
-		: ctx->EXTERNAL_RW()			? make_shared< PrimitiveType >(PrimitiveType::external__)
+		: ctx->EXTERNAL_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::external__)
 		: ctx->integer_type()			? parseIntegerType(ctx->integer_type())
-		: ctx->OID_IRI_RW()			? make_shared< PrimitiveType >(PrimitiveType::oid_iri__)
-		: ctx->NULL_RW()			? make_shared< PrimitiveType >(PrimitiveType::null__)
-		: (ctx->OBJECT_RW() && ctx->IDENTIFIER_RW()) ? make_shared< PrimitiveType >(PrimitiveType::object_identifier__)
-		: (ctx->OCTET_RW() && ctx->STRING_RW()) ? make_shared< PrimitiveType >(PrimitiveType::octet_string__)
-		: ctx->RELATIVE_OID_IRI_RW()		? make_shared< PrimitiveType >(PrimitiveType::relative_oid_iri__)
-		: ctx->RELATIVE_OID_RW()		? make_shared< PrimitiveType >(PrimitiveType::relative_oid__)
+		: ctx->OID_IRI_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::oid_iri__)
+		: ctx->NULL_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::null__)
+		: (ctx->OBJECT_RW() && ctx->IDENTIFIER_RW()) ? make_shared< PrimitiveType >(ctx, PrimitiveType::object_identifier__)
+		: (ctx->OCTET_RW() && ctx->STRING_RW()) ? make_shared< PrimitiveType >(ctx, PrimitiveType::octet_string__)
+		: ctx->RELATIVE_OID_IRI_RW()		? make_shared< PrimitiveType >(ctx, PrimitiveType::relative_oid_iri__)
+		: ctx->RELATIVE_OID_RW()		? make_shared< PrimitiveType >(ctx, PrimitiveType::relative_oid__)
 		: ctx->sequence_or_set_type()		? parseSequenceOrSetType(ctx->sequence_or_set_type())
 		: ctx->sequence_or_set_of_type()	? parseSequenceOrSetOfType(ctx->sequence_or_set_of_type())
 		: ctx->prefixed_type()			? parsePrefixedType(ctx->prefixed_type())
-		: ctx->TIME_RW()			? make_shared< PrimitiveType >(PrimitiveType::time__)
-		: ctx->TIME_OF_DAY_RW()			? make_shared< PrimitiveType >(PrimitiveType::time_of_day__)
-		: shared_ptr< TypeDescriptor >(make_shared< UnknownType >()) // the explicit construction is a hint for the compiler to resolve the types in the tree of ternary operators
+		: ctx->TIME_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::time__)
+		: ctx->TIME_OF_DAY_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::time_of_day__)
+		: shared_ptr< TypeDescriptor >(make_shared< UnknownType >(ctx)) // the explicit construction is a hint for the compiler to resolve the types in the tree of ternary operators
 		;
 }
 shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string_typeContext *ctx)
@@ -376,25 +376,32 @@ shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string
 			if (named_bit->NUMBER())
 			{
 				unsigned int value(parseNumber(named_bit->NUMBER()));
-				if (find_if(named_bits.begin(), named_bits.end(), [value](auto named_bit){ return named_bit.second == value; }) != named_bits.end())
+				if (value == numeric_limits< unsigned int >::max())
+				{
+					emitError(ctx, "reserved value used for bit %s", name.c_str());
+					throw ParseError("internal error: reserved value for bit used");
+				}
+				else
+				{ /* all is well */ }
+				if (find_if(named_bits.begin(), named_bits.end(), [value](auto named_bit){ return named_bit.bit_ == value; }) != named_bits.end())
 				{
 					emitError(ctx, "more than one name for bit %u", value);
 					throw ParseError("more than one name for bit");
 				}
 				else
 				{ /* all is well so far */ }
-				named_bits.push_back(make_pair(name, value));
+				named_bits.push_back({named_bit, name, value});
 			}
 			else
 			{
-				emitWarning(ctx, "using defined values for named bits is not supported. Bit name ignored.");
+				named_bits.push_back({named_bit, name, numeric_limits< unsigned int >::max()});
 			}
 		}
 	}
 	else
 	{ /* no named bits */ }
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< BitStringType >(named_bits);
+	return make_shared< BitStringType >(ctx, named_bits);
 }
 std::shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser::Character_string_typeContext *ctx)
 {
@@ -402,12 +409,69 @@ std::shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser:
 	pre_condition(ctx);
 	if (ctx->unrestricted_character_string_type())
 	{
-		return make_shared< CharacterStringType >();
+		return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 29));
 	}
 	else
 	{
 		assert(ctx->restricted_character_string_type());
-		return make_shared< CharacterStringType >(ctx->restricted_character_string_type()->getText());
+		string string_type(ctx->restricted_character_string_type()->getText());
+		if (string_type == "BMPString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 30));
+		}
+		else if (string_type == "GeneralString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 27));
+		}
+		else if (string_type == "GraphicString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 25));
+		}
+		else if (string_type == "IA5String")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 22));
+		}
+		else if (string_type == "ISO646String")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 26));
+		}
+		else if (string_type == "NumericString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 18));
+		}
+		else if (string_type == "PrintableString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 19));
+		}
+		else if (string_type == "TeletexString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 20));
+		}
+		else if (string_type == "T61String")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 20));
+		}
+		else if (string_type == "UniversalString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 28));
+		}
+		else if (string_type == "UTF8String")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 12));
+		}
+		else if (string_type == "VideotexString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 21));
+		}
+		else if (string_type == "VisibleString")
+		{
+			return make_shared< CharacterStringType >(ctx, Tag(Tag::universal__, 26));
+		}
+		else
+		{
+			emitError(ctx, "Unknown string type %s", string_type.c_str());
+			throw ParseError("unknown string type");
+		}
 	}
 }
 
@@ -454,7 +518,7 @@ std::shared_ptr< TypeDescriptor > Listener::parseChoiceType(asn1Parser::Choice_t
 	{ /* no extension addition alternatives */ }
 
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< ChoiceType >(alternative_type_list, extensible);
+	return make_shared< ChoiceType >(ctx, alternative_type_list, extensible);
 }
 NamedType Listener::parseNamedType(asn1Parser::Named_typeContext *ctx)
 {
@@ -464,7 +528,7 @@ NamedType Listener::parseNamedType(asn1Parser::Named_typeContext *ctx)
 	pre_condition(ctx->type());
 	string name(ctx->IDENTIFIER()->getText());
 	auto type(parseType(ctx->type()));
-	return NamedType(name, type);
+	return NamedType(ctx, name, type);
 }
 std::shared_ptr< TypeDescriptor > Listener::parseEnumeratedType(asn1Parser::Enumerated_typeContext *ctx)
 {
@@ -513,7 +577,7 @@ std::shared_ptr< TypeDescriptor > Listener::parseEnumeratedType(asn1Parser::Enum
 	{ /* no exceptions */ }
 
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< EnumeratedType >(enumeration_values, extensible);
+	return make_shared< EnumeratedType >(ctx, enumeration_values, extensible);
 }
 NamedNumber Listener::parseNamedNumber(asn1Parser::Named_numberContext *ctx)
 {
@@ -572,7 +636,7 @@ shared_ptr< TypeDescriptor > Listener::parseIntegerType(asn1Parser::Integer_type
 	else
 	{ /* no named numbers */ }
 
-	return make_shared< IntegerType >(values);
+	return make_shared< IntegerType >(ctx, values);
 }
 shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetType(asn1Parser::Sequence_or_set_typeContext *ctx)
 {
@@ -597,7 +661,7 @@ shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetType(asn1Parser::Sequen
 					assert(component_type->OF_RW());
 					root = false;
 					auto type(parseType(component_type->type()));
-					component_types.push_back(make_shared< SequenceOrSetType::ComponentsOfType >(type));
+					component_types.push_back(make_shared< SequenceOrSetType::ComponentsOfType >(ctx, type));
 				}
 				else
 				{
@@ -605,23 +669,23 @@ shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetType(asn1Parser::Sequen
 					auto named_type(parseNamedType(component_type->named_type()));
 					if (component_type->DEFAULT_RW())
 					{
-						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(root, named_type, parseValue(component_type->value())));
+						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(ctx, root, named_type, parseValue(component_type->value())));
 					}
 					else
 					{
-						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(root, named_type, component_type->OPTIONAL_RW() != nullptr));
+						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(ctx, root, named_type, component_type->OPTIONAL_RW() != nullptr));
 					}
 				}
 			}
 			root = false;
 		}
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-		return make_shared< SequenceOrSetType >(is_set, component_types);
+		return make_shared< SequenceOrSetType >(ctx, is_set, component_types);
 	}
 	else
 	{
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-		return make_shared< SequenceOrSetType >();
+		return make_shared< SequenceOrSetType >(ctx);
 	}
 }
 shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetOfType(asn1Parser::Sequence_or_set_of_typeContext *ctx)
@@ -633,13 +697,13 @@ shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetOfType(asn1Parser::Sequ
 	if (ctx->type())
 	{
 		auto type(parseType(ctx->type()));
-		return make_shared< SequenceOrSetOfType >(is_set, type);
+		return make_shared< SequenceOrSetOfType >(ctx, is_set, type);
 	}
 	else
 	{
 		assert(ctx->named_type());
 		auto type(parseNamedType(ctx->named_type()));
-		return make_shared< SequenceOrSetOfType >(is_set, type);
+		return make_shared< SequenceOrSetOfType >(ctx, is_set, type);
 	}
 }
 shared_ptr< TypeDescriptor > Listener::parsePrefixedType(asn1Parser::Prefixed_typeContext *ctx)
@@ -664,7 +728,7 @@ shared_ptr< TypeDescriptor > Listener::parsePrefixedType(asn1Parser::Prefixed_ty
 		{ /* ok */ }
 		
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-		return make_shared< TaggedType >(tag, explicit_tagging, force_implicit_tagging, type);
+		return make_shared< TaggedType >(ctx, tag, explicit_tagging, force_implicit_tagging, type);
 	}
 	else
 	{
@@ -704,14 +768,14 @@ shared_ptr< TypeDescriptor > Listener::parseDefinedType(asn1Parser::Defined_type
 			}
 			else
 			{
-				return make_shared< ExternalTypeReference >(module_name, symbol_name);
+				return make_shared< ExternalTypeReference >(ctx, module_name, symbol_name);
 			}
 		}
 	}
 	else
 	{
 		assert(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE());
-		return make_shared< DefinedType >(ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText());
+		return make_shared< DefinedType >(ctx, ctx->TYPE_REFERENCE_OR_MODULE_REFERENCE()->getText());
 	}
 }
 shared_ptr< TypeDescriptor > Listener::parseUsefulType(asn1Parser::Useful_typeContext *ctx)
@@ -720,16 +784,16 @@ shared_ptr< TypeDescriptor > Listener::parseUsefulType(asn1Parser::Useful_typeCo
 	pre_condition(ctx);
 	if (ctx->getText() == "GeneralizedTime")
 	{
-		return make_shared< GeneralizedTimeType >();
+		return make_shared< GeneralizedTimeType >(ctx);
 	}
 	else if (ctx->getText() == "UTCTime")
 	{
-		return make_shared< UTCTimeType >();
+		return make_shared< UTCTimeType >(ctx);
 	}
 	else
 	{
 		assert(ctx->getText() == "ObjectDescriptor");
-		return make_shared< ObjectDescriptorType >();
+		return make_shared< ObjectDescriptorType >(ctx);
 	}
 }
 shared_ptr< TypeDescriptor > Listener::parseSelectionType(asn1Parser::Selection_typeContext *ctx)
@@ -738,7 +802,7 @@ shared_ptr< TypeDescriptor > Listener::parseSelectionType(asn1Parser::Selection_
 	pre_condition(ctx);
 	auto selection(ctx->IDENTIFIER()->getText());
 	auto type(parseType(ctx->type()));
-	return make_shared< SelectionType >(selection, type);
+	return make_shared< SelectionType >(ctx, selection, type);
 }
 shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrained_typeContext *ctx)
 {
@@ -752,8 +816,8 @@ shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrain
 		assert(ctx->type_with_constraint()->type() || ctx->type_with_constraint()->named_type());
 		bool is_set(ctx->type_with_constraint()->SET_RW() ? true : false);
 		auto retval(ctx->type_with_constraint()->type()
-			? make_shared< TypeWithConstraint >(is_set, constraint, parseType(ctx->type_with_constraint()->type()))
-			: make_shared< TypeWithConstraint >(is_set, constraint, parseNamedType(ctx->type_with_constraint()->named_type())))
+			? make_shared< TypeWithConstraint >(ctx, is_set, constraint, parseType(ctx->type_with_constraint()->type()))
+			: make_shared< TypeWithConstraint >(ctx, is_set, constraint, parseNamedType(ctx->type_with_constraint()->named_type())))
 			;
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 		return retval;
@@ -763,7 +827,7 @@ shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrain
 		assert(ctx->builtin_type() || parseReferencedType(ctx->referenced_type()));
 		auto type(ctx->builtin_type() ? parseBuiltinType(ctx->builtin_type()) : parseReferencedType(ctx->referenced_type()));
 		tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-		return make_shared< ConstrainedType >(type, constraint);
+		return make_shared< ConstrainedType >(ctx, type, constraint);
 	}
 }
 
@@ -858,7 +922,7 @@ shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext
 		: ctx->enumerated_value()		? parseEnumeratedValue(ctx->enumerated_value())
 		: ctx->integer_value()			? parseIntegerValue(ctx->integer_value())
 		: ctx->iri_value()			? parseIRIValue(ctx->iri_value())
-		: ctx->NULL_RW()			? make_shared< NullValue >()
+		: ctx->NULL_RW()			? make_shared< NullValue >(ctx)
 		: ctx->object_identifier_value()	? parseObjectIdentifierValue(ctx->object_identifier_value())
 		: ctx->octet_string_value()		? parseOctetStringValue(ctx->octet_string_value())
 		: ctx->real_value()			? parseRealValue(ctx->real_value())
@@ -894,7 +958,7 @@ shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext
 			)
 		, text.end()
 		);
-	return make_shared< DefinedValue >(text);
+	return make_shared< DefinedValue >(ctx, text);
 }
 shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx)
 {
@@ -903,28 +967,28 @@ shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueCo
 	if (ctx->BSTRING())
 	{
 		auto bstring(parseBString(ctx->BSTRING()));
-		return make_shared< BitStringValue >(bstring.first, bstring.second);
+		return make_shared< BitStringValue >(ctx, bstring.first, bstring.second);
 	}
 	else if (ctx->HSTRING())
 	{
 		auto hstring(parseHString(ctx->HSTRING()));
-		return make_shared< BitStringValue >(hstring.first, hstring.second);
+		return make_shared< BitStringValue >(ctx, hstring.first, hstring.second);
 
 	}
 	else if (ctx->CONTAINING_RW())
 	{
-		return make_shared< BitStringValue >(parseValue(ctx->value()));
+		return make_shared< BitStringValue >(ctx, parseValue(ctx->value()));
 	}
 	else if (ctx->identifier_list())
 	{
 		vector< string > identifiers;
 		auto identifier_list(ctx->identifier_list()->IDENTIFIER());
 		transform(identifier_list.begin(), identifier_list.end(), back_inserter(identifiers), [](auto identifier){ return identifier->getText(); });
-		return make_shared< BitStringValue >(move(identifiers));
+		return make_shared< BitStringValue >(ctx, move(identifiers));
 	}
 	else
 	{
-		return make_shared< BitStringValue >();
+		return make_shared< BitStringValue >(ctx);
 	}
 }
 pair< vector< unsigned char >, unsigned int > Listener::parseBString(antlr4::tree::TerminalNode *bstring)
@@ -1034,7 +1098,7 @@ shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext
 	pre_condition(ctx);
 	assert(ctx->TRUE_RW() || ctx->FALSE_RW());
 
-	return make_shared< BooleanValue >(ctx->TRUE_RW() != nullptr);
+	return make_shared< BooleanValue >(ctx, ctx->TRUE_RW() != nullptr);
 }
 
 shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)
@@ -1054,10 +1118,10 @@ shared_ptr< Value > Listener::parseRestrictedCharacterStringValue(asn1Parser::Re
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->CSTRING() || ctx->character_string_list() || ctx->quadruple() || ctx->tuple());
-	RestrictedCharacterStringValue retval;
+	RestrictedCharacterStringValue retval(ctx);
 	if (ctx->CSTRING())
 	{
-		return make_shared< RestrictedCharacterStringValue >(ctx->CSTRING()->getSymbol()->getText());
+		return make_shared< RestrictedCharacterStringValue >(ctx, ctx->CSTRING()->getSymbol()->getText());
 	}
 	else if (ctx->character_string_list())
 	{
@@ -1130,13 +1194,13 @@ shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::
 	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
 	//TODO: check that the sequence value corresponds to spec
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< UnrestrictedCharacterStringValue >(sequence_value);
+	return make_shared< UnrestrictedCharacterStringValue >(ctx, sequence_value);
 }
 shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	return make_shared< ChoiceValue >(ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value()));
+	return make_shared< ChoiceValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value()));
 }
 shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)
 {
@@ -1146,27 +1210,27 @@ shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_val
 	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
 	//TODO: check that the sequence value corresponds to spec
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< EmbeddedPDVValue >(sequence_value);
+	return make_shared< EmbeddedPDVValue >(ctx, sequence_value);
 }
 shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
-	return make_shared< EnumeratedValue >(ctx->IDENTIFIER()->getSymbol()->getText());
+	return make_shared< EnumeratedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText());
 }
 shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->signed_number() || ctx->IDENTIFIER());
-	return ctx->signed_number() ? make_shared< IntegerValue >(parseSignedNumber(ctx->signed_number()))
-		: make_shared< IntegerValue >(ctx->IDENTIFIER()->getSymbol()->getText())
+	return ctx->signed_number() ? make_shared< IntegerValue >(ctx, parseSignedNumber(ctx->signed_number()))
+		: make_shared< IntegerValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText())
 		;
 }
 shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< IRIValue >());
+	auto retval(make_shared< IRIValue >(ctx));
 	for (auto arc_identifier : ctx->arc_identifier())
 	{
 		retval->add(parseArcIdentifier(arc_identifier));
@@ -1177,7 +1241,7 @@ shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
-	return make_shared< ObjectIdentifierValue >(parseObjectIdentifier(ctx));
+	return make_shared< ObjectIdentifierValue >(ctx, parseObjectIdentifier(ctx));
 }
 shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)
 {
@@ -1185,17 +1249,17 @@ shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_val
 	if (ctx->BSTRING())
 	{
 		auto bstring(parseBString(ctx->BSTRING()));
-		return make_shared< OctetStringValue >(bstring.first, bstring.second);
+		return make_shared< OctetStringValue >(ctx, bstring.first, bstring.second);
 	}
 	else if (ctx->HSTRING())
 	{
 		auto hstring(parseHString(ctx->HSTRING()));
-		return make_shared< OctetStringValue >(hstring.first, hstring.second);
+		return make_shared< OctetStringValue >(ctx, hstring.first, hstring.second);
 	}
 	else
 	{
 		assert(ctx->CONTAINING_RW());
-		return make_shared< OctetStringValue >(parseValue(ctx->value()));
+		return make_shared< OctetStringValue >(ctx, parseValue(ctx->value()));
 	}
 	return shared_ptr< Value >();
 }
@@ -1249,16 +1313,16 @@ shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
 		value += whole_part;
 		double const e(std::pow(10, negative_exponent ? -((int)exponent) : (int)exponent));
 		value *= e;
-		return make_shared< RealValue >(value);
+		return make_shared< RealValue >(ctx, value);
 	}
 	else if (ctx->sequence_value())
 	{
-		return make_shared< RealValue >(parseSequenceValue(ctx->sequence_value()));
+		return make_shared< RealValue >(ctx, parseSequenceValue(ctx->sequence_value()));
 	}
 	else
 	{
-		return make_shared< RealValue >(
-				  ctx->PLUS_INFINITY_RW() ? RealValue::plus_infinity__
+		return make_shared< RealValue >(ctx
+				, ctx->PLUS_INFINITY_RW() ? RealValue::plus_infinity__
 				: ctx->MINUS_INFINITY_RW() ? RealValue::minus_infinity__
 				: RealValue::not_a_number__
 			);
@@ -1268,7 +1332,7 @@ shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_val
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< IRIValue >(true));
+	auto retval(make_shared< IRIValue >(ctx, true));
 	for (auto arc_identifier : ctx->arc_identifier())
 	{
 		retval->add(parseArcIdentifier(arc_identifier));
@@ -1280,7 +1344,7 @@ shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_val
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< OIDValue >(true));
+	auto retval(make_shared< OIDValue >(ctx,true));
 	for (auto oid_component : ctx->relative_oid_components_list()->relative_oid_components())
 	{
 		retval->add(parseOIDComponent(oid_component));
@@ -1322,7 +1386,7 @@ shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueConte
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	
-	auto retval(make_shared< SequenceValue >());
+	auto retval(make_shared< SequenceValue >(ctx));
 	if (ctx->component_value_list())
 	{
 		for (auto value : ctx->component_value_list()->named_value())
@@ -1340,14 +1404,14 @@ shared_ptr< Value > Listener::parseNamedValue(asn1Parser::Named_valueContext *ct
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< NamedValue >(ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value())));
+	auto retval(make_shared< NamedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value())));
 	return retval;
 }
 shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< SequenceOfValue >());
+	auto retval(make_shared< SequenceOfValue >(ctx));
 	if (ctx->value_list())
 	{
 		for (auto value : ctx->value_list()->value())
@@ -1372,7 +1436,7 @@ shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< SetValue >());
+	auto retval(make_shared< SetValue >(ctx));
 	if (ctx->component_value_list())
 	{
 		for (auto value : ctx->component_value_list()->named_value())
@@ -1389,7 +1453,7 @@ shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *c
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	auto retval(make_shared< SetOfValue >());
+	auto retval(make_shared< SetOfValue >(ctx));
 	if (ctx->value_list())
 	{
 		for (auto value : ctx->value_list()->value())
@@ -1433,10 +1497,12 @@ ValueAssignment Listener::parseValueAssignment(asn1Parser::Value_assignmentConte
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	pre_condition(ctx->IDENTIFIER());
+	pre_condition(ctx->type());
 	pre_condition(ctx->value());
 	string name(ctx->IDENTIFIER()->getText());
 	auto value(parseValue(ctx->value()));
-	return ValueAssignment(ctx, name, value);
+	auto type(parseType(ctx->type()));
+	return ValueAssignment(ctx, name, type, value);
 }
 
 /*static */void Listener::emitWarning(antlr4::ParserRuleContext *ctx, char const *fmt, ...)

@@ -7,7 +7,8 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class SetOfValue : public Value
 {
 public :
-	SetOfValue()
+	SetOfValue(SourceLocation const &source_location)
+		: Value(source_location)
 	{ /* no-op */ }
 
 	void add(std::shared_ptr< Value > const &value)

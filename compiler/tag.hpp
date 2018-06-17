@@ -10,7 +10,7 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct Tag
 {
-	enum struct Class {
+	enum Class {
 		  universal__
 		, application__
 		, private__

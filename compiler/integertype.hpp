@@ -9,10 +9,11 @@ struct IntegerType : EnumeratedType
 {
 	using EnumeratedType::Values;
 
-	IntegerType(Values const &values)
-		: EnumeratedType(values, false)
+	IntegerType(SourceLocation const &source_location, Values const &values)
+		: EnumeratedType(source_location, values, false)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os, std::string const &instance_name) const override;
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::Integer"; }
 };

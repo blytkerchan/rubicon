@@ -5,8 +5,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class BooleanValue : public Value
 {
 public :
-	BooleanValue(bool value)
-		: value_(value)
+	BooleanValue(SourceLocation const &source_location, bool value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "BooleanString"; }

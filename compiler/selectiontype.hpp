@@ -9,11 +9,13 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct SelectionType : TypeDescriptor
 {
-	SelectionType(std::string const &selection, std::shared_ptr< TypeDescriptor > const type)
-		: selection_(selection)
+	SelectionType(SourceLocation const &source_location, std::string const &selection, std::shared_ptr< TypeDescriptor > const type)
+		: TypeDescriptor(source_location)
+		, selection_(selection)
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 

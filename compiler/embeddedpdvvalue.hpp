@@ -5,8 +5,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class EmbeddedPDVValue : public Value
 {
 public :
-	EmbeddedPDVValue(std::shared_ptr< Value > const &value)
-		: value_(value)
+	EmbeddedPDVValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "EmbeddedPDV"; }

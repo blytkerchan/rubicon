@@ -4,6 +4,7 @@
 #include "../generated/asn1Parser.h"
 #include "errorlistener.hpp"
 #include "listener.hpp"
+#include "resolver.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace antlr4;
@@ -82,6 +83,19 @@ void Builder::postParseSanityCheck()
 		auto which_type(types.find(symbol));
 		auto which_value(values.find(symbol));
 		okay_ &= (which_type != types.end()) || (which_value != values.end());
+	}
+}
+
+void Builder::resolve()
+{
+	Resolver resolver(listener_);
+	for (auto type_assignment : listener_->getTypeAssignments())
+	{
+		resolver(type_assignment);
+	}
+	for (auto value_assignment : listener_->getValueAssignments())
+	{
+		resolver(value_assignment);
 	}
 }
 

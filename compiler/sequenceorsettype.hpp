@@ -14,6 +14,9 @@ class SequenceOrSetType : public TypeDescriptor
 public :
 	struct ComponentType
 	{
+		ComponentType(SourceLocation const &source_location)
+			: source_location_(source_location)
+		{ /* no-op */ }
 		virtual ~ComponentType() = default;
 
 		virtual bool root() const noexcept = 0;
@@ -24,13 +27,16 @@ public :
 		virtual std::string getTypeName() const = 0;
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
 		virtual bool isOptional() const = 0;
+
+		SourceLocation source_location_;
 	};
 	struct ComponentsOfType : ComponentType
 	{
 		typedef std::shared_ptr< TypeDescriptor > Type;
 
-		ComponentsOfType(Type const &type)
-			: type_(type)
+		ComponentsOfType(SourceLocation const &source_location, Type const &type)
+			: ComponentType(source_location)
+			, type_(type)
 		{ /* no-op */ }
 		virtual bool root() const noexcept override { return false; }
 		virtual std::set< std::string > getDependencies() const override { return hasTypeName() ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
@@ -44,14 +50,16 @@ public :
 	};
 	struct NamedComponentType : ComponentType
 	{
-		NamedComponentType(bool root, NamedType const &named_type, bool optional = false)
-			: root_(root)
+		NamedComponentType(SourceLocation const &source_location, bool root, NamedType const &named_type, bool optional = false)
+			: ComponentType(source_location)
+			, root_(root)
 			, named_type_(named_type)
 			, optional_(optional)
 		{ /* no-op */ }
 
-		NamedComponentType(bool root, NamedType const &named_type, std::shared_ptr< Value > const &default_value)
-			: root_(root)
+		NamedComponentType(SourceLocation const &source_location, bool root, NamedType const &named_type, std::shared_ptr< Value > const &default_value)
+			: ComponentType(source_location)
+			, root_(root)
 			, named_type_(named_type)
 			, optional_(true)
 			, default_value_(default_value)
@@ -85,12 +93,16 @@ public :
 	};
 	typedef std::vector< std::shared_ptr< ComponentType > > ComponentTypes;
 
-	SequenceOrSetType() = default;
-	SequenceOrSetType(bool is_set, ComponentTypes const &component_types)
-		: is_set_(is_set)
+	SequenceOrSetType(SourceLocation const &source_location)
+		: TypeDescriptor(source_location)
+	{ /* no-op */ }
+	SequenceOrSetType(SourceLocation const &source_location, bool is_set, ComponentTypes const &component_types)
+		: TypeDescriptor(source_location)
+		, is_set_(is_set)
 		, component_types_(component_types)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual std::set< std::string > getDependencies() const override;
 	virtual std::set< std::string > getStrongDependencies() const override;
 	virtual std::set< std::string > getWeakDependencies() const override;

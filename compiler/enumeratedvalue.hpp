@@ -5,8 +5,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class EnumeratedValue : public Value
 {
 public :
-	EnumeratedValue(std::string const &identifier)
-		: identifier_(identifier)
+	EnumeratedValue(SourceLocation const &source_location, std::string const &identifier)
+		: Value(source_location)
+		, identifier_(identifier)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return typeid(*this).name(); }

@@ -25,10 +25,12 @@ public :
 		, time__
 		, time_of_day__
 		};
-	PrimitiveType(Primitive primitive)
-		: primitive_(primitive)
+	PrimitiveType(SourceLocation const &source_location, Primitive primitive)
+		: TypeDescriptor(source_location)
+		, primitive_(primitive)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual std::string getTypeName() const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 

@@ -12,14 +12,17 @@ public :
 		, not_a_number__
 		};
 
-	RealValue(double value)
-		: value_(value)
+	RealValue(SourceLocation const &source_location, double value)
+		: Value(source_location)
+		, value_(value)
 	{ /* no-op */ }
-	RealValue(ValueType value_type)
-		: value_type_(value_type)
+	RealValue(SourceLocation const &source_location, ValueType value_type)
+		: Value(source_location)
+		, value_type_(value_type)
 	{ /* no-op */ }
-	RealValue(std::shared_ptr< Value > value)
-		: sequence_value_(value)
+	RealValue(SourceLocation const &source_location, std::shared_ptr< Value > value)
+		: Value(source_location)
+		, sequence_value_(value)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "Real"; }

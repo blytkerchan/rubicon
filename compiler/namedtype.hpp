@@ -8,12 +8,16 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct NamedType : TypeDescriptor
 {
-	NamedType() = default;
-	NamedType(std::string const &name, std::shared_ptr< TypeDescriptor > const &type)
-		: name_(name)
+	explicit NamedType(SourceLocation const &source_location)
+		: TypeDescriptor(source_location)
+	{ /* no-op */ }
+	NamedType(SourceLocation const &source_location, std::string const &name, std::shared_ptr< TypeDescriptor > const &type)
+		: TypeDescriptor(source_location)
+		, name_(name)
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 	std::string getName() const { return name_; }

@@ -9,25 +9,32 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class RestrictedCharacterStringValue : public Value
 {
 public :
-	RestrictedCharacterStringValue() = default;
+	explicit RestrictedCharacterStringValue(SourceLocation const &source_location)
+		: Value(source_location)
+	{ /* no-op */ }
+
 	RestrictedCharacterStringValue(RestrictedCharacterStringValue &&value)
-		: string_values_(std::move(value.string_values_))
+		: Value(std::move(value))
+		, string_values_(std::move(value.string_values_))
 		, values_(std::move(value.values_))
 		, quadruple_values_(std::move(value.quadruple_values_))
 		, tuple_values_(std::move(value.tuple_values_))
 	{ /* no-op */ }
-	RestrictedCharacterStringValue(std::string const &value)
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::string const &value)
+		: Value(source_location)
 	{
 		string_values_.push_back(std::make_pair(next_index_++, value));
 	}
-	RestrictedCharacterStringValue(std::vector< std::string > const &values)
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::vector< std::string > const &values)
+		: Value(source_location)
 	{
-		for(auto value : values)
+		for (auto value : values)
 		{
 			string_values_.push_back(std::make_pair(next_index_++, value));
 		}
 	}
-	RestrictedCharacterStringValue(std::shared_ptr< Value > const &value)
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
+		: Value(source_location)
 	{
 		values_.push_back(std::make_pair(next_index_++, value));
 	}

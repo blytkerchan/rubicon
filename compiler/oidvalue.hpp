@@ -8,8 +8,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class OIDValue : public Value
 {
 public :
-	OIDValue(bool relative = false)
-		: relative_(relative)
+	OIDValue(SourceLocation const &source_location, bool relative = false)
+		: Value(source_location)
+		, relative_(relative)
 	{ /* no-op */ }
 
 	void add(OIDComponent const &oid_component)

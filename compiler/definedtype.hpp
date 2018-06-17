@@ -8,10 +8,12 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct DefinedType : TypeDescriptor
 {
-	DefinedType(std::string const &type_name)
-		: type_name_(type_name)
+	DefinedType(SourceLocation const &source_location, std::string const &type_name)
+		: TypeDescriptor(source_location)
+		, type_name_(type_name)
 	{ /* no-op */ }
 
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return true; }
 	virtual std::string getTypeName() const override { return type_name_; }
 

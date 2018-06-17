@@ -4,7 +4,8 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct NullValue : Value
 {
-	NullValue()
+	explicit NullValue(SourceLocation const &source_location)
+		: Value(source_location)
 	{ /* no-op */ }
 	std::string getTypeName() const override { return "Null"; }
 };

@@ -8,8 +8,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class ObjectIdentifierValue : public Value
 {
 public :
-	ObjectIdentifierValue(ObjectIdentifier const &oid)
-		: oid_(oid)
+	ObjectIdentifierValue(SourceLocation const &source_location, ObjectIdentifier const &oid)
+		: Value(source_location)
+		, oid_(oid)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return "ObjectIdentifier"; }

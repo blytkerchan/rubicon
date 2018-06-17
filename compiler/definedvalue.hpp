@@ -7,8 +7,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class DefinedValue : public Value
 {
 public :
-	DefinedValue(std::string const &name)
-		: name_(name)
+	DefinedValue(SourceLocation const &source_location, std::string const &name)
+		: Value(source_location)
+		, name_(name)
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return typeid(*this).name(); }

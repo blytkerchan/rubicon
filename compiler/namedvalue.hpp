@@ -9,9 +9,12 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class NamedValue : public Value
 {
 public :
-	NamedValue() = default;
-	NamedValue(std::string const &name, std::shared_ptr< Value > const &value)
-		: name_(name)
+	explicit NamedValue(SourceLocation const &source_location)
+		: Value(source_location)
+	{ /* no-op */ }
+	NamedValue(SourceLocation const &source_location, std::string const &name, std::shared_ptr< Value > const &value)
+		: Value(source_location)
+		, name_(name)
 		, value_(value)
 	{ /* no-op */ }
 

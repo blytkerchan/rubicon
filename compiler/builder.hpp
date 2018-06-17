@@ -31,6 +31,7 @@ public :
 private :
 	void parse(std::istream &is);
 	void postParseSanityCheck();
+	void resolve();
 	void scanDependencies();
 
 	bool okay_ = true;

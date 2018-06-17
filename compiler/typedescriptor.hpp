@@ -4,10 +4,16 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include "resolver.hpp"
+#include "sourcelocation.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct TypeDescriptor
+class TypeDescriptor
 {
+public :
+	TypeDescriptor(SourceLocation const &source_location)
+		: source_location_(source_location)
+	{ /* no-op */ }
 	virtual bool requireExplicitTag() const { return false; }
 	virtual bool hasTypeName() const { return false; }
 	virtual std::string getTypeName() const { return std::string(); }
@@ -25,6 +31,13 @@ struct TypeDescriptor
 	virtual void generateDestructorImplementation(std::ostream &os) const {}
 	virtual void generateSwapparatorImplementation(std::ostream &os) const {}
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const {}
+
+	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) = 0;
+
+	SourceLocation getSourceLocation() const { return source_location_; }
+
+private :
+	SourceLocation source_location_;
 };
 }}}
 

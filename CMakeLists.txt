@@ -140,6 +140,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/primitivetype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/quadruple.hpp
 	${PROJECT_SOURCE_DIR}/compiler/realvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/resolver.cpp
+	${PROJECT_SOURCE_DIR}/compiler/resolver.hpp
 	${PROJECT_SOURCE_DIR}/compiler/restrictedcharacterstringvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/selectiontype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/selectiontype.hpp

@@ -5,8 +5,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class ChoiceValue : public Value
 {
 public :
-	ChoiceValue(std::string const &identifier, std::shared_ptr< Value > const &value)
-		: identifier_(identifier)
+	ChoiceValue(SourceLocation const &source_location, std::string const &identifier, std::shared_ptr< Value > const &value)
+		: Value(source_location)
+		, identifier_(identifier)
 		, value_(value)
 	{ /* no-op */ }
 
