@@ -6,8 +6,9 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct ConstrainedType : TypeDescriptor
+class ConstrainedType : public TypeDescriptor
 {
+public :
 	ConstrainedType(SourceLocation const &source_location, std::shared_ptr< TypeDescriptor > const &type, Constraint const &constraint)
 		: TypeDescriptor(source_location)
 		, type_(type)
@@ -17,6 +18,10 @@ struct ConstrainedType : TypeDescriptor
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
+	std::shared_ptr< TypeDescriptor > getType() const { return type_; }
+	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
+
+private :
 	std::shared_ptr< TypeDescriptor > type_;
 	Constraint constraint_;
 };

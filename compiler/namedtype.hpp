@@ -6,8 +6,9 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct NamedType : TypeDescriptor
+class NamedType : public TypeDescriptor
 {
+public :
 	explicit NamedType(SourceLocation const &source_location)
 		: TypeDescriptor(source_location)
 	{ /* no-op */ }
@@ -21,11 +22,14 @@ struct NamedType : TypeDescriptor
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 	std::string getName() const { return name_; }
+	std::shared_ptr< TypeDescriptor > getType() const { return type_; }
+	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
+private :
 	std::string name_;
 	std::shared_ptr< TypeDescriptor > type_;
 };
