@@ -63,6 +63,7 @@ private :
 		  resolve__		// make sure all the names resolve, and we have everything we need to generate code
 		, collapse__		// collapse to the leaf primitive (has no effect on non-primitive types)
 		, clone_if_choice__	// clone if the type is a CHOICE, so we can tag it
+		, get_selected_type__
 		};
 	struct Context
 	{
@@ -93,10 +94,12 @@ private :
 	std::shared_ptr< TypeDescriptor > resolve(std::shared_ptr< TypeDescriptor > const &type_descriptor);
 	std::shared_ptr< Value > resolve(std::shared_ptr< Value > const &value);
 
+	static void emitWarning(SourceLocation const &source_location, char const *fmt, ...);
 	static void emitError(SourceLocation const &source_location, char const *fmt, ...);
 
 	Listener *listener_;
 	Contexts contexts_;
+	unsigned int next_clone_id_ = 0;
 };
 }}}
 

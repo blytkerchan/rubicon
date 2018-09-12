@@ -1,13 +1,20 @@
 #include "resolver.hpp"
-#include "valueassignment.hpp"
-#include "typeassignment.hpp"
+#include "../exceptions.hpp"
+#include "../exceptions/contract.hpp"
+#include "../tracing.hpp"
 #include "bitstringtype.hpp"
 #include "choicetype.hpp"
+#include "constrainedtype.hpp"
+#include "definedtype.hpp"
+#include "generalizedtimetype.hpp"
 #include "integertype.hpp"
 #include "integervalue.hpp"
 #include "listener.hpp"
-#include "../exceptions.hpp"
-#include "../tracing.hpp"
+#include "primitivetype.hpp"
+#include "selectiontype.hpp"
+#include "typeassignment.hpp"
+#include "utctimetype.hpp"
+#include "valueassignment.hpp"
 
 using namespace std;
 
@@ -19,7 +26,7 @@ Resolver::Resolver(Listener *listener)
 Resolver const& Resolver::operator()(TypeAssignment &type_assignment)
 {
 	ScopedContext context(contexts_, resolve__);
-	type_assignment.setTypeDescriptor(resolve(type_assignment.getTypeDescriptor()));
+	type_assignment.setType(resolve(type_assignment.getType()));
 	return *this;
 }
 Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
@@ -32,6 +39,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 {
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
 	if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
+	if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); // can't select from a bit string
 
 	assert(contexts_.back().mode_ == resolve__);
 	// recursion detection
@@ -130,11 +138,12 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 {
 	if (contexts_.back().mode_ == clone_if_choice__)
 	{
-		return make_shared(choice_type);
+		return make_shared< ChoiceType >(choice_type);
 	}
 	else
 	{ /* not cloning */ }
 	if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >(); // definitely not a primitive
+	if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); //TODO: select
 
 	// The goal of resolution here is to ascertain that all the types in the choice type have a unique tag. For that to
 	// be the case, they must be tagged either using their user-provided (textual) tag or using automatic tags.
@@ -162,6 +171,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 			{ // do a general resolution pass so we apply constraints and somesuch
 				resolve(get< NamedType >(alternative_type));
 			}
+			break;
 		}
 		case 1 : // VersionedTypeList
 			// we don't do versioned type lists yet, so fall through to the logic error
@@ -169,6 +179,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 			throw std::logic_error("Unexpected type in variant");
 		}
 	}
+	//TODO step 2
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type)
@@ -210,6 +221,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type
 		// once for the general transformations.
 		emitWarning(constrained_type.getSourceLocation(), "don't know how to constrain types (yet) -- using unconstrained type in stead");
 		return resolve(constrained_type.getType());
+	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
 	}
@@ -219,10 +231,11 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 	// When cloning choices, we do not need to go any further than this, unless the underlying type is a CHOICE, in which case we will return a clone of the choice.
 	// Regardless of what we're doing, we need to resolve the type name to make sure it exists.
 	auto type_assignments(listener_->getTypeAssignments());
-	auto which(find_if(type_assignments.begin(), type_assignments.end(), [=](auto type_assignment){ return type_assignment.getName() == defined_type.getTypeName(); }));
+	auto const name(defined_type.getTypeName());
+	auto which(find_if(type_assignments.begin(), type_assignments.end(), [name](auto type_assignment){ return name == type_assignment.getName(); }));
 	if (which == type_assignments.end())
 	{
-		emitError(which->source_location_, "undefined reference to %s", defined_type.getTypeName().c_str());
+		emitError(which->getSourceLocation(), "undefined reference to %s", defined_type.getTypeName().c_str());
 		throw UndefinedReference("undefined reference");
 	}
 	else
@@ -244,44 +257,101 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 		// also add a unique clone number so a choice could embed the same choice more than once if it needed to.
 		//
 		// We know that our defined type is a clone if the resolution results in a different pointer than the one we have.
-		//TODO
-		// 1. resolve the contained type
-		// 2. if resolution != current pointer, we have a choice
-		//    a. annotate with our type name
-		//    b. annotate with our clone #
-		//    c. bump the clone number
-		//    d. return annotated clone
-		// 3. otherwise, return empty shared_ptr
+		{
+			auto the_referred_type(which->getType());
+			auto the_resolved_type(resolve(the_referred_type));
+			if (the_referred_type != the_resolved_type)
+			{
+				invariant(dynamic_pointer_cast< ChoiceType >(the_resolved_type) == static_pointer_cast< ChoiceType >(the_resolved_type));
+				auto the_choice(static_pointer_cast< ChoiceType >(the_resolved_type)); // this used to be the name of a very interesting on-line discussion group -- I wonder if it's still there..?
+				the_choice->setClone(next_clone_id_++, defined_type.getTypeName());
+				return the_choice;
+			}
+			else
+			{ /* not a CHOICE */ }
+			return shared_ptr< TypeDescriptor >();
+		}
+		break;
 	case collapse__ :
 		// if we're collapsing primitives, we only need to know whether the type we contain is a primitive (which we can ask it).
 		// If so, we return it. Otherwise, we return an empty shared_ptr.
-		//TODO
+		{
+			auto the_referred_type(which->getType());
+			auto the_resolved_type(resolve(the_referred_type));
+			if (the_referred_type != the_resolved_type)
+			{
+				return the_resolved_type;
+			}
+			else
+			{ /* not a primitive */ }
+			return shared_ptr< TypeDescriptor >();
+		}
 	case resolve__ :
 		// If we're doing a "normal" resolution, we have nothing more to do - return an empty shared_ptr
 		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
 	}
+	throw logic_error("Unreachable code");
 }
-//TODO
 shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		return make_shared< EnumeratedType >(enumerated_type);
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_type_reference)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case resolve__ :
+	case collapse__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_time_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		return make_shared< GeneralizedTimeType >(generalized_time_type);
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		return make_shared< IntegerType >(integer_type);
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
@@ -296,58 +366,167 @@ shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_descriptor_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case resolve__ :
+	case collapse__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		return make_shared< PrimitiveType >(primitive_type);
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		// if the type being selected is a primitive, we clone and return it. Otherwise, we return an empty shared_ptr< TypeDescriptor >.
+	{
+		auto selection(selection_type.getSelection());
+		ScopedContext context(contexts_, get_selected_type__); 
+		auto the_referred_type(selection_type.getType());
+		auto the_resolved_type(resolve(the_referred_type));
+		if (the_resolved_type)
+		{
+ 
+		}
+		else
+		{
+		}
+	///	
+	}
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_set_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case resolve__ :
+	case collapse__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_set_of_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case resolve__ :
+	case collapse__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >(); //TODO check this- should go through the underlying type
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		// if the type being tagged is a primitive, clone and return it
+		//TODO
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >(); //TODO check this- should go through the underlying type
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_constraint)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >(); //TODO check this- should go through the underlying type
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		// if the type being tagged is a primitive, clone and return it
+		//TODO
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >(); //TODO check this- should go through the underlying type
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case resolve__ :
+	case collapse__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UTCTimeType &utc_time_type)
 {
-	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	switch (contexts_.back().mode_)
+	{
+	case collapse__ :
+		return make_shared< UTCTimeType >(utc_time_type);
+	case resolve__ :
+	case clone_if_choice__ :
+		return shared_ptr< TypeDescriptor >();
+	case get_selected_type__ :
+	default :
+		throw logic_error("Unexpected mode");
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(shared_ptr< TypeDescriptor > const &type_descriptor)
 {
 	auto retval(type_descriptor->visit(*this));
-	return retval ? retval : type_descriptor;
+	return retval ? retval : ((contexts_.back().mode_ == get_selected_type__) ? retval : type_descriptor);
 }
 shared_ptr< Value > Resolver::resolve(shared_ptr< Value > const &value)
 {
 	return value;
-	//return value.visit(*this);
+	//return value->visit(*this);
+}
+/*static */void Resolver::emitWarning(SourceLocation const &source_location, char const *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	tracer__->trace(1, TRACE_ERROR)("%s:%u:%u: warning: ", source_location.filename_.c_str(), source_location.line_, source_location.offset_)(fmt, ap)("\n");
+	va_end(ap);
 }
 /*static */void Resolver::emitError(SourceLocation const &source_location, char const *fmt, ...)
 {

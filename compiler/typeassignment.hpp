@@ -20,8 +20,8 @@ public :
 
 	SourceLocation getSourceLocation() const { return source_location_; }
 	std::string getName() const { return name_; }
-	std::shared_ptr< TypeDescriptor > getTypeDescriptor() const { return type_descriptor_; }
-	void setTypeDescriptor(std::shared_ptr< TypeDescriptor > const &type_descriptor) { type_descriptor_ = type_descriptor; }
+	std::shared_ptr< TypeDescriptor > getType() const { return type_descriptor_; }
+	void setType(std::shared_ptr< TypeDescriptor > const &type_descriptor) { type_descriptor_ = type_descriptor; }
 	std::set< std::string > getDependencies() const { return type_descriptor_->getDependencies(); }
 	std::set< std::string > getStrongDependencies() const { return type_descriptor_->getStrongDependencies(); }
 	std::set< std::string > getWeakDependencies() const { return type_descriptor_->getWeakDependencies(); }

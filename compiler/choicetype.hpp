@@ -27,9 +27,22 @@ public :
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
+	bool isClone() const { return is_clone_; }
+	unsigned int getCloneID() const;
+	std::string getCloneName() const;
+	void setClone(unsigned int clone_id, std::string const &clone_name)
+	{
+		is_clone_ = true;
+		clone_id_ = clone_id;
+		clone_name_ = clone_name;
+	}
+
 private :
 	AlternativeTypes alternative_types_;
 	bool extensible_;
+	bool is_clone_ = false;
+	unsigned int clone_id_ = 0;
+	std::string clone_name_;
 
 	friend class Resolver;
 };
