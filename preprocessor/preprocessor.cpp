@@ -1,5 +1,5 @@
 #include "preprocessor.hpp"
-#include <antlr4-runtime/antlr4-runtime.h>
+#include "antlr4-runtime.h"
 #include "../generated/preprocLexer.h"
 #include "../generated/preprocParser.h"
 #include "listener.hpp"

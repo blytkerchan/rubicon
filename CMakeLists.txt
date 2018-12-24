@@ -3,9 +3,18 @@ project(Rubicon)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/settings.cmake)
-include_directories(/usr/local/include)
-include_directories(/usr/local/include/antlr4-runtime)
-link_directories(/usr/local/lib)
+
+include(ExternalProject)
+ExternalProject_Add(antlr4
+	DOWNLOAD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -d
+	INSTALL_COMMAND ""
+	STEP_TARGETS build
+	)
+ExternalProject_Get_property(antlr4 SOURCE_DIR)
+include_directories(${SOURCE_DIR}/runtime/src)
+ExternalProject_Get_property(antlr4 BINARY_DIR)
+link_directories(${BINARY_DIR}/../antlr4/dist)
+
 add_subdirectory(exceptions)
 add_subdirectory(tracing)
 add_executable(poc-real
@@ -15,8 +24,10 @@ target_link_libraries(poc-real exceptions)
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 add_custom_command(OUTPUT preproc-grammar-tag
-	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -p
 	COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/preproc-grammar-tag
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	MAIN_DEPENDENCY preproc.g4
@@ -24,7 +35,7 @@ add_custom_command(OUTPUT preproc-grammar-tag
 	)
 add_custom_target(preproc-grammar DEPENDS preproc-grammar-tag)
 add_custom_command(OUTPUT compiler-grammar-tag
-	COMMAND java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -visitor -Dlanguage=Cpp -o generated asn1.g4
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -a
 	COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/compiler-grammar-tag
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	MAIN_DEPENDENCY asn1.g4
@@ -186,7 +197,7 @@ add_executable(asn1p
 	${PROJECT_SOURCE_DIR}/asn1p.cpp
 	${preproc-SRC}
 	)
-add_dependencies(asn1p preproc-grammar)
+add_dependencies(asn1p preproc-grammar antlr4-build)
 target_link_libraries(asn1p antlr4-runtime ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 
 add_executable(asn1c
@@ -194,7 +205,7 @@ add_executable(asn1c
 	${compiler-SRC}
 	${preproc-SRC}
 	)
-add_dependencies(asn1c compiler-grammar preproc-grammar)
+add_dependencies(asn1c compiler-grammar preproc-grammar antlr4-build)
 target_link_libraries(asn1c antlr4-runtime ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 set_source_files_properties(
 	${PROJECT_SOURCE_DIR}/asn1c.cpp

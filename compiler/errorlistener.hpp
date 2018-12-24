@@ -1,7 +1,7 @@
 #ifndef rubicon_compiler_errorlistener_hpp
 #define rubicon_compiler_errorlistener_hpp
 
-#include <antlr4-runtime/BaseErrorListener.h>
+#include "BaseErrorListener.h"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class ErrorListener : public antlr4::BaseErrorListener

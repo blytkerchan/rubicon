@@ -1,4 +1,36 @@
 #! /bin/bash
-java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated preproc.g4
-java -Xmx500M -cp "/usr/local/lib/java/antlr-4.7-complete.jar:${CLASSPATH}" org.antlr.v4.Tool -Dlanguage=Cpp -o generated asn1.g4
+DO_ALL=1
+DO_PREPROC=0
+DO_ASN1=0
+DO_DEPLOY=0
+
+while (( "$#" )); do
+	case "$1" in
+	-d)
+		DO_ALL=0
+		DO_DEPLOY=1
+		;;
+	-p)
+		DO_ALL=0
+		DO_PREPROC=1
+		;;
+	-a)
+		DO_ALL=0
+		DO_ASN1=1
+		;;
+	esac
+	shift
+done
+
+if [ x"${DO_ALL}${DO_PREPROC}" != x"00" ]; then
+	mkdir -p generated
+	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4 antlr4 -Dlanguage=Cpp -o generated preproc.g4
+fi
+if [ x"${DO_ALL}${DO_ASN1}" != x"00" ]; then
+	mkdir -p generated
+	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4 antlr4 -Dlanguage=Cpp -o generated -visitor asn1.g4
+fi
+if [ x"${DO_ALL}${DO_DEPLOY}" != x"00" ]; then
+	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4 deploy -o antlr4
+fi
 

@@ -2,6 +2,29 @@
 
 This project is mostly proof-of-concept at the moment. The goal is to show that "DER code ain't that bad".
 
+## Preparing the build environment
+
+You need a standard Vlinder development environment, which means an LTS Ubuntu (currently 18.04) with:
+
+ $ sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc-multilib \
+      build-essential chrpath socat cpio python python3 python3-pip python3-pexpect \
+      xz-utils debianutils iputils-ping libsdl1.2-dev xterm
+
+and the latest Boost installed in ~/opt/boost-<version>, which you will need to tell CMake about using the
+`-DBOOSTROOT=${HOME}/opt/boost<version>` option at the command-line
+
+Additionally, you need uuid-dev:
+
+ $ sudo apt-get install uuid-dev
+
+and the vlinder/antlr4 Docker appliance
+
+ $ docker pull vlinder/antlr4
+
+## Notes about building
+
+* Parallel builds are broken at the moment. This is due to the way part of the code is generated, and how part of the C++ runtime for the code generator is built as an "external" dependency.
+
 ## About ASN.1
 
 ASN.1, or Abstract Syntax Notation 1, is a domain-specific language (DSL) that consists of a human-readable schema language and several machine-readable representations for data encoded according to a schema described by that schema language.
