@@ -19,7 +19,7 @@ int main(int argc, char const **argv)
 {
 	Vlinder::Tracing::StdErrTracer tracer;
 	tracer__ = &tracer;
-	tracer__->setMask(DEFAULT_TRACE_MASK);
+	tracer__->setMask(DEFAULT_TRACE_MASK | TRACE_INFO);
 	po::options_description opts("options");
 	opts.add_options()
 		("help,h", "Display this help screen")
