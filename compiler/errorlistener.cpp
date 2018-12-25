@@ -1,5 +1,6 @@
 #include "errorlistener.hpp"
 #include "../tracing.hpp"
+#include "Token.h"
 
 using namespace std;
 using namespace antlr4;
@@ -16,6 +17,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	)/* override*/
 {
 	tracer__->trace(1, TRACE_ERROR)("%s:%u:%u: syntax error: ", input_filename_.c_str(), line, char_position_in_line)(msg.c_str())("\n");
+	tracer__->trace(1, TRACE_INFO)("%s:%u:%u: offending symbol: ", input_filename_.c_str(), line, char_position_in_line)(offending_symbol->getText().c_str())("\n");
 	on_error_callback_();
 }
 
