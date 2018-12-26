@@ -250,7 +250,7 @@ void Generator::openNamespace(ostream &ofs) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
-		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", " { namespace ")
+		+ alg::replace_all_copy(getNamespaceName(), "::", " { namespace ")
 		+ " {"
 		);
 	ofs << namespace_declaration << "\n";
@@ -259,7 +259,7 @@ void Generator::closeNamespace(ostream &ofs) const
 {
 	string const namespace_declaration(
 		  string("namespace ")
-		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", " { namespace ")
+		+ alg::replace_all_copy(getNamespaceName(), "::", " { namespace ")
 		+ " {"
 		);
 	string const namespace_close(count(namespace_declaration.begin(), namespace_declaration.end(), '{'), '}');
