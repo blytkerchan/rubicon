@@ -9,57 +9,20 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class RestrictedCharacterStringValue : public Value
 {
 public :
-	explicit RestrictedCharacterStringValue(SourceLocation const &source_location)
-		: Value(source_location)
-	{ /* no-op */ }
+	explicit RestrictedCharacterStringValue(SourceLocation const &source_location);
+	RestrictedCharacterStringValue(RestrictedCharacterStringValue &&value);
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::string const &value);
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::vector< std::string > const &values);
+	RestrictedCharacterStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value);
 
-	RestrictedCharacterStringValue(RestrictedCharacterStringValue &&value)
-		: Value(std::move(value))
-		, string_values_(std::move(value.string_values_))
-		, values_(std::move(value.values_))
-		, quadruple_values_(std::move(value.quadruple_values_))
-		, tuple_values_(std::move(value.tuple_values_))
-	{ /* no-op */ }
-	RestrictedCharacterStringValue(SourceLocation const &source_location, std::string const &value)
-		: Value(source_location)
-	{
-		string_values_.push_back(std::make_pair(next_index_++, value));
-	}
-	RestrictedCharacterStringValue(SourceLocation const &source_location, std::vector< std::string > const &values)
-		: Value(source_location)
-	{
-		for (auto value : values)
-		{
-			string_values_.push_back(std::make_pair(next_index_++, value));
-		}
-	}
-	RestrictedCharacterStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
-		: Value(source_location)
-	{
-		values_.push_back(std::make_pair(next_index_++, value));
-	}
+	void add(std::string const &value);
+	void add(std::shared_ptr< Value > const &value);
+	void add(Quadruple const &value);
+	void add(Tuple const &value);
 
-	void add(std::string const &value)
-	{
-		string_values_.push_back(std::make_pair(next_index_++, value));
-	}
+	std::string getTypeName() const override;
 
-	void add(std::shared_ptr< Value > const &value)
-	{
-		values_.push_back(std::make_pair(next_index_++, value));
-	}
-
-	void add(Quadruple const &value)
-	{
-		quadruple_values_.push_back(std::make_pair(next_index_++, value));
-	}
-
-	void add(Tuple const &value)
-	{
-		tuple_values_.push_back(std::make_pair(next_index_++, value));
-	}
-
-	std::string getTypeName() const override { return "RestrictedCharacterString"; }
+	std::string generateInstance() const override;
 
 private :
 	std::vector< std::pair< unsigned int, std::string > > string_values_;

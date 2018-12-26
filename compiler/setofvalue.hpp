@@ -18,6 +18,8 @@ public :
 
 	std::string getTypeName() const override { return typeid(*this).name(); }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	std::vector< std::shared_ptr< Value > > values_;
 };

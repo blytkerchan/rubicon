@@ -27,6 +27,7 @@ public :
 		virtual std::string getTypeName() const = 0;
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
 		virtual bool isOptional() const = 0;
+		virtual bool hasDefaultValue() const { false; }
 
 		SourceLocation source_location_;
 	};
@@ -77,7 +78,8 @@ public :
 		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
 		std::string getName() const { return named_type_.getName(); }
 		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { named_type_.generateEncodeImplementation(os, member_name); }
-		virtual bool isOptional() const override { return optional_; };
+		virtual bool isOptional() const override { return optional_; }
+		virtual bool hasDefaultValue() const override { return (bool)default_value_; }
 		void generateHeaderGetterAndSetter(std::ostream &os) const;
 		void generateMemberDeclarations(std::ostream &os) const;
 		void generateGetterImplementation(std::string const &type_name, std::ostream &os) const;

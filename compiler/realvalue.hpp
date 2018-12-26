@@ -27,6 +27,8 @@ public :
 
 	std::string getTypeName() const override { return "Real"; }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	double value_ = 0.0;
 	ValueType value_type_ = normal__;

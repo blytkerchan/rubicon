@@ -12,6 +12,8 @@ public :
 
 	std::string getTypeName() const override { return "EmbeddedPDV"; }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	std::shared_ptr< Value > value_;
 };

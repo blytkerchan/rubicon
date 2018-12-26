@@ -14,6 +14,8 @@ struct Value
 	virtual std::set< std::string > getDependencies() const { return std::set< std::string >(); }
 	virtual std::string getTypeName() const = 0;
 
+	virtual std::string generateInstance() const = 0;
+
 	SourceLocation source_location_;
 };
 }}}

@@ -13,6 +13,7 @@ public :
 	{ /* no-op */ }
 
 	std::string getTypeName() const override { return typeid(*this).name(); }
+	std::string generateInstance() const override { return name_; /*TODO may need some formatting*/ }
 
 private :
 	std::string name_;

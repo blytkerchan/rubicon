@@ -10,7 +10,9 @@ public :
 		, value_(value)
 	{ /* no-op */ }
 
-	std::string getTypeName() const override { return "BooleanString"; }
+	std::string getTypeName() const override { return "Boolean"; }
+
+	std::string generateInstance() const override { return "/*TODO*/"; }
 
 private :
 	bool value_;

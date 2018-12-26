@@ -27,6 +27,8 @@ public :
 
 	std::string getTypeName() const override { return "BitString"; }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	std::vector< unsigned char > bit_string_;
 	unsigned int trailing_bits_ = 0;

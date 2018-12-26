@@ -20,6 +20,8 @@ public :
 
 	std::string getTypeName() const override { return "IRI"; }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	bool relative_;
 	std::vector< ArcIdentifier > arc_identifiers_;

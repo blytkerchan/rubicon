@@ -15,6 +15,8 @@ public :
 
 	std::string getTypeName() const override { return "ObjectIdentifier"; }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+
 private :
 	ObjectIdentifier oid_;
 };

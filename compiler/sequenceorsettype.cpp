@@ -13,7 +13,7 @@ void SequenceOrSetType::NamedComponentType::generateHeaderGetterAndSetter(ostrea
 {
 	string name(getName());
 	name[0] = toupper(name[0]);
-	os << "\t" << getTypeName() << (isOptional() ? " const* " : " ") << "get" << name << "() const;\n";
+	os << "\t" << getTypeName() << ((isOptional() && !hasDefaultValue()) ? " const* " : " ") << "get" << name << "() const;\n";
 	os << "\t" << "void set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ");\n";
 }
 void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string const &type_name, ostream &os) const
@@ -21,11 +21,19 @@ void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string 
 	string name(getName());
 	name[0] = toupper(name[0]);
 	os <<
-		getTypeName() << (isOptional() ? " const* " : " ") << type_name <<  "::get" << name << "() const\n"
+		getTypeName() << ((isOptional() && !hasDefaultValue()) ? " const* " : " ") << type_name <<  "::get" << name << "() const\n"
 		"{\n"
-		"\treturn " << toMemberName(getName()) << ";\n"
-		"}\n"
 		;
+	if (isOptional() && hasDefaultValue())
+	{
+		os << "\treturn " << toMemberName(getName()) << " ? " << toMemberName(getName()) << " : " << default_value_->generateInstance() << "\n";
+	}
+	else
+	{
+		//TODO use the default value if the value is not set
+		os << "\treturn " << toMemberName(getName()) << ";\n";
+	}
+	os << "}\n";
 }
 void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string const &type_name, ostream &os) const
 {

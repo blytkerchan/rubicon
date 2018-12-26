@@ -17,8 +17,11 @@ public :
 	{
 		oid_components_.push_back(oid_component);
 	}
+
 	std::string getTypeName() const override { return typeid(*this).name(); }
 
+	std::string generateInstance() const override { return "/*TODO*/"; }
+	
 private :
 	bool relative_;
 	std::vector< OIDComponent > oid_components_;
