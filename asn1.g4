@@ -5,70 +5,75 @@ file : module_definition ;
 // 12.38 - reserved words
 // these have to come first so they take precedence over identifiers and somesuch
 ABSENT_RW				: 'ABSENT' ;
-INTERSECTION_RW			: 'INTERSECTION' ;
-SEQUENCE_RW				: 'SEQUENCE' ;
-ENCODING_CONTROL_RW		: 'ENCODING-CONTROL' ;
-SET_RW					: 'SET' ;
 ALL_RW					: 'ALL' ;
-END_RW					: 'END' ;
-MAX_RW					: 'MAX' ;
-SETTINGS_RW				: 'SETTINGS' ;
 APPLICATION_RW			: 'APPLICATION' ;
-ENUMERATED_RW			: 'ENUMERATED' ;
-MIN_RW					: 'MIN' ;
 AUTOMATIC_RW			: 'AUTOMATIC' ;
-EXCEPT_RW				: 'EXCEPT' ;
-MINUS_INFINITY_RW		: 'MINUS-INFINITY' ;
-STRING_RW				: 'STRING' ;
 BEGIN_RW				: 'BEGIN' ;
-EXPLICIT_RW				: 'EXPLICIT' ;
-NOT_A_NUMBER_RW			: 'NOT-A-NUMBER' ;
 BIT_RW					: 'BIT' ;
-EXPORTS_RW				: 'EXPORTS' ;
-NULL_RW					: 'NULL' ;
-EXTENSIBILITY_RW		: 'EXTENSIBILITY' ;
-TAGS_RW					: 'TAGS' ;
 BOOLEAN_RW				: 'BOOLEAN' ;
-EXTERNAL_RW				: 'EXTERNAL' ;
-OBJECT_RW				: 'OBJECT' ;
-FALSE_RW				: 'FALSE' ;
-TIME_RW					: 'TIME' ;
 CHARACTER_RW			: 'CHARACTER' ;
-FROM_RW					: 'FROM' ;
-OCTET_RW				: 'OCTET' ;
-TIME_OF_DAY_RW			: 'TIME-OF-DAY' ;
 CHOICE_RW				: 'CHOICE' ;
-OF_RW					: 'OF' ;
-TRUE_RW					: 'TRUE' ;
-OID_IRI_RW				: 'OID-IRI' ;
-COMPONENT_RW			: 'COMPONENT' ;
-UNION_RW				: 'UNION' ;
 COMPONENTS_RW			: 'COMPONENTS' ;
-PATTERN_RW				: 'PATTERN' ;
-IDENTIFIER_RW			: 'IDENTIFIER' ;
-PDV_RW					: 'PDV' ;
-UNIVERSAL_RW			: 'UNIVERSAL' ;
+COMPONENT_RW			: 'COMPONENT' ;
 CONTAINING_RW			: 'CONTAINING' ;
-IMPLICIT_RW				: 'IMPLICIT' ;
-PLUS_INFINITY_RW	  	: 'PLUS-INFINITY' ;
 DATE_RW					: 'DATE' ;
-IMPLIED_RW				: 'IMPLIED' ;
-PRESENT_RW				: 'PRESENT' ;
 DATE_TIME_RW			: 'DATE-TIME' ;
-IMPORTS_RW				: 'IMPORTS' ;
 DEFAULT_RW				: 'DEFAULT' ;
-INCLUDES_RW				: 'INCLUDES' ;
-PRIVATE_RW				: 'PRIVATE' ;
 DEFINITIONS_RW			: 'DEFINITIONS' ;
-REAL_RW					: 'REAL' ;
 DURATION_RW				: 'DURATION' ;
-INSTRUCTIONS_RW	   		: 'INSTRUCTIONS' ;
-RELATIVE_OID_RW	   		: 'RELATIVE-OID' ;
-WITH_RW					: 'WITH' ;
 EMBEDDED_RW				: 'EMBEDDED' ;
+ENCODING_CONTROL_RW		: 'ENCODING-CONTROL' ;
+END_RW					: 'END' ;
+ENUMERATED_RW			: 'ENUMERATED' ;
+EXCEPT_RW				: 'EXCEPT' ;
+EXPLICIT_RW				: 'EXPLICIT' ;
+EXPORTS_RW				: 'EXPORTS' ;
+EXTENSIBILITY_RW		: 'EXTENSIBILITY' ;
+EXTERNAL_RW				: 'EXTERNAL' ;
+FALSE_RW				: 'FALSE' ;
+FROM_RW					: 'FROM' ;
+IDENTIFIER_RW			: 'IDENTIFIER' ;
+IMPLICIT_RW				: 'IMPLICIT' ;
+IMPLIED_RW				: 'IMPLIED' ;
+IMPORTS_RW				: 'IMPORTS' ;
+INCLUDES_RW				: 'INCLUDES' ;
+INSTRUCTIONS_RW	   		: 'INSTRUCTIONS' ;
 INTEGER_RW				: 'INTEGER' ;
-RELATIVE_OID_IRI_RW   	: 'RELATIVE-OID-IRI' ;
+INTERSECTION_RW			: 'INTERSECTION' ;
+MAX_RW					: 'MAX' ;
+MINUS_INFINITY_RW		: 'MINUS-INFINITY' ;
+MIN_RW					: 'MIN' ;
+NOT_A_NUMBER_RW			: 'NOT-A-NUMBER' ;
+NULL_RW					: 'NULL' ;
+OBJECT_RW				: 'OBJECT' ;
+OCTET_RW				: 'OCTET' ;
+OF_RW					: 'OF' ;
+OID_IRI_RW				: 'OID-IRI' ;
 OPTIONAL_RW				: 'OPTIONAL' ;
+PATTERN_RW				: 'PATTERN' ;
+PDV_RW					: 'PDV' ;
+PLUS_INFINITY_RW	  	: 'PLUS-INFINITY' ;
+PRESENT_RW				: 'PRESENT' ;
+PRIVATE_RW				: 'PRIVATE' ;
+REAL_RW					: 'REAL' ;
+RELATIVE_OID_IRI_RW   	: 'RELATIVE-OID-IRI' ;
+RELATIVE_OID_RW	   		: 'RELATIVE-OID' ;
+SEQUENCE_RW				: 'SEQUENCE' ;
+SETTINGS_RW				: 'SETTINGS' ;
+SET_RW					: 'SET' ;
+SIZE_RW					: 'SIZE' ;
+STRING_RW				: 'STRING' ;
+TAGS_RW					: 'TAGS' ;
+TIME_OF_DAY_RW			: 'TIME-OF-DAY' ;
+TIME_RW					: 'TIME' ;
+TRUE_RW					: 'TRUE' ;
+UNION_RW				: 'UNION' ;
+UNIVERSAL_RW			: 'UNIVERSAL' ;
+WITH_RW					: 'WITH' ;
+// these are no longer in X.680, but are still widely unrestricted_character_string_type
+ANY_RW					: 'ANY' ;
+DEFINED_RW				: 'DEFINED' ;
+BY_RW					: 'BY' ;
 
 //////////////////////////////////////////////////
 // lexical stuff (sections 11 and 12)
@@ -372,6 +377,8 @@ type
 	: builtin_type
 	| referenced_type
 	| constrained_type
+	// this one is no longer in X.680, but still widely used, so we'll try to support it
+	| any_type
 	;
 
 builtin_type
@@ -408,6 +415,12 @@ referenced_type
 
 named_type
 	: IDENTIFIER type
+	;
+
+// no longer in X.680, but still widely used
+any_type
+	: ANY_RW DEFINED_RW BY_RW IDENTIFIER
+	| ANY_RW
 	;
 
 value
@@ -591,9 +604,9 @@ component_type_list
 	: component_type (COMMA_TK component_type)*
 	;
 component_type
-	: named_type
-	| named_type OPTIONAL_RW
+	: named_type OPTIONAL_RW
 	| named_type DEFAULT_RW value
+	| named_type
 	| COMPONENTS_RW OF_RW type
 	;
 
@@ -814,12 +827,19 @@ constrained_type
 
 type_with_constraint
 	: SET_RW constraint OF_RW type
+	| SET_RW size_constraint OF_RW type
 	| SEQUENCE_RW constraint OF_RW type
+	| SEQUENCE_RW size_constraint OF_RW type
 	| SET_RW constraint OF_RW named_type
+	| SET_RW size_constraint OF_RW named_type
 	| SEQUENCE_RW constraint OF_RW named_type
+	| SEQUENCE_RW size_constraint OF_RW named_type
 	;
 constraint
 	: LEFT_PARENTHESIS_TK constraint_spec exception_spec? RIGHT_PARENTHESIS_TK
+	;
+size_constraint
+	: SIZE_RW constraint
 	;
 constraint_spec
 	: subtype_constraint
@@ -877,6 +897,7 @@ subtype_elements
 	| contained_subtype
 	| value_range
 	| permitted_alphabet
+	| size_constraint
 	| type_constraint
 	| inner_type_constraints
 	| pattern_constraint
