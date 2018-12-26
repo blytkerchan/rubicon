@@ -73,10 +73,12 @@ void Builder::postParseSanityCheck()
 	set< string > types;
 	transform(type_assignments.begin(), type_assignments.end(), inserter(types, types.end()), [](auto type){ return type.getName(); });
 	okay_ &= type_assignments.size() == types.size();
+	//TODO: output an error message if there's a duplicate
 	auto value_assignments(listener_->getValueAssignments());
 	set< string > values;
 	transform(value_assignments.begin(), value_assignments.end(), inserter(values, values.end()), [](auto value){ return value.getName(); });
 	okay_ &= value_assignments.size() == values.size();
+	//TODO: output an error message if there's a duplicate
 	// check that everything that was exported actually exists
 	for (auto symbol : listener_->getSymbolsToExport())
 	{
