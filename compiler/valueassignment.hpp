@@ -21,6 +21,7 @@ public :
 	std::string getName() const { return name_; }
 	std::set< std::string > getDependencies() const { return value_->getDependencies(); }
 	void generateDeclaration(std::ostream &os) const;
+	void generateDefinition(std::ostream &os) const;
 	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
 	std::shared_ptr< TypeDescriptor > getType() { return type_; }
 	void setValue(std::shared_ptr< Value > const &value) { value_ = value; }

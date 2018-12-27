@@ -8,26 +8,14 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class BitStringValue : public Value
 {
 public :
-	explicit BitStringValue(SourceLocation const &source_location)
-		: Value(source_location)
-	{ /* no-op */ }
-	BitStringValue(SourceLocation const &source_location, std::vector< unsigned char > const &bit_string, unsigned int trailing_bits)
-		: Value(source_location)
-		, bit_string_(bit_string)
-		, trailing_bits_(trailing_bits)
-	{ /* no-op */ }
-	BitStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value)
-		: Value(source_location)
-		, value_(value)
-	{ /* no-op */ }
-	BitStringValue(SourceLocation const &source_location, std::vector< std::string > &&identifiers)
-		: Value(source_location)
-		, identifiers_(std::move(identifiers))
-	{ /* no-op */ }
+	explicit BitStringValue(SourceLocation const &source_location);
+	BitStringValue(SourceLocation const &source_location, std::vector< unsigned char > const &bit_string, unsigned int trailing_bits);
+	BitStringValue(SourceLocation const &source_location, std::shared_ptr< Value > const &value);
+	BitStringValue(SourceLocation const &source_location, std::vector< std::string > &&identifiers);
 
-	std::string getTypeName() const override { return "BitString"; }
+	std::string getTypeName() const override;
 
-	std::string generateInstance() const override { return "/*TODO*/"; }
+	std::string generateInstance() const override;
 
 private :
 	std::vector< unsigned char > bit_string_;

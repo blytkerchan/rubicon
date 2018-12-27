@@ -154,17 +154,11 @@ void Generator::generateImplementation(ValueAssignment const &value_assignment) 
 
 	generatePreamble(ofs);
 
-//	generateImplementationIncludeDirectives(ofs, value_assignment);
+	openNamespace(ofs);
 
-//	openNamespace(ofs);
+	generateDefinition(ofs, value_assignment);
 
-//	generateCopyConstructorImplementation(ofs, type_assignment);
-//	generateDestructorImplementation(ofs, type_assignment);
-//	generateAssignmentOperatorImplementation(ofs, type_assignment);
-//	generateSwapparatorImplementation(ofs, type_assignment);
-//	generateGetterAndSetterImplementations(ofs, type_assignment);
-
-//	closeNamespace(ofs);
+	closeNamespace(ofs);
 }
 void Generator::generatePreamble(ostream &ofs) const
 {
@@ -329,7 +323,10 @@ void Generator::generateDeclaration(std::ostream &os, ValueAssignment const &val
 {
 	value_assignment.generateDeclaration(os);
 }
-
+void Generator::generateDefinition(std::ostream &os, ValueAssignment const &value_assignment) const
+{
+	value_assignment.generateDefinition(os);
+}
 }}}
 
 

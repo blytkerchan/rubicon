@@ -1001,14 +1001,15 @@ pair< vector< unsigned char >, unsigned int > Listener::parseBString(antlr4::tre
 	vector< unsigned char > bstring_value;
 	for (auto bstring_char : bstring_text)
 	{
-		char_value <<= 1;
 		switch (bstring_char)
 		{
 		case '1' :
+			char_value <<= 1;
 			char_value |= 1;
 			--bits_remaining;
 			break;
 		case '0' :
+			char_value <<= 1;
 			--bits_remaining;
 			break;
 		default :

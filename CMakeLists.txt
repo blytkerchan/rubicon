@@ -101,6 +101,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/arcidentifier.hpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.cpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/booleanvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/builder.cpp
@@ -246,4 +247,5 @@ add_executable(test_rubicon
 	tests/catch.hpp
 	tests/main.cpp
 	)
+target_link_libraries(test_rubicon rubicon)
 add_test(test_rubicon test_rubicon)
