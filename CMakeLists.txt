@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/settings.cmake)
 
+enable_testing()
+
 include(ExternalProject)
 ExternalProject_Add(antlr4
 	DOWNLOAD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -d
@@ -25,6 +27,7 @@ target_link_libraries(poc-real exceptions)
 find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR})
 
 add_custom_command(OUTPUT preproc-grammar-tag
 	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -p
@@ -213,3 +216,34 @@ set_source_files_properties(
 	PROPERTIES COMPILE_FLAGS "-Wno-overloaded-virtual -Wno-shadow -Wno-unused-but-set-variable -Wno-attributes"
 	)
 
+add_library(rubicon
+	runtime/bitstring.cpp
+	runtime/bitstring.hpp
+	runtime/derdecoder.hpp
+	runtime/derencoder.hpp
+	)
+install(
+	TARGETS asn1c asn1p
+	RUNTIME DESTINATION bin
+	)
+install(
+	TARGETS rubicon
+	ARCHIVE DESTINATION lib
+	DESTINATION lib
+	)
+install(
+	DIRECTORY runtime/
+	DESTINATION include/rubicon
+	FILES_MATCHING PATTERN "*.hpp"
+	)
+install(
+	DIRECTORY runtime/details/
+	DESTINATION include/rubicon/details
+	FILES_MATCHING PATTERN "*.hpp"
+	)
+add_executable(test_rubicon
+	tests/bitstring.cpp
+	tests/catch.hpp
+	tests/main.cpp
+	)
+add_test(test_rubicon test_rubicon)

@@ -1,4 +1,4 @@
-#include "../details/integer.hpp"
+#include "../runtime/details/integer.hpp"
 #include "../exceptions/contract.hpp"
 #include <algorithm>
 #include <cmath>

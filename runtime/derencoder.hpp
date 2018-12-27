@@ -1,8 +1,12 @@
 #ifndef vlinder_rubicon_derencoder_hpp
 #define vlinder_rubicon_derencoder_hpp
 
+#include "config.hpp"
+#include "details/integer.hpp"
+#include <cmath>
+#include <limits>
+
 namespace Vlinder { namespace Rubicon {
-template < unsigned int max_bits_per_integer__ = 2048 >
 class DEREncoder
 {
 	enum struct DoubleValueCategory {
@@ -38,7 +42,7 @@ public :
 	}
 	
 	template < typename OutputIterator >
-	void encodeInteger(OutputIterator &out, Details::Integer value)
+	void encodeInteger(OutputIterator &out, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value)
 	{
 		*out++ = 0x02;
 		value.compact();
@@ -50,7 +54,7 @@ public :
 	void encodeEnumerated(OutputIterator &out, int value)
 	{
 		*out++ = 0x0A;
-		Details::Integer value_as_integer(value);
+		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value_as_integer(value);
 		value_as_integer.compact();
 		encodeLength(out, value_as_integer.size());
 		out = std::copy(value_as_integer.begin(), value_as_integer.end(), out);
@@ -67,7 +71,7 @@ public :
 		pre_condition(unused_bits < 8);
 		*out++ = 0x03;
 		*out++ = unused_bits;
-		encodeLength(out, std::distance(first, last);
+		encodeLength(out, std::distance(first, last));
 		out = std::copy(first, last, out);
 	}
 	
@@ -76,9 +80,9 @@ public :
 	{
 		DoubleValueCategory category;
 		int sign;
-		Details::Integer< max_bits_per_integer__ > mantissa;
+		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > mantissa;
 		unsigned int base;
-		unsigned int scale_factor
+		unsigned int scale_factor;
 		int exponent;
 		dissectDouble(value, category, sign, mantissa, base, scale_factor, exponent);
 	
@@ -110,7 +114,7 @@ public :
 			break;
 		}
 		
-		Details::Integer exponent_as_integer(exponent);
+		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > exponent_as_integer(exponent);
 		// the first encoded value octet doesn't have a name in X.690, but it
 		// *indicates* the way the value is encoded, so I decided to call it
 		// the "indicator octet".
@@ -153,7 +157,7 @@ public :
 		unsigned int const bytes_for_indicator(1);
 		unsigned int const bytes_for_exponent_length(exponent_as_integer.size() > 3 ? 1 : 0);
 		unsigned int const bytes_for_exponent_value(exponent_as_integer.size());
-		unsigned int const bytes_for_mantissa_value(mantissa_as_integer.size());
+		unsigned int const bytes_for_mantissa_value(mantissa.size());
 		encodeLength(out, bytes_for_indicator + bytes_for_exponent_length + bytes_for_exponent_value + bytes_for_mantissa_value);
 		*out++ = indicator_octet;
 		if (exponent_as_integer.size() > 3)
@@ -170,7 +174,7 @@ public :
 		{
 			out = std::copy(exponent_as_integer.begin(), exponent_as_integer.end(), out);
 		}
-		assert(mantissa.size() != 0):
+		assert(mantissa.size() != 0);
 		out = std::copy(mantissa.begin(), mantissa.end(), out);
 	}
 	
@@ -221,7 +225,7 @@ private :
 		}
 		else 
 		{
-			Details::Integer integer_length(length);
+			Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > integer_length(length);
 			integer_length.compact();
 			assert(integer_length.size() > 1);
 			assert(integer_length.size() <= sizeof(length));
@@ -243,28 +247,28 @@ private :
 		, int &exponent
 		)
 	{
-		switch (fpclassify(value))
+		switch (std::fpclassify(value))
 		{
 		case FP_INFINITE :
-			category = signbit(value) ? DoubleValueCategory::negative_infinity__ : DoubleValueCategory::positive_infinity__;
+			category = std::signbit(value) ? DoubleValueCategory::negative_infinity__ : DoubleValueCategory::positive_infinity__;
 			return;
 		case FP_NAN :
 			category = DoubleValueCategory::not_a_number__;
 			return;
 		case FP_ZERO :
-			category = signbit(value) ? DoubleValueCategory::negative_zero__ : DoubleValueCategory::positive_zero__;
+			category = std::signbit(value) ? DoubleValueCategory::negative_zero__ : DoubleValueCategory::positive_zero__;
 			return;
 		default :
 			category = DoubleValueCategory::normal__;
 		}
 	
-		sign = signbit(value) ? -1 : 1;
+		sign = std::signbit(value) ? -1 : 1;
 		value *= sign;
-		double const mantissa_as_double(frexp(value, &exponent));
-		double const mantissa_as_intermediate_for_integer(ldexp(mantissa_as_double, numeric_limits< double >::digits));
-		exponent -= numeric_limits< double >::digits;
-		static_assert(numeric_limits< double >::digits < numeric_limits< uint64_t >::digits, "double is expected to have a smaller mantissa than the bits in a 64-bit integer");
-		static_assert(numeric_limits< double >::radix == numeric_limits< uint64_t >::radix, "radix for double and int should be the same");
+		double const mantissa_as_double(std::frexp(value, &exponent));
+		double const mantissa_as_intermediate_for_integer(ldexp(mantissa_as_double, std::numeric_limits< double >::digits));
+		exponent -= std::numeric_limits< double >::digits;
+		static_assert(std::numeric_limits< double >::digits < std::numeric_limits< uint64_t >::digits, "double is expected to have a smaller mantissa than the bits in a 64-bit integer");
+		static_assert(std::numeric_limits< double >::radix == std::numeric_limits< uint64_t >::radix, "radix for double and int should be the same");
 		uint64_t mantissa_as_uint(mantissa_as_intermediate_for_integer);
 		while ((mantissa_as_uint % 256) == 0)
 		{
@@ -281,7 +285,7 @@ private :
 			++exponent;
 			mantissa_as_uint /= 2;
 		}
-		mantissa = Details::Integer< max_bits_per_integer__ >(mantissa_as_uint);
+		mantissa = Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(mantissa_as_uint);
 		base = 2;
 		if ((exponent % 4) == 0)
 		{

@@ -2,7 +2,7 @@
 #define vlinder_rubicon_details_integer_hpp
 
 #include "../exceptions.hpp"
-#include "../exceptions/contract.hpp"
+#include "exceptions/contract.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Details {
 template < unsigned int max_bits_per_integer__ = 2048 >
