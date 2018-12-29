@@ -1,0 +1,7 @@
+BitStringTest4 DEFINITIONS ::=
+BEGIN
+	a INTEGER ::= 1
+	T1 ::= INTEGER { a(2) }
+	T2 ::= BIT STRING { a(3), b(a) }
+	c T2 ::= { b }
+END

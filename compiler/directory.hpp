@@ -20,7 +20,8 @@ public :
 	std::vector< ValueAssignment > getValueAssignments() const;
 
         std::shared_ptr< TypeDescriptor > findType(std::string const &type_name) const;
-
+	std::shared_ptr< Value > findValue(std::string const &value_name) const;
+	
 protected :
 	std::vector< std::string > symbols_to_export_;
 	ModuleNameMappings module_name_mappings_;

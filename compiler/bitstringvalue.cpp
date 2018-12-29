@@ -24,12 +24,35 @@ BitStringValue::BitStringValue(SourceLocation const &source_location, Directory 
 	: Value(source_location)
 	, type_(type)
 	, value_(value)
-{ /* no-op */ }
-BitStringValue::BitStringValue(SourceLocation const &source_location, Directory const &directory, shared_ptr< TypeDescriptor > const &type, vector< string > &&identifiers)
+{
+	/* 22.19 The CONTAINING alternative can only be used if there 
+	 * is a contents constraint on the bitstring type which 
+	 * includes CONTAINING . The "Value" shall then be value 
+	 * notation for a value of the "Type" in the 
+	 * "ContentsConstraint" (see Rec. ITU-T X.682 | ISO/IEC 
+	 * 8824-3, clause 11).
+	 * NOTE – This value notation can never appear in a subtype 
+	 * constraint because Rec. ITU-T X.682 | ISO/IEC 8824-3, 
+	 * clause 11.3 forbids further constraints after a 
+	 * "ContentsConstraint", and the above text forbids its use
+	 * unless the governor has a "ContentsConstraint".
+	 * 22.20 The CONTAINING alternative shall be used if there 
+	 * is a contents constraint on the bitstring type which does
+	 * not contain ENCODED BY. */
+	throw std::logic_error("Not yet implemented");
+}
+BitStringValue::BitStringValue(SourceLocation const &source_location, Directory const &directory, shared_ptr< TypeDescriptor > const &type, vector< string > const &identifiers)
 	: Value(source_location)
 	, type_(type)
-	, identifiers_(move(identifiers))
 {
+	/* If we get an identifier list, the identifiers must be
+	 * associated with a bit string type, must all be associated 
+	 * with the same one, must be associated with the one this 
+	 * value is associated with (meaning our type must be that of 
+	 * the named bit string type) and each indicate the index of 
+	 * the bit that is set. All other bits are zero, and we 
+	 * automatically have the same size constraint as the bit 
+	 * string type we're associated with. */
 	if (!type)
 	{
 		tracer__->trace(true, TRACE_ERROR)("%s:%u:%u: no associated type for bit string\n", source_location.filename_.c_str(), source_location.line_, source_location.offset_);
@@ -63,9 +86,8 @@ BitStringValue::BitStringValue(SourceLocation const &source_location, Directory 
 			done = true;
 		}
 	} while (!done);
-	static_assert(RUBICON_MAX_BITS_PER_INTEGER < 65536);
-	vector< unsigned short > indices;
-	for (auto identifier : identifiers_)
+	vector< decltype(BitStringType::NamedBits::value_type::bit_) > indices;
+	for (auto identifier : identifiers)
 	{
 		auto which(
 			find_if(
@@ -83,55 +105,45 @@ BitStringValue::BitStringValue(SourceLocation const &source_location, Directory 
 		}
 		else
 		{ /* all is well so far */ }
+		indices.push_back(which->bit_);
 	}
+	sort(indices.begin(), indices.end());
+	unsigned int bit_count(0);
+	for_each(
+		  indices.begin()
+		, indices.end()
+		, [&](decltype(indices)::value_type index){
+				while (bit_count < index)
+				{
+					bit_string_.push_back(0);
+					bit_count += 8;
+				}
+				trailing_bits_ = bit_count - (index + 1);
+				index = index % 8;
+				unsigned char const lookup[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+				bit_string_.back() |= lookup[index];
+			}
+		);
 }
 
 string BitStringValue::getTypeName() const/* override*/
 {
-	return "BitString";
+	return "Vlinder::Rubicon::BitString";
 }
 
 string BitStringValue::generateInstance() const/* override*/
 {
 	stringstream ss;
 
-	if (!bit_string_.empty())
+	ss << "Vlinder::Rubicon::BitString({";
+	bool first(true);
+	for (auto bit : bit_string_)
 	{
-		ss << "Vlinder::Rubicon::BitString({";
-		bool first(true);
-		for (auto bit : bit_string_)
-		{
-			if (!first) ss << ", ";
-			ss << (int)bit;
-			first = false;
-		}
-		ss <<"}, " << trailing_bits_ << ")"; 
+		if (!first) ss << ", ";
+		ss << (int)bit;
+		first = false;
 	}
-	else
-	{
-		/* If we get an identifier list, the identifiers must be
-		 * associated with a bit string type, must all be associated 
-		 * with the same one, must be associated with the one this 
-		 * value is associated with (meaning our type must be that of 
-		 * the named bit string type) and each indicate the index of 
-		 * the bit that is set. All other bits are zero, and we 
-		 * automatically have the same size constraint as the bit 
-		 * string type we're associated with. */
-		/* 22.19 The CONTAINING alternative can only be used if there 
-		 * is a contents constraint on the bitstring type which 
-		 * includes CONTAINING . The "Value" shall then be value 
-		 * notation for a value of the "Type" in the 
-		 * "ContentsConstraint" (see Rec. ITU-T X.682 | ISO/IEC 
-		 * 8824-3, clause 11).
-		 * NOTE – This value notation can never appear in a subtype 
-		 * constraint because Rec. ITU-T X.682 | ISO/IEC 8824-3, 
-		 * clause 11.3 forbids further constraints after a 
-		 * "ContentsConstraint", and the above text forbids its use
-		 * unless the governor has a "ContentsConstraint".
-		 * 22.20 The CONTAINING alternative shall be used if there 
-		 * is a contents constraint on the bitstring type which does
-		 * not contain ENCODED BY. */
-	}
+	ss <<"}, " << trailing_bits_ << ")"; 
 
 	return ss.str();
 }

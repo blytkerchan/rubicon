@@ -394,7 +394,25 @@ shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string
 			}
 			else
 			{
-				named_bits.push_back({named_bit, name, numeric_limits< unsigned int >::max()});
+				auto value(findValue(named_bit->defined_value()->IDENTIFIER()->getText()));
+				auto integer_value(dynamic_pointer_cast< IntegerValue >(value));
+				if (!integer_value)
+				{
+					SourceLocation source_location(named_bit);
+					tracer__->trace(1, TRACE_ERROR, "%s:%u:%u: %s does not refer to an integer value\n", source_location.filename_.c_str(), source_location.line_, source_location.offset_, named_bit->defined_value()->IDENTIFIER()->getText().c_str());
+					throw ParseError("invalid bit value");
+				}
+				else
+				{ /* all is well */ }
+				if (integer_value->getValue() > std::numeric_limits< decltype(decltype(named_bits)::value_type::bit_) >::max())
+				{
+					SourceLocation source_location(named_bit);
+					tracer__->trace(1, TRACE_ERROR, "%s:%u:%u: %s refers to a value that is too large to be a bit index\n", source_location.filename_.c_str(), source_location.line_, source_location.offset_, named_bit->defined_value()->IDENTIFIER()->getText().c_str());
+					throw ParseError("invalid bit value");
+				}
+				else
+				{ /* all is well */ }
+				named_bits.push_back({named_bit, name, static_cast< decltype(decltype(named_bits)::value_type::bit_) >(integer_value->getValue())});
 			}
 		}
 	}

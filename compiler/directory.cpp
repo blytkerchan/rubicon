@@ -44,5 +44,25 @@ shared_ptr< TypeDescriptor > Directory::findType(string const &type_name) const
                 return shared_ptr< TypeDescriptor >();
         }
 }
+shared_ptr< Value > Directory::findValue(string const &value_name) const
+{
+        auto which(
+                find_if(
+                          value_assignments_.begin()
+                        , value_assignments_.end()
+                        , [=](ValueAssignment const &value_assignment) -> bool {
+                                        return value_assignment.getName() == value_name;
+                                }
+                        )
+                );
+        if (which != value_assignments_.end())
+        {
+                return which->getValue();
+        }
+        else
+        {
+                return shared_ptr< Value >();
+        }
+}
 }}}
 
