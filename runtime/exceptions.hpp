@@ -12,6 +12,7 @@ namespace Vlinder { namespace Rubicon {
 		, unresolved_reference__
 		, undefined_reference__
 		, recursive_definition__
+		, invalid_definition__
 		};
 	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::encoding_error__ > EncodingError;
 	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::decoding_error__ > DecodingError;
@@ -20,7 +21,7 @@ namespace Vlinder { namespace Rubicon {
 	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::unresolved_reference__ > UnresolvedReference;
 	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::undefined_reference__ > UndefinedReference;
 	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::recursive_definition__ > RecursiveDefinition;
-
+	typedef Exceptions::Exception< std::runtime_error, Errors, Errors::invalid_definition__ > InvalidDefinition;
 }}
 
 #endif

@@ -40,6 +40,8 @@ public :
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::BitString"; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 
+	NamedBits getNamedBits() const { return named_bits_; }
+
 private :
 	NamedBits named_bits_;
 

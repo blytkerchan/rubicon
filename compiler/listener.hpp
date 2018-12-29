@@ -4,21 +4,19 @@
 #include "../generated/asn1BaseListener.h"
 #include "arcidentifier.hpp"
 #include "constraint.hpp"
-#include "modulenamemappings.hpp"
+#include "directory.hpp"
 #include "namednumber.hpp"
 #include "namedtype.hpp"
 #include "oidcomponent.hpp"
 #include "tag.hpp"
-#include "typeassignment.hpp"
 #include "typedescriptor.hpp"
 #include "value.hpp"
-#include "valueassignment.hpp"
 #include <ostream>
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct RestrictedCharacterStringValue;
-class Listener : public ::asn1BaseListener
+class Listener : public ::asn1BaseListener, public Directory
 {
 public :
 	enum struct TagDefault {
@@ -26,7 +24,6 @@ public :
 		, implicit_tags__
 		, automatic_tags__
 		};
-	typedef std::map< std::string, std::vector< std::string > > ImportedSymbols;
 
 	Listener();
 
@@ -45,13 +42,8 @@ protected :
 public :
 	std::string getModuleName() const { return module_name_; }
 	TagDefault getTagDefault() const { return tag_default_; }
-	bool isModuleTypesExtensibilityImplies() const { return module_types_extensibility_implied_; }
+	bool isModuleTypesExtensibilityImplied() const { return module_types_extensibility_implied_; }
 	bool exportAll() const { return export_all_; }
-	std::vector< std::string > getSymbolsToExport() const { return symbols_to_export_; }
-	ModuleNameMappings getModuleNameMappings() const { return module_name_mappings_; }
-	ImportedSymbols getImportedSymbols() const { return imported_symbols_; }
-	std::vector< TypeAssignment > getTypeAssignments() const { return type_assignments_; }
-	std::vector< ValueAssignment > getValueAssignments() const { return value_assignments_; }
 
 private :
 	ObjectIdentifier parseObjectIdentifier(asn1Parser::Object_identifier_valueContext *ctx);
@@ -79,10 +71,11 @@ private :
 
 	Tag parseTag(asn1Parser::TagContext *ctx);
 
+	std::shared_ptr< Value > parseValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::ValueContext *ctx);
 	std::shared_ptr< Value > parseValue(asn1Parser::ValueContext *ctx);
-	std::shared_ptr< Value > parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx);
-	std::shared_ptr< Value > parseDefinedValue(asn1Parser::Defined_valueContext *ctx);
-	std::shared_ptr< Value > parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx);
+	std::shared_ptr< Value > parseBuiltinValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Builtin_valueContext *ctx);
+	std::shared_ptr< Value > parseDefinedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Defined_valueContext *ctx);
+	std::shared_ptr< Value > parseBitStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Bit_string_valueContext *ctx);
 	std::pair< std::vector< unsigned char >, unsigned int > parseBString(antlr4::tree::TerminalNode *bstring);
 	std::pair< std::vector< unsigned char >, unsigned int > parseHString(antlr4::tree::TerminalNode *hstring);
 
@@ -128,11 +121,6 @@ private :
 	TagDefault tag_default_ = TagDefault::explicit_tags__;
 	bool module_types_extensibility_implied_ = false;
 	bool export_all_ = false;
-	std::vector< std::string > symbols_to_export_;
-	ModuleNameMappings module_name_mappings_;
-	ImportedSymbols imported_symbols_;
-	std::vector< TypeAssignment > type_assignments_;
-	std::vector< ValueAssignment > value_assignments_;
 };
 }}}
 

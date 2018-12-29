@@ -50,6 +50,7 @@ std::vector< ValueAssignment > Builder::getValueAssignments() const
 void Builder::parse(istream &is)
 {
 	ANTLRInputStream input(is);
+	input.name = input_filename_;
 	asn1Lexer lexer(&input);
 	CommonTokenStream tokens(&lexer);
 	asn1Parser parser(&tokens);

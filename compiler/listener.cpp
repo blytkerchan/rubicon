@@ -191,7 +191,7 @@ Listener::Listener()
 				else
 				{
 					assert(symbols_from_module->global_module_reference()->assigned_identifier()->defined_value());
-					module_name_mappings_.insert(local_name, parseDefinedValue(symbols_from_module->global_module_reference()->assigned_identifier()->defined_value()));
+					module_name_mappings_.insert(local_name, parseDefinedValue(shared_ptr< TypeDescriptor >(), symbols_from_module->global_module_reference()->assigned_identifier()->defined_value()));
 				}
 			}
 			else
@@ -274,7 +274,7 @@ ObjectIdentifier Listener::parseObjectIdentifier(asn1Parser::Object_identifier_v
 		else
 		{
 			assert(component->defined_value());
-			auto parsed_defined_value(parseDefinedValue(component->defined_value()));
+			auto parsed_defined_value(parseDefinedValue(shared_ptr< TypeDescriptor >(), component->defined_value()));
 			auto typed_parsed_defined_value(static_cast< DefinedValue const& >(*parsed_defined_value));
 			retval.push_back(typed_parsed_defined_value);
 		}
@@ -593,7 +593,7 @@ NamedNumber Listener::parseNamedNumber(asn1Parser::Named_numberContext *ctx)
 	else
 	{
 		assert(ctx->defined_value());
-		auto value(parseDefinedValue(ctx->defined_value()));
+		auto value(parseDefinedValue(shared_ptr< TypeDescriptor >(), ctx->defined_value()));
 		return NamedNumber(name, static_cast< DefinedValue const& >(*value));
 	}
 }
@@ -895,26 +895,30 @@ Tag Listener::parseTag(asn1Parser::TagContext *ctx)
 	else
 	{
 		assert(ctx->class_number()->defined_value());
-		return Tag(the_class, static_cast< DefinedValue const& >(*parseDefinedValue(ctx->class_number()->defined_value())));
+		return Tag(the_class, static_cast< DefinedValue const& >(*parseDefinedValue(shared_ptr< TypeDescriptor >(), ctx->class_number()->defined_value())));
 	}
 }
 
-shared_ptr< Value > Listener::parseValue(asn1Parser::ValueContext *ctx)
+shared_ptr< Value > Listener::parseValue(shared_ptr< TypeDescriptor > const &type, asn1Parser::ValueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->builtin_value() || ctx->defined_value());
 	return ctx->builtin_value()
-		? parseBuiltinValue(ctx->builtin_value())
-		: parseDefinedValue(ctx->defined_value())
+		? parseBuiltinValue(type, ctx->builtin_value())
+		: parseDefinedValue(type, ctx->defined_value())
 		;
 }
 
-shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext *ctx)
+shared_ptr< Value > Listener::parseValue(asn1Parser::ValueContext *ctx)
+{
+	return parseValue(shared_ptr< TypeDescriptor >(), ctx);
+}
+shared_ptr< Value > Listener::parseBuiltinValue(shared_ptr< TypeDescriptor > const &type, asn1Parser::Builtin_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return
-		  ctx->bit_string_value()		? parseBitStringValue(ctx->bit_string_value())
+		  ctx->bit_string_value()		? parseBitStringValue(type, ctx->bit_string_value())
 		: ctx->boolean_value()			? parseBooleanValue(ctx->boolean_value())
 		: ctx->character_string_value()		? parseCharacterStringValue(ctx->character_string_value())
 		: ctx->choice_value()			? parseChoiceValue(ctx->choice_value())
@@ -935,7 +939,7 @@ shared_ptr< Value > Listener::parseBuiltinValue(asn1Parser::Builtin_valueContext
 							: parseTimeValue(ctx->time_value())
 		;
 }
-shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext *ctx)
+shared_ptr< Value > Listener::parseDefinedValue(shared_ptr< TypeDescriptor > const &type, asn1Parser::Defined_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -960,35 +964,35 @@ shared_ptr< Value > Listener::parseDefinedValue(asn1Parser::Defined_valueContext
 		);
 	return make_shared< DefinedValue >(ctx, text);
 }
-shared_ptr< Value > Listener::parseBitStringValue(asn1Parser::Bit_string_valueContext *ctx)
+shared_ptr< Value > Listener::parseBitStringValue(shared_ptr< TypeDescriptor > const &type, asn1Parser::Bit_string_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	if (ctx->BSTRING())
 	{
 		auto bstring(parseBString(ctx->BSTRING()));
-		return make_shared< BitStringValue >(ctx, bstring.first, bstring.second);
+		return make_shared< BitStringValue >(ctx, *this, type, bstring.first, bstring.second);
 	}
 	else if (ctx->HSTRING())
 	{
 		auto hstring(parseHString(ctx->HSTRING()));
-		return make_shared< BitStringValue >(ctx, hstring.first, hstring.second);
+		return make_shared< BitStringValue >(ctx, *this, type, hstring.first, hstring.second);
 
 	}
 	else if (ctx->CONTAINING_RW())
 	{
-		return make_shared< BitStringValue >(ctx, parseValue(ctx->value()));
+		return make_shared< BitStringValue >(ctx, *this, type, parseValue(ctx->value()));
 	}
 	else if (ctx->identifier_list())
 	{
 		vector< string > identifiers;
 		auto identifier_list(ctx->identifier_list()->IDENTIFIER());
 		transform(identifier_list.begin(), identifier_list.end(), back_inserter(identifiers), [](auto identifier){ return identifier->getText(); });
-		return make_shared< BitStringValue >(ctx, move(identifiers));
+		return make_shared< BitStringValue >(ctx, *this, type, move(identifiers));
 	}
 	else
 	{
-		return make_shared< BitStringValue >(ctx);
+		return make_shared< BitStringValue >(ctx, *this, type);
 	}
 }
 pair< vector< unsigned char >, unsigned int > Listener::parseBString(antlr4::tree::TerminalNode *bstring)
@@ -1045,33 +1049,41 @@ pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tre
 	vector< unsigned char > bstring_value;
 	for (auto hstring_char : hstring_text)
 	{
-		char_value <<= 4;
-		switch (hstring_char)
+		if ((hstring_char >= '0' && hstring_char <= '9')
+			|| (hstring_char >= 'a' && hstring_char <= 'f')
+			|| (hstring_char >= 'A' && hstring_char <= 'F')
+			)
 		{
-		case '0' : char_value |= 0x0; bits_remaining -= 4; break;
-		case '1' : char_value |= 0x1; bits_remaining -= 4; break;
-		case '2' : char_value |= 0x2; bits_remaining -= 4; break;
-		case '3' : char_value |= 0x3; bits_remaining -= 4; break;
-		case '4' : char_value |= 0x4; bits_remaining -= 4; break;
-		case '5' : char_value |= 0x5; bits_remaining -= 4; break;
-		case '6' : char_value |= 0x6; bits_remaining -= 4; break;
-		case '7' : char_value |= 0x7; bits_remaining -= 4; break;
-		case '8' : char_value |= 0x8; bits_remaining -= 4; break;
-		case '9' : char_value |= 0x9; bits_remaining -= 4; break;
-		case 'a' : char_value |= 0xA; bits_remaining -= 4; break;
-		case 'A' : char_value |= 0xA; bits_remaining -= 4; break;
-		case 'b' : char_value |= 0xB; bits_remaining -= 4; break;
-		case 'B' : char_value |= 0xB; bits_remaining -= 4; break;
-		case 'c' : char_value |= 0xC; bits_remaining -= 4; break;
-		case 'C' : char_value |= 0xC; bits_remaining -= 4; break;
-		case 'd' : char_value |= 0xD; bits_remaining -= 4; break;
-		case 'D' : char_value |= 0xD; bits_remaining -= 4; break;
-		case 'e' : char_value |= 0xE; bits_remaining -= 4; break;
-		case 'E' : char_value |= 0xE; bits_remaining -= 4; break;
-		case 'f' : char_value |= 0xF; bits_remaining -= 4; break;
-		case 'F' : char_value |= 0xF; bits_remaining -= 4; break;
+			char_value <<= 4;
+			switch (hstring_char)
+			{
+			case '0' : char_value |= 0x0; bits_remaining -= 4; break;
+			case '1' : char_value |= 0x1; bits_remaining -= 4; break;
+			case '2' : char_value |= 0x2; bits_remaining -= 4; break;
+			case '3' : char_value |= 0x3; bits_remaining -= 4; break;
+			case '4' : char_value |= 0x4; bits_remaining -= 4; break;
+			case '5' : char_value |= 0x5; bits_remaining -= 4; break;
+			case '6' : char_value |= 0x6; bits_remaining -= 4; break;
+			case '7' : char_value |= 0x7; bits_remaining -= 4; break;
+			case '8' : char_value |= 0x8; bits_remaining -= 4; break;
+			case '9' : char_value |= 0x9; bits_remaining -= 4; break;
+			case 'a' : char_value |= 0xA; bits_remaining -= 4; break;
+			case 'A' : char_value |= 0xA; bits_remaining -= 4; break;
+			case 'b' : char_value |= 0xB; bits_remaining -= 4; break;
+			case 'B' : char_value |= 0xB; bits_remaining -= 4; break;
+			case 'c' : char_value |= 0xC; bits_remaining -= 4; break;
+			case 'C' : char_value |= 0xC; bits_remaining -= 4; break;
+			case 'd' : char_value |= 0xD; bits_remaining -= 4; break;
+			case 'D' : char_value |= 0xD; bits_remaining -= 4; break;
+			case 'e' : char_value |= 0xE; bits_remaining -= 4; break;
+			case 'E' : char_value |= 0xE; bits_remaining -= 4; break;
+			case 'f' : char_value |= 0xF; bits_remaining -= 4; break;
+			case 'F' : char_value |= 0xF; bits_remaining -= 4; break;
+			}
 		}
-		
+		else
+		{ /* not a character we're interested in */ }
+			
 		if (!bits_remaining)
 		{
 			bstring_value.push_back(char_value);
@@ -1090,7 +1102,7 @@ pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tre
 	else
 	{ /* no-op */ }
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_pair(bstring_value, bits_remaining);
+	return make_pair(bstring_value, bits_remaining % 8);
 }
 
 shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)
@@ -1162,7 +1174,7 @@ void Listener::parseCharacterStringList(RestrictedCharacterStringValue &retval, 
 		else
 		{
 			assert(chars_defn->defined_value());
-			retval.add(parseDefinedValue(chars_defn->defined_value()));
+			retval.add(parseDefinedValue(shared_ptr< TypeDescriptor >(), chars_defn->defined_value()));
 		}
 	}
 }
@@ -1501,8 +1513,8 @@ ValueAssignment Listener::parseValueAssignment(asn1Parser::Value_assignmentConte
 	pre_condition(ctx->type());
 	pre_condition(ctx->value());
 	string name(ctx->IDENTIFIER()->getText());
-	auto value(parseValue(ctx->value()));
 	auto type(parseType(ctx->type()));
+	auto value(parseValue(type, ctx->value()));
 	return ValueAssignment(ctx, name, type, value);
 }
 

@@ -1,0 +1,4 @@
+InvalidBitStringTest1 DEFINITIONS ::=
+BEGIN
+    test-value BIT STRING ::= { hello, world }
+END

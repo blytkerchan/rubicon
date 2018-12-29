@@ -1,0 +1,4 @@
+BitStringTest3 DEFINITIONS ::=
+BEGIN
+    test-value BIT STRING ::= {}
+END

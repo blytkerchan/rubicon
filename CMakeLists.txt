@@ -119,6 +119,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/definedvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/dependencies.cpp
 	${PROJECT_SOURCE_DIR}/compiler/dependencies.hpp
+	${PROJECT_SOURCE_DIR}/compiler/directory.cpp
+	${PROJECT_SOURCE_DIR}/compiler/directory.hpp
 	${PROJECT_SOURCE_DIR}/compiler/embeddedpdvvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.hpp
@@ -223,6 +225,7 @@ add_library(rubicon
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
 	)
+target_link_libraries(rubicon exceptions)
 install(
 	TARGETS asn1c asn1p
 	RUNTIME DESTINATION bin
