@@ -37,10 +37,15 @@ public :
 		, named_bits_(named_bits)
 	{ /* no-op */ }
 
+	virtual std::vector< std::string > getPublicParents() const override { return std::vector< std::string >{ "Vlinder::Rubicon::BitString" }; }
+
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::BitString"; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 
 	NamedBits getNamedBits() const { return named_bits_; }
+
+	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;
+	virtual void generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const override;
 
 private :
 	NamedBits named_bits_;

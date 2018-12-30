@@ -139,6 +139,7 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment) co
 	openNamespace(ofs);
 
 	generateCopyConstructorImplementation(ofs, type_assignment);
+	generateAlternateConstructorImplementations(ofs, type_assignment);
 	generateDestructorImplementation(ofs, type_assignment);
 	generateAssignmentOperatorImplementation(ofs, type_assignment);
 	generateSwapparatorImplementation(ofs, type_assignment);
@@ -261,10 +262,30 @@ void Generator::closeNamespace(ostream &ofs) const
 }
 void Generator::openClassDefinition(ostream &ofs, TypeAssignment const &type_assignment) const
 {
-	ofs
-		<< "class " << type_assignment.getName() << "\n"
-		<< "{\n"
-		;
+	auto public_parents(type_assignment.getPublicParents());
+	auto protected_parents(type_assignment.getProtectedParents());
+	auto private_parents(type_assignment.getPrivateParents());
+	ofs << "class " << type_assignment.getName() << "\n";
+	bool first(true);
+	for_each(public_parents.begin(), public_parents.end(), [&](auto public_parent){
+				if (first) ofs << "\t: "; else ofs << "\t, ";
+				ofs << "public " << public_parent << "\n";
+				first = false;
+			}
+		);
+	for_each(protected_parents.begin(), protected_parents.end(), [&](auto protected_parent){
+				if (first) ofs << "\t: "; else ofs << "\t, ";
+				ofs << "protected " << protected_parent;
+				first = false;
+			}
+		);
+	for_each(private_parents.begin(), private_parents.end(), [&](auto private_parent){
+				if (first) ofs << "\t: "; else ofs << "\t, ";
+				ofs << "private " << private_parent;
+				first = false;
+			}
+		);
+	ofs << "{\n";
 }
 void Generator::closeClassDefinition(ostream &ofs, TypeAssignment const &type_assignment) const
 {
@@ -276,7 +297,9 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 		"public :\n"
 		"\t" << type_assignment.getName() << "() = default;\n"
 		"\t" << type_assignment.getName() << "(Vlinder::Rubicon::DERDecoder &der_decoder);\n"
-		"\tvirtual ~" << type_assignment.getName() << "()" <<  (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
+		;
+	type_assignment.generateAlternateConstructorDeclarations(ofs);
+	ofs << 	"\tvirtual ~" << type_assignment.getName() << "()" <<  (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "& operator=(" << type_assignment.getName() << " const &other)" << (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"
 		"\t" << type_assignment.getName() << "(" << type_assignment.getName() << " &&other) = default;\n"
@@ -284,6 +307,7 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 		"\t" << type_assignment.getName() << "& swap(" << type_assignment.getName() << " &other);\n"
 		"\n"
 		;
+	ofs << "\n";
 	type_assignment.generateHeaderGettersAndSetters(ofs);
 	ofs << "\n";
 
@@ -291,6 +315,10 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder);\n"
 		"\n"
 		;
+}
+void  Generator::generateAlternateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generateAlternateConstructorImplementations(ofs);
 }
 void Generator::generatePrivateDefinitionSection(ostream &ofs, TypeAssignment const &type_assignment) const
 {

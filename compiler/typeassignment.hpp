@@ -25,10 +25,15 @@ public :
 	std::set< std::string > getDependencies() const { return type_descriptor_->getDependencies(); }
 	std::set< std::string > getStrongDependencies() const { return type_descriptor_->getStrongDependencies(); }
 	std::set< std::string > getWeakDependencies() const { return type_descriptor_->getWeakDependencies(); }
+	std::vector< std::string > getPublicParents() const { return type_descriptor_->getPublicParents(); }
+	std::vector< std::string > getProtectedParents() const { return type_descriptor_->getProtectedParents(); }
+	std::vector< std::string > getPrivateParents() const { return type_descriptor_->getPrivateParents(); }
 	bool hasOptionalMembers() const { return type_descriptor_->hasOptionalMembers(); }
+	void generateAlternateConstructorDeclarations(std::ostream &os) const { type_descriptor_->generateAlternateConstructorDeclarations(os, name_); }
 	void generateHeaderGettersAndSetters(std::ostream &os) const { type_descriptor_->generateHeaderGettersAndSetters(os); }
 	void generateMemberDeclarations(std::ostream &os) const { type_descriptor_->generateMemberDeclarations(os); }
 	void generateCopyConstructorImplementation(std::ostream &os) const;
+	void generateAlternateConstructorImplementations(std::ostream &os) const;
 	void generateDestructorImplementation(std::ostream &os) const;
 	void generateAssignmentOperatorImplementation(std::ostream &os) const;
 	void generateSwapparatorImplementation(std::ostream &os) const;

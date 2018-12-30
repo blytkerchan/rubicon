@@ -12,6 +12,10 @@ void TypeAssignment::generateCopyConstructorImplementation(std::ostream &os) con
 	else
 	{ /* no optional members - default copy constructor */ }
 }
+void TypeAssignment::generateAlternateConstructorImplementations(std::ostream &os) const
+{
+	type_descriptor_->generateAlternateConstructorImplementations(os, name_);
+}
 void TypeAssignment::generateDestructorImplementation(std::ostream &os) const
 {
 	if (hasOptionalMembers())

@@ -20,6 +20,11 @@ public :
 	virtual std::set< std::string > getDependencies() const { return std::set< std::string >(); }
 	virtual std::set< std::string > getStrongDependencies() const { return getDependencies(); }
 	virtual std::set< std::string > getWeakDependencies() const { return std::set< std::string >(); }
+	virtual std::vector< std::string > getPublicParents() const { return std::vector< std::string >(); }
+	virtual std::vector< std::string > getProtectedParents() const { return std::vector< std::string >(); }
+	virtual std::vector< std::string > getPrivateParents() const { return std::vector< std::string >(); }
+	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const {}
+	virtual void generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const {}
 	virtual void generateEncodeImplementation(std::ostream &os) const;
 	virtual void generateEncodeImplementation(std::ostream &os, std::string const &instance_name) const;
 	virtual void generateEventHandlers(std::ostream &os) const {};
