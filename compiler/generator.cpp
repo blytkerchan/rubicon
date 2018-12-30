@@ -105,6 +105,7 @@ void Generator::generateHeader(TypeAssignment const &type_assignment) const
 	openClassDefinition(ofs, type_assignment);
 
 	generatePublicDefinitionSection(ofs, type_assignment);
+	generatePublicStaticMembers(ofs, type_assignment);
 	generatePrivateDefinitionSection(ofs, type_assignment);
 
 	closeClassDefinition(ofs, type_assignment);
@@ -316,7 +317,11 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 		"\n"
 		;
 }
-void  Generator::generateAlternateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generatePublicStaticMembers(ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generatePublicStaticMembers(ofs);
+}
+void Generator::generateAlternateConstructorImplementations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateAlternateConstructorImplementations(ofs);
 }

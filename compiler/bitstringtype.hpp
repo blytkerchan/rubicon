@@ -45,6 +45,7 @@ public :
 	NamedBits getNamedBits() const { return named_bits_; }
 
 	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;
+	virtual void generatePublicStaticMembers(std::ostream &os) const override;
 	virtual void generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const override;
 
 private :

@@ -38,6 +38,10 @@ public :
 	const_reference operator[](size_type index) const { return value_[index]; }
 	reference operator[](size_type index) { return value_[index]; }
 
+	void setBit(size_type index) { value_[index] = true; }
+	void clearBit(size_type index) { value_[index] = false; }
+	void toggleBit(size_type index) { value_[index] = !value_[index]; }
+
 private :
 	std::vector< bool > value_;
 };

@@ -43,6 +43,7 @@ private :
 	void openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void closeClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generatePublicDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generatePublicStaticMembers(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateAlternateConstructorImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generatePrivateDefinitionSection(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateCopyConstructorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;

@@ -30,6 +30,7 @@ public :
 	std::vector< std::string > getPrivateParents() const { return type_descriptor_->getPrivateParents(); }
 	bool hasOptionalMembers() const { return type_descriptor_->hasOptionalMembers(); }
 	void generateAlternateConstructorDeclarations(std::ostream &os) const { type_descriptor_->generateAlternateConstructorDeclarations(os, name_); }
+	void generatePublicStaticMembers(std::ostream &os) const { type_descriptor_->generatePublicStaticMembers(os); }
 	void generateHeaderGettersAndSetters(std::ostream &os) const { type_descriptor_->generateHeaderGettersAndSetters(os); }
 	void generateMemberDeclarations(std::ostream &os) const { type_descriptor_->generateMemberDeclarations(os); }
 	void generateCopyConstructorImplementation(std::ostream &os) const;

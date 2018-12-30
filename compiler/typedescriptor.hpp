@@ -33,6 +33,7 @@ public :
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const {}
 	virtual void generateMemberDeclarations(std::ostream &os) const {}
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const {}
+	virtual void generatePublicStaticMembers(std::ostream &os) const {}
 	virtual void generateDestructorImplementation(std::ostream &os) const {}
 	virtual void generateSwapparatorImplementation(std::ostream &os) const {}
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const {}
