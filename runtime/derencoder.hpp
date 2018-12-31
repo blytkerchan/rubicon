@@ -2,9 +2,11 @@
 #define vlinder_rubicon_derencoder_hpp
 
 #include "config.hpp"
+#include "details/buffer.hpp"
 #include "details/integer.hpp"
 #include <cmath>
 #include <limits>
+#include <memory>
 
 namespace Vlinder { namespace Rubicon {
 class DEREncoder
@@ -19,14 +21,25 @@ class DEREncoder
 		};
 public :
 	DEREncoder() = default;
+	template < typename Buffer >
+	DEREncoder(Buffer &buffer)
+		: buffer_(std::make_shared< Details::Buffer_< Buffer > >(buffer))
+	{ /* no-op */ }
 	~DEREncoder() = default;
 	DEREncoder(DEREncoder const&) = default;
 	DEREncoder(DEREncoder &&) = default;
 	DEREncoder& operator=(DEREncoder const&) = default;
 	DEREncoder& operator=(DEREncoder &&) = default;
-	
+
+	void encodeBoolean(bool value)
+	{
+		auto iter(std::back_inserter(*buffer_));
+		encodeBoolean_(iter, value);
+	}
+
+private :
 	template < typename OutputIterator >
-	void encodeEndOfContents(OutputIterator &out)
+	static void encodeEndOfContents(OutputIterator &out)
 	{
 		// encode the type octet 
 		*out++ = 0x00;
@@ -34,7 +47,7 @@ public :
 	}
 	
 	template < typename OutputIterator >
-	void encodeBoolean(OutputIterator &out, bool value)
+	static void encodeBoolean_(OutputIterator &out, bool value)
 	{
 		*out++ = 0x01;
 		encodeLength(out, 1);
@@ -42,7 +55,7 @@ public :
 	}
 	
 	template < typename OutputIterator >
-	void encodeInteger(OutputIterator &out, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value)
+	static void encodeInteger(OutputIterator &out, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value)
 	{
 		*out++ = 0x02;
 		value.compact();
@@ -51,7 +64,7 @@ public :
 	}
 	
 	template < typename OutputIterator >
-	void encodeEnumerated(OutputIterator &out, int value)
+	static void encodeEnumerated(OutputIterator &out, int value)
 	{
 		*out++ = 0x0A;
 		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value_as_integer(value);
@@ -61,7 +74,7 @@ public :
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
-	void encodeBitString(
+	static void encodeBitString(
 		  OutputIterator &out
 		, unsigned int unused_bits
 		, MultiPassInputIterator first
@@ -76,7 +89,7 @@ public :
 	}
 	
 	template < typename OutputIterator >
-	void encodeReal(OutputIterator &out, double value)
+	static void encodeReal(OutputIterator &out, double value)
 	{
 		DoubleValueCategory category;
 		int sign;
@@ -179,7 +192,7 @@ public :
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
-	void encodeOctetString(
+	static void encodeOctetString(
 		  OutputIterator &out 
 		, MultiPassInputIterator first 
 		, MultiPassInputIterator last 
@@ -192,7 +205,7 @@ public :
 	}
 
 	template < typename OutputIterator, typename MultiPassInputIterator >
-	void encodeSequence(
+	static void encodeSequence(
 		  OutputIterator &out
 		, MultiPassInputIterator first
 		, MultiPassInputIterator last
@@ -204,7 +217,7 @@ public :
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
-	void encodeSet(
+	static void encodeSet(
 		  OutputIterator &out
 		, MultiPassInputIterator first
 		, MultiPassInputIterator last
@@ -217,7 +230,7 @@ public :
 
 private :
 	template < typename OutputIterator >
-	void encodeLength(OutputIterator &out, uint64_t length)
+	static void encodeLength(OutputIterator &out, uint64_t length)
 	{
 		if (length <= 127)
 		{
@@ -310,7 +323,8 @@ private :
 			{ /* not this one */ }
 		}
 	}
-
+private :
+	std::shared_ptr< Details::Buffer > buffer_;
 };
 }}
 

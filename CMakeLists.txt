@@ -240,6 +240,8 @@ add_library(rubicon SHARED
 	runtime/derdecoder.cpp
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
+	runtime/details/buffer.hpp
+	runtime/details/integer.hpp
 	)
 target_link_libraries(rubicon exceptions)
 set_target_properties(rubicon PROPERTIES SOVERSION 1)
@@ -263,6 +265,7 @@ add_executable(test_rubicon
 	tests/bitstring.cpp
 	tests/catch.hpp
 	tests/derdecoder.cpp
+	tests/derencoder.cpp
 	tests/main.cpp
 	)
 target_link_libraries(test_rubicon rubicon)
