@@ -1,22 +1,23 @@
+#ifndef vlinder_rubicon_derdecoder_hpp
+#define vlinder_rubicon_derdecoder_hpp
+
+#include "config.hpp"
+#include "details/integer.hpp"
+#include <algorithm>
+#include <limits>
+
 namespace Vlinder { namespace Rubicon {
-template < unsigned int max_bits_per_integer__ = 2048, unsigned int stack_size__ = 16 >
 class DERDecoder
 {
 public :
 	DERDecoder() = default;
-	virtual ~DERDecoder = default;
+	virtual ~DERDecoder() = default;
 	DERDecoder(DERDecoder const &) = default;
 	DERDecoder(DERDecoder &&) = default;
-	DERDecoder& operator=DERDecoder(DERDecoder const &) = default;
-	DERDecoder& operator=DERDecoder(DERDecoder &&) = default;
+	DERDecoder& operator=(DERDecoder const &) = default;
+	DERDecoder& operator=(DERDecoder &&) = default;
 	
-	void reset()
-	{
-		state_ = State::expect_type__;
-		parse_buffer_size_ = 0;
-		length_ = 0;
-		stack_depth_ = 0;
-	}
+	void reset();
 	
 	template < typename InputIterator >
 	bool parse(InputIterator &first, InputIterator last)
@@ -68,7 +69,7 @@ public :
 	}
 	
 	virtual void onEndOfContents() = 0;
-	virtual void onInteger(Details::Integer< max_bits_per_integer__ > const &value) = 0;
+	virtual void onInteger(Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > const &value) = 0;
 	virtual void onEnumerated(int value) = 0;
 	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) = 0;
 	virtual void onOctetString(bool final, unsigned char *first, unsigned char *last) = 0;
@@ -77,6 +78,8 @@ public :
 	virtual void onEndSequence() = 0;
 	virtual void onBeginSet() = 0;
 	virtual void onEndSet() = 0;
+	virtual void onBoolean(bool val) = 0;
+	virtual void onReal(double val) = 0;
 	
 private :
 	enum struct State {
@@ -98,32 +101,7 @@ private :
 		uint8_t tag_;
 	};
 	
-	void parseType(unsigned char tag)
-	{
-		switch (tag & 0xC0)
-		{
-		case 0x00 :
-			type_.type_class_ = TypeClass::universal__;
-			break;
-		case 0x40 :
-			type.type_class_ = TypeClass::application__;
-			break;
-		case 0x80 :
-			type_.type_class_ = TypeClass::context_specific__;
-			break;
-		case 0xC0 :
-			type_.type_class_ = TypeClass::private__;
-			break;
-		}
-		type_.constructed_ = ((tag & 0x20) == 0x20);
-		type_.tag_ = tag & 0x1F;
-		if (0x1F == type_.tag_)
-		{
-			throw NotYetImplemented("multi-byte type tags are not yet implemented");
-		}
-		else 
-		{ /* all is well */ }
-	}
+	void parseType(unsigned char tag);
 	
 	template < typename InputIterator >
 	bool parseLength(InputIterator &first, InputIterator last)
@@ -161,7 +139,7 @@ private :
 					length_ = 0;
 					for (
 						  unsigned char *length_byte(parse_buffer_ + 1)
-						; length_byte != (parse_buffer + parse_buffer_size_)
+						; length_byte != (parse_buffer_ + parse_buffer_size_)
 						; ++length_byte
 						)
 					{
@@ -172,7 +150,7 @@ private :
 					if (0 != stack_depth_)
 					{
 						if (length_ > length_stack_[stack_depth_ - 1]) throw EncodingError("TLV larger than remaining space in construct");
-						lenght_stack_[stack_depth_ - 1] -= length_;
+						length_stack_[stack_depth_ - 1] -= length_;
 					}
 					return true;
 				}
@@ -233,6 +211,7 @@ private :
 			case 0x1C : // universal string (may be primitive)
 			case 0x1D : // character string (may be primitive)
 			case 0x1E : // BMP string (may be primitive)
+				break;
 			}
 		}
 		else 
@@ -312,9 +291,9 @@ private :
 		{
 			parse_buffer_[parse_buffer_size_++] = *first++;
 		} while ((first != last) && (parse_buffer_size_ != length_));
-		if (parser_buffer_size_ == length_)
+		if (parse_buffer_size_ == length_)
 		{
-			onInteger(Details::Integer< max_bits_per_integer__ >(parse_buffer_, parse_buffer_ + parse_buffer_size_));
+			onInteger(Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(parse_buffer_, parse_buffer_ + parse_buffer_size_));
 			parse_buffer_size_ = 0;
 			return true;
 		}
@@ -337,12 +316,12 @@ private :
 		{
 			parse_buffer_[parse_buffer_size_++] = *first++;
 		} while ((first != last) && (parse_buffer_size_ != length_));
-		if (parser_buffer_size_ == length_)
+		if (parse_buffer_size_ == length_)
 		{
-			int value(parse_buffer_[0] & 0x80 ? ~0 : 0;
+			int value(parse_buffer_[0] & 0x80 ? ~0 : 0);
 			for (
 				  unsigned char *value_byte(parse_buffer_ + 1)
-				; value_byte != (parse_buffer + parse_buffer_size_)
+				; value_byte != (parse_buffer_ + parse_buffer_size_)
 				; ++value_byte
 				)
 			{
@@ -389,7 +368,7 @@ private :
 		bool const content_bytes_in_buffer(parse_buffer_size_ > parse_buffer_size);
 		uint64_t const available_bytes(parse_buffer_size_ - parse_buffer_size);
 		bool const final(length_ == parse_buffer_size_);
-		unsigned int const unused_bits(final ? parse_buffer_[0]);
+		unsigned int const unused_bits(final ? parse_buffer_[0] : 0);
 		auto const beg(parse_buffer_ + 1);
 		auto const end(parse_buffer_ + (parse_buffer_size_ - parse_buffer_size) + 1);
 		assert(((parse_buffer_size_ - parse_buffer_size) + 1) <= sizeof(parse_buffer_));
@@ -448,7 +427,7 @@ private :
 				{
 				case 0x40 : onReal(std::numeric_limits< double >::infinity()); return true;
 				case 0x41 : onReal(-std::numeric_limits< double >::infinity()); return true;
-				case 0x42 : onReal(std::numeric_limits< double >::quiet_nan()); return true;
+				case 0x42 : onReal(std::numeric_limits< double >::quiet_NaN()); return true;
 				case 0x43 : onReal(-0); return true;
 				default : throw EncodingError("reserved special real value");
 				}
@@ -486,7 +465,7 @@ private :
 			unsigned char const *beg(parse_buffer_ + (((parse_buffer_[0] & 0x03) == 3) ? 2 : 1));
 			unsigned char const *end(parse_buffer_ + parse_buffer_size_);
 			int exponent(0);
-			if ((bytes_in_exponent > sizeof(exponent)) || (distance(beg, end) < bytes_in_exponent)) throw EncodingError("exponent length error");
+			if ((bytes_in_exponent > sizeof(exponent)) || (std::distance(beg, end) < bytes_in_exponent)) throw EncodingError("exponent length error");
 			end = beg + bytes_in_exponent;
 			if ((bytes_in_exponent != 0) && ((*beg & 0x80) == 0x80)) exponent = ~0;
 			for ( ; beg != end; ++beg)
@@ -496,7 +475,7 @@ private :
 			}
 			end = parse_buffer_ + parse_buffer_size_;
 			
-			double value(buildDouble(sign, Details::Integer< max_bits_per_integer__ >(beg, end), base, scale_factor, exponent));
+			double value(buildDouble(sign, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(beg, end), base, scale_factor, exponent));
 			onReal(value);
 			length_ = 0;
 			parse_buffer_size_ = 0;
@@ -519,7 +498,7 @@ private :
 		while (first != last)
 		{
 			uint64_t initial_parse_buffer_size(parse_buffer_size_);
-			uint64_t working_length(min(length_ - initial_parse_buffer_size), sizeof(parse_buffer_));
+			uint64_t working_length(std::min(length_ - initial_parse_buffer_size, sizeof(parse_buffer_)));
 			// there is no combination of std::copy and std::copy_n that works for
 			// this particular situation, where I want to copy up to n elements
 			// from a range, so I'll have to write an actual copying loop by hand :(
@@ -545,63 +524,29 @@ private :
 		return done;
 	}
 
-	void push(Type const &type)
-	{
-		static_assert((sizeof(type_stack_) / sizeof(type_stack_[0])) == (sizeof(length_stack_) / sizeof(length_stack_[0])), "Both stacks should be the same size");
-		if (stack_depth_ == (sizeof(type_stack_) / sizeof(type_stack_[0]))) throw StackOverflow("Too many levels of structured data");
-		length_stack_[stack_depth_] = length_;
-		type_stack_[stack_depth_] = type;
-		++stack_depth_;
-	}
+	void push(Type const &type);
 
 	static double buildDouble(
 		  int sign
-		, Details::Integer< max_bits_per_integer__ > mantissa
+		, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > mantissa
 		, unsigned int base
 		, unsigned int scale_factor
 		, int exponent
-		)
-	{
-		static_assert(numeric_limits< double >::radix == 2, "radix of double must be 2");
-		double retval(0.0);
+		);
 	
-		pre_condition((base == 2) || (base == 8) || (base == 16));
-		switch (base)
-		{
-		case 2 :
-			base = 1;
-			break;
-		case 8:
-			base = 3;
-			break;
-		case 16:
-			base = 4;
-			break;
-		}
-		for_each(
-			  mantissa.begin()
-			, mantissa.end()
-			, [&retval](unsigned char octet){
-				retval = ldexp(retval, 8) + octet;
-			});
-		pre_condition(scale_factor <= 3);
-		pre_condition(		(exponent >= numeric_limits< decltype(exponent) >::min() / 12/*see below*/)
-				&& 	(exponent <= numeric_limits< decltype(exponent) >::max() / 12/*maximum value for scale_factor * base*/)
-				);
-		retval = ldexp(retval, exponent * scale_factor * base) * sign;
-	
-		return retval;
-	}
-	
-	State state_ = initial__;
+	State state_ = State::initial__;
 	Type type_;
 	uint64_t length_;
-	unsigned char parse_buffer_[max_bits_per_integer__ / 8];
-	static_assert(max_bits_per_integer__ >= 64);
-	static_assert(max_bits_per_integer__ >= (sizeof(int) * 8));
+	unsigned char parse_buffer_[RUBICON_MAX_BITS_PER_INTEGER / 8];
+	static_assert(RUBICON_MAX_BITS_PER_INTEGER >= 64);
+	static_assert(RUBICON_MAX_BITS_PER_INTEGER >= (sizeof(int) * 8));
 	uint64_t parse_buffer_size_ = 0;
-	uint64_t length_stack_[stack_size__];
-	Type type_stack_[stack_size__];
+	uint64_t length_stack_[RUBICON_STACK_SIZE];
+	Type type_stack_[RUBICON_STACK_SIZE];
 	uint64_t stack_depth_ = 0;
 };
 }}
+
+#endif
+
+
