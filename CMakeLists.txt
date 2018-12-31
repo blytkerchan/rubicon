@@ -1,8 +1,26 @@
-cmake_minimum_required(VERSION 2.6)
-project(Rubicon)
+cmake_minimum_required(VERSION 3.10)
+project(Rubicon VERSION 1.0.00)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/settings.cmake)
+
+find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
+
+set(CPACK_PACKAGE_NAME rubicon)
+set(CPACK_PACKAGE_VENDOR "Vlinder Software")
+set(CPACK_PACKAGE_CONTACT "Ronald Landheer-Cieslak <rlc@vlinder.ca>")
+set(CPACK_PACKAGE_VERSION_MAJOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH 00)
+set(CPACK_PACKAGE_DESCRIPTION "ASN1 compiler, code generator, runtime library")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ASN1 compiler, code generator, runtime library")
+set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/CPack.Description.txt)
+set(CPACK_PACKAGE_HOMEPAGE_URL "http://vlinder.ca")
+set(CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},libboost-program-options${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}, libboost-system${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+set(CPACK_GENERATOR DEB)
+include(CPack)
 
 enable_testing()
 
@@ -23,8 +41,6 @@ add_executable(poc-real
 	tests/poc-real.cpp
 	)
 target_link_libraries(poc-real exceptions)
-
-find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
@@ -205,27 +221,29 @@ add_executable(asn1p
 	${preproc-SRC}
 	)
 add_dependencies(asn1p preproc-grammar antlr4-build)
-target_link_libraries(asn1p antlr4-runtime ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
-
+target_link_libraries(asn1p libantlr4-runtime.a ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 add_executable(asn1c
 	${PROJECT_SOURCE_DIR}/asn1c.cpp
 	${compiler-SRC}
 	${preproc-SRC}
 	)
 add_dependencies(asn1c compiler-grammar preproc-grammar antlr4-build)
-target_link_libraries(asn1c antlr4-runtime ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
+target_link_libraries(asn1c libantlr4-runtime.a ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} exceptions tracing)
 set_source_files_properties(
 	${PROJECT_SOURCE_DIR}/asn1c.cpp
 	PROPERTIES COMPILE_FLAGS "-Wno-overloaded-virtual -Wno-shadow -Wno-unused-but-set-variable -Wno-attributes"
 	)
 
-add_library(rubicon
+add_library(rubicon SHARED
 	runtime/bitstring.cpp
 	runtime/bitstring.hpp
+	runtime/derdecoder.cpp
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
 	)
 target_link_libraries(rubicon exceptions)
+set_target_properties(rubicon PROPERTIES SOVERSION 1)
+set_target_properties(rubicon PROPERTIES VERSION ${PROJECT_VERSION})
 install(
 	TARGETS asn1c asn1p
 	RUNTIME DESTINATION bin
@@ -233,6 +251,7 @@ install(
 install(
 	TARGETS rubicon
 	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
 	DESTINATION lib
 	)
 install(
@@ -240,15 +259,12 @@ install(
 	DESTINATION include/rubicon
 	FILES_MATCHING PATTERN "*.hpp"
 	)
-install(
-	DIRECTORY runtime/details/
-	DESTINATION include/rubicon/details
-	FILES_MATCHING PATTERN "*.hpp"
-	)
 add_executable(test_rubicon
 	tests/bitstring.cpp
 	tests/catch.hpp
+	tests/derdecoder.cpp
 	tests/main.cpp
 	)
 target_link_libraries(test_rubicon rubicon)
 add_test(test_rubicon test_rubicon)
+
