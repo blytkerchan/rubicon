@@ -55,6 +55,7 @@ private :
 	void generateAssignmentOperatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateSwapparatorImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateGetterAndSetterImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateEncodeImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const;
 	void generateDefinition(std::ostream &os, ValueAssignment const &value_assignment) const;
 

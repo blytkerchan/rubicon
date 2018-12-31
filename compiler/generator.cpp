@@ -149,6 +149,7 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	generateAssignmentOperatorImplementation(ofs, type_assignment);
 	generateSwapparatorImplementation(ofs, type_assignment);
 	generateGetterAndSetterImplementations(ofs, type_assignment);
+	generateEncodeImplementation(ofs, type_assignment);
 
 	closeNamespace(ofs);
 }
@@ -345,7 +346,7 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 	ofs << "\n";
 
 	ofs <<
-		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder);\n"
+		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder) const;\n"
 		"\n"
 		;
 }
@@ -383,6 +384,10 @@ void Generator::generateSwapparatorImplementation(ostream &ofs, TypeAssignment c
 void Generator::generateGetterAndSetterImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateGetterAndSetterImplementations(ofs);
+}
+void Generator::generateEncodeImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generateEncodeImplementation(ofs);
 }
 void Generator::generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const
 {

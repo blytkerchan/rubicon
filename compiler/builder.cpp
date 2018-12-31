@@ -30,6 +30,8 @@ Builder& Builder::operator()(istream &is)
 	postParseSanityCheck();
 	if (!okay_) return *this;
 	scanDependencies();
+	if (!okay_) return *this;
+	resolve();
 
 	return *this;
 }

@@ -26,6 +26,15 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
                 << "{ /* no-op */ }\n"
                 ;
 }
+/*virtual */void BitStringType::generateSwapparatorImplementation(std::ostream &os) const/* override*/
+{
+        os << "\tVlinder::Rubicon::BitString::swap(other);\n";
+}
+/*virtual */void BitStringType::generateEncodeImplementation(std::ostream &os) const/* override*/
+{
+        os << "\tVlinder::Rubicon::BitString::encode(der_encoder);\n";
+}
+
 }}}
 
 

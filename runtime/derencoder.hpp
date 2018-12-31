@@ -36,6 +36,16 @@ public :
 		auto iter(std::back_inserter(*buffer_));
 		encodeBoolean_(iter, value);
 	}
+	template < typename MultiPassInputIterator >
+	void encodeBitString(
+		  unsigned int unused_bits
+		, MultiPassInputIterator first
+		, MultiPassInputIterator last
+		)
+	{
+		auto iter(std::back_inserter(*buffer_));
+		encodeBitString_(iter, unused_bits, first, last);
+	}
 
 private :
 	template < typename OutputIterator >
@@ -74,7 +84,7 @@ private :
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >
-	static void encodeBitString(
+	static void encodeBitString_(
 		  OutputIterator &out
 		, unsigned int unused_bits
 		, MultiPassInputIterator first
@@ -83,8 +93,8 @@ private :
 	{
 		pre_condition(unused_bits < 8);
 		*out++ = 0x03;
+		encodeLength(out, std::distance(first, last) + 1);
 		*out++ = unused_bits;
-		encodeLength(out, std::distance(first, last));
 		out = std::copy(first, last, out);
 	}
 	

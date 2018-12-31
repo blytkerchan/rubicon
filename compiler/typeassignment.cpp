@@ -57,6 +57,13 @@ void TypeAssignment::generateGetterAndSetterImplementations(std::ostream &ofs) c
 {
 	type_descriptor_->generateGetterAndSetterImplementations(getName(), ofs);
 }
+void TypeAssignment::generateEncodeImplementation(std::ostream &ofs) const
+{
+	ofs << "void " << getName() << "::encode(DEREncoder &der_encoder) const\n";
+	ofs << "{\n";
+	type_descriptor_->generateEncodeImplementation(ofs);
+	ofs << "}\n";
+}
 }}}
 
 

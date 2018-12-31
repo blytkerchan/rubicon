@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace Vlinder { namespace Rubicon {
+class DEREncoder;
 class BitString
 {
 public :
@@ -23,6 +24,8 @@ public :
 	BitString(BitString &&other) = default;
 	BitString& operator=(BitString &&other) = default;
 	BitString& swap(BitString &other) { value_.swap(other.value_); return *this; }
+
+	void encode(DEREncoder &der_encoder) const;
 
 	const_iterator begin() const { return value_.begin(); }
 	const_iterator end() const { return value_.end(); }
