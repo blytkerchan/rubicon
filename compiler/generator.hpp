@@ -2,6 +2,8 @@
 #define rubicon_compiler_generator_hpp
 
 #include <string>
+#include <vector>
+#include <boost/filesystem/path.hpp>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class Builder;
@@ -25,12 +27,14 @@ private :
 	void setNamespaceName();
 	void createOutputDirectory();
 	void outputDependencies() const;
-	void outputTypes() const;
-	void outputValues() const;
-	void generateHeader(TypeAssignment const &type_assignment) const;
-	void generateHeader(ValueAssignment const &value_assignment) const;
-	void generateImplementation(TypeAssignment const &type_assignment) const;
-	void generateImplementation(ValueAssignment const &value_assignment) const;
+	void outputTypes();
+	void outputValues();
+	void generateHeader(TypeAssignment const &type_assignment);
+	void generateHeader(ValueAssignment const &value_assignment);
+	void generateImplementation(TypeAssignment const &type_assignment);
+	void generateImplementation(ValueAssignment const &value_assignment);
+	void generateCMakeLists() const;
+
 	void generatePreamble(std::ostream &ofs) const;
 	void openIncludeGuard(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void openIncludeGuard(std::ostream &ofs, ValueAssignment const &value_assignment) const;
@@ -60,6 +64,7 @@ private :
 	std::string namespace_suffix_;
 	std::string namespace_name_;
 	Builder const *builder_ = nullptr;
+	std::vector< boost::filesystem::path > generated_files_;
 };
 }}}
 
