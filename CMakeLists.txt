@@ -40,7 +40,7 @@ add_subdirectory(tracing)
 add_executable(poc-real
 	tests/poc-real.cpp
 	)
-target_link_libraries(poc-real exceptions)
+target_link_libraries(poc-real exceptions rubicon)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
@@ -241,7 +241,8 @@ add_library(rubicon SHARED
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
 	runtime/details/buffer.hpp
-	runtime/details/integer.hpp
+	runtime/integer.cpp
+	runtime/integer.hpp
 	)
 target_link_libraries(rubicon exceptions)
 set_target_properties(rubicon PROPERTIES SOVERSION 1)

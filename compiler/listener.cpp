@@ -922,10 +922,18 @@ shared_ptr< Value > Listener::parseValue(shared_ptr< TypeDescriptor > const &typ
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->builtin_value() || ctx->defined_value());
-	return ctx->builtin_value()
+	auto retval(ctx->builtin_value()
 		? parseBuiltinValue(type, ctx->builtin_value())
 		: parseDefinedValue(type, ctx->defined_value())
-		;
+		);
+	shared_ptr< DefinedType > defined_type(dynamic_pointer_cast< DefinedType >(type));
+	if (defined_type)
+	{
+		retval->addDependency(defined_type->getTypeName());
+	}
+	else
+	{ /* not a defined type */ }
+	return retval;
 }
 
 shared_ptr< Value > Listener::parseValue(asn1Parser::ValueContext *ctx)

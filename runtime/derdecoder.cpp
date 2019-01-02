@@ -51,7 +51,7 @@ void DERDecoder::push(Type const &type)
 
 /*static */double DERDecoder::buildDouble(
 	  int sign
-	, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > mantissa
+	, Integer mantissa
 	, unsigned int base
 	, unsigned int scale_factor
 	, int exponent

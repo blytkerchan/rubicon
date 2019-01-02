@@ -2,7 +2,7 @@
 #define vlinder_rubicon_derdecoder_hpp
 
 #include "config.hpp"
-#include "details/integer.hpp"
+#include "integer.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -69,7 +69,7 @@ public :
 	}
 	
 	virtual void onEndOfContents() = 0;
-	virtual void onInteger(Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > const &value) = 0;
+	virtual void onInteger(Integer const &value) = 0;
 	virtual void onEnumerated(int value) = 0;
 	virtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) = 0;
 	virtual void onOctetString(bool final, unsigned char *first, unsigned char *last) = 0;
@@ -293,7 +293,7 @@ private :
 		} while ((first != last) && (parse_buffer_size_ != length_));
 		if (parse_buffer_size_ == length_)
 		{
-			onInteger(Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(parse_buffer_, parse_buffer_ + parse_buffer_size_));
+			onInteger(Integer(parse_buffer_, parse_buffer_ + parse_buffer_size_));
 			parse_buffer_size_ = 0;
 			return true;
 		}
@@ -475,7 +475,7 @@ private :
 			}
 			end = parse_buffer_ + parse_buffer_size_;
 			
-			double value(buildDouble(sign, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(beg, end), base, scale_factor, exponent));
+			double value(buildDouble(sign, Integer(beg, end), base, scale_factor, exponent));
 			onReal(value);
 			length_ = 0;
 			parse_buffer_size_ = 0;
@@ -528,7 +528,7 @@ private :
 
 	static double buildDouble(
 		  int sign
-		, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > mantissa
+		, Integer mantissa
 		, unsigned int base
 		, unsigned int scale_factor
 		, int exponent

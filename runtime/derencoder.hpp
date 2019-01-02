@@ -3,7 +3,7 @@
 
 #include "config.hpp"
 #include "details/buffer.hpp"
-#include "details/integer.hpp"
+#include "integer.hpp"
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -65,7 +65,7 @@ private :
 	}
 	
 	template < typename OutputIterator >
-	static void encodeInteger(OutputIterator &out, Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value)
+	static void encodeInteger(OutputIterator &out, Integer value)
 	{
 		*out++ = 0x02;
 		value.compact();
@@ -77,7 +77,7 @@ private :
 	static void encodeEnumerated(OutputIterator &out, int value)
 	{
 		*out++ = 0x0A;
-		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > value_as_integer(value);
+		Integer value_as_integer(value);
 		value_as_integer.compact();
 		encodeLength(out, value_as_integer.size());
 		out = std::copy(value_as_integer.begin(), value_as_integer.end(), out);
@@ -103,7 +103,7 @@ private :
 	{
 		DoubleValueCategory category;
 		int sign;
-		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > mantissa;
+		Integer mantissa;
 		unsigned int base;
 		unsigned int scale_factor;
 		int exponent;
@@ -137,7 +137,7 @@ private :
 			break;
 		}
 		
-		Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > exponent_as_integer(exponent);
+		Integer exponent_as_integer(exponent);
 		// the first encoded value octet doesn't have a name in X.690, but it
 		// *indicates* the way the value is encoded, so I decided to call it
 		// the "indicator octet".
@@ -248,7 +248,7 @@ private :
 		}
 		else 
 		{
-			Details::Integer< RUBICON_MAX_BITS_PER_INTEGER > integer_length(length);
+			Integer integer_length(length);
 			integer_length.compact();
 			assert(integer_length.size() > 1);
 			assert(integer_length.size() <= sizeof(length));
@@ -264,7 +264,7 @@ private :
 		  double value
 		, DoubleValueCategory &category
 		, int &sign
-		, Details::Integer<> &mantissa
+		, Integer &mantissa
 		, unsigned int &base
 		, unsigned int &scale_factor
 		, int &exponent
@@ -308,7 +308,7 @@ private :
 			++exponent;
 			mantissa_as_uint /= 2;
 		}
-		mantissa = Details::Integer< RUBICON_MAX_BITS_PER_INTEGER >(mantissa_as_uint);
+		mantissa = Integer(mantissa_as_uint);
 		base = 2;
 		if ((exponent % 4) == 0)
 		{

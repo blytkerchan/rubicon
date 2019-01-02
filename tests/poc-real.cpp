@@ -1,4 +1,4 @@
-#include "../runtime/details/integer.hpp"
+#include "../runtime/integer.hpp"
 #include "../exceptions/contract.hpp"
 #include <algorithm>
 #include <cmath>
@@ -20,7 +20,7 @@ enum struct DoubleValueCategory {
 
 static double buildDouble(
 	  int sign
-	, Details::Integer<> mantissa
+	, Integer mantissa
 	, unsigned int base
 	, unsigned int scale_factor
 	, int exponent
@@ -61,7 +61,7 @@ static void dissectDouble(
 	  double value
 	, DoubleValueCategory &category
 	, int &sign
-	, Details::Integer<> &mantissa
+	, Integer &mantissa
 	, unsigned int &base
 	, unsigned int &scale_factor
 	, int &exponent
@@ -105,7 +105,7 @@ static void dissectDouble(
 		++exponent;
 		mantissa_as_uint /= 2;
 	}
-	mantissa = Details::Integer<>(mantissa_as_uint);
+	mantissa = Integer(mantissa_as_uint);
 	base = 2;
 	if ((exponent % 4) == 0)
 	{
@@ -133,19 +133,19 @@ static void dissectDouble(
 
 int main()
 {
-	cout << "-4*2^(1*12) = " << buildDouble(-1, Details::Integer<>(4), 2, 1, 12) << endl;
-	cout << "827 * 16^(2*13) = " << buildDouble(1, Details::Integer<>(827), 16, 2, 13) << endl;
+	cout << "-4*2^(1*12) = " << buildDouble(-1, Integer(4), 2, 1, 12) << endl;
+	cout << "827 * 16^(2*13) = " << buildDouble(1, Integer(827), 16, 2, 13) << endl;
 
 	DoubleValueCategory category;
 	int sign;
-	Details::Integer<> mantissa;
+	Integer mantissa;
 	unsigned int base;
 	unsigned int scale_factor;
 	int exponent;
-	dissectDouble(buildDouble(-1, Details::Integer<>(4), 2, 1, 12), category, sign, mantissa, base, scale_factor, exponent);
+	dissectDouble(buildDouble(-1, Integer(4), 2, 1, 12), category, sign, mantissa, base, scale_factor, exponent);
 	assert(category == DoubleValueCategory::normal__);
 	assert(sign == -1);
-	auto int_(make_unique< Details::Integer<> >(1));
+	auto int_(make_unique< Integer >(1));
 	assert(mantissa == *int_);
 	assert(base == 2);
 	assert(scale_factor == 2);

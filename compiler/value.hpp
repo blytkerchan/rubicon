@@ -6,17 +6,25 @@
 #include "sourcelocation.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct Value
+class Value
 {
+public :
 	Value(SourceLocation const &source_location)
 		: source_location_(source_location)
 	{ /* no-op */ }
-	virtual std::set< std::string > getDependencies() const { return std::set< std::string >(); }
+	virtual void addDependency(std::string const &dependency)
+	{
+		dependencies_.insert(dependency);
+	}
+	virtual std::set< std::string > getDependencies() const { return dependencies_; }
 	virtual std::string getTypeName() const = 0;
 
 	virtual std::string generateInstance() const = 0;
 
 	SourceLocation source_location_;
+
+private:
+	std::set< std::string > dependencies_;
 };
 }}}
 
