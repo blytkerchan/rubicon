@@ -42,6 +42,9 @@ private :
 	void generateHeaderIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;
 	void generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateImplementationUsingDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateImplementationIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;
+	void generateImplementationUsingDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;
 	void openNamespace(std::ostream &ofs) const;
 	void closeNamespace(std::ostream &ofs) const;
 	void openClassDefinition(std::ostream &ofs, TypeAssignment const &type_assignment) const;

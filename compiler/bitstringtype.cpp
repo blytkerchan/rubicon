@@ -15,7 +15,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
                   named_bits_.begin()
                 , named_bits_.end()
                 , [&](NamedBit const &named_bit){
-                                os << "\tstatic unsigned int " << alg::replace_all_copy(named_bit.name_, "-", "_") << " = " << named_bit.bit_ << ";\n";
+                                os << "\tstatic unsigned int const " << alg::replace_all_copy(named_bit.name_, "-", "_") << " = " << named_bit.bit_ << ";\n";
                         }
                 );
 }

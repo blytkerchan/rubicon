@@ -140,6 +140,7 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	generatePreamble(ofs);
 
 	generateImplementationIncludeDirectives(ofs, type_assignment);
+	generateImplementationUsingDirectives(ofs, type_assignment);
 
 	openNamespace(ofs);
 
@@ -161,6 +162,9 @@ void Generator::generateImplementation(ValueAssignment const &value_assignment)
 	ofstream ofs(filename.string(), ofstream::trunc);
 
 	generatePreamble(ofs);
+
+	generateImplementationIncludeDirectives(ofs, value_assignment);
+	generateImplementationUsingDirectives(ofs, value_assignment);
 
 	openNamespace(ofs);
 
@@ -274,6 +278,27 @@ void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssign
 	else
 	{ /* no optional members, no need for unique_ptr */ }
 	ofs << "\n";
+}
+void Generator::generateImplementationUsingDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	ofs
+		<< "using namespace std;\n"
+		<< "using namespace Vlinder::Rubicon;\n"
+		<< "\n"
+		;
+}
+void Generator::generateImplementationIncludeDirectives(ostream &ofs, ValueAssignment const &value_assignment) const
+{
+	ofs << "#include \"" << alg::to_lower_copy(value_assignment.getName()) << ".hpp\"\n";
+	ofs << "\n";
+}
+void Generator::generateImplementationUsingDirectives(ostream &ofs, ValueAssignment const &value_assignment) const
+{
+	ofs
+		<< "using namespace std;\n"
+		<< "using namespace Vlinder::Rubicon;\n"
+		<< "\n"
+		;
 }
 void Generator::openNamespace(ostream &ofs) const
 {
