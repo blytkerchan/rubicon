@@ -36,6 +36,7 @@ Generator& Generator::operator()(Builder const &builder, bool output_dependencie
 		{ /* don't output dependencies */ }
 		outputTypes();
 		outputValues();
+		generateFactory();
 		generateCMakeLists();
 	}
 	else
@@ -102,6 +103,7 @@ void Generator::generateHeader(TypeAssignment const &type_assignment)
 	generatePreamble(ofs);
 	openIncludeGuard(ofs, type_assignment);
 	generateHeaderIncludeDirectives(ofs, type_assignment);
+	generateHeaderForwardDeclarations(ofs, type_assignment);
 	openNamespace(ofs);
 
 	openClassDefinition(ofs, type_assignment);
@@ -171,6 +173,268 @@ void Generator::generateImplementation(ValueAssignment const &value_assignment)
 	generateDefinition(ofs, value_assignment);
 
 	closeNamespace(ofs);
+}
+void Generator::generateFactory()
+{
+	generateFactoryHeader();
+	generateFactoryImplementation();
+}
+void Generator::generateFactoryHeader()
+{
+	bfs::path const directory(getOutputDirectoryName());
+	bfs::path const filename(directory / "factory.hpp");
+	generated_files_.push_back(filename);
+
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	generatePreamble(ofs);
+
+	string const guard(
+		string("generated_")
+		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", "_")
+		+ "_factory_hpp"
+		);
+	ofs << "#ifndef " << guard << "\n";
+	ofs << "#define " << guard << "\n\n";
+
+	ofs << "#include <rubicon/derdecoder.hpp>\n";
+
+	for (auto type_assignment : builder_->getTypeAssignments())
+	{
+		ofs << "#include \"" << alg::to_lower_copy(type_assignment.getName()) << ".hpp\"\n";
+	}
+	ofs << "\n";
+	ofs << "namespace Vlinder { namespace Rubicon { class Integer; } }\n";
+
+	openNamespace(ofs);
+
+	ofs << "namespace Details {\n";
+	for (auto type_assignment : builder_->getTypeAssignments())
+	{
+		generateBuilderDeclaration(ofs, type_assignment);
+	}
+	ofs << "}\n";
+	for (auto type_assignment : builder_->getTypeAssignments())
+	{
+		ofs << "template < typename InputIterator >\n";
+		ofs << type_assignment.getName() << " decode" << type_assignment.getName() << "(InputIterator &first, InputIterator last)\n";
+		ofs << "{\n";
+		ofs << "\tDetails::" << type_assignment.getName() << "Builder builder;\n";
+		ofs << "\treturn builder(first, last);\n";
+		ofs << "}\n";
+	}
+	closeNamespace(ofs);
+
+	ofs << "\n#endif\n";
+}
+void Generator::generateFactoryImplementation()
+{
+	bfs::path const directory(getOutputDirectoryName());
+	bfs::path const filename(directory / "factory.cpp");
+	generated_files_.push_back(filename);
+	ofstream ofs(filename.string(), ofstream::trunc);
+
+	generatePreamble(ofs);
+	ofs << "#include \"factory.hpp\"\n";
+	ofs << "#include <rubicon/exceptions.hpp>\n";
+	ofs << "\n";
+
+	ofs << "using namespace std;\n";
+	ofs << "using namespace Vlinder::Rubicon;\n";
+	ofs << "\n";
+	
+	openNamespace(ofs);
+	ofs << "namespace Details {\n";
+	for (auto type_assignment : builder_->getTypeAssignments())
+	{
+		generateBuilderImplementation(ofs, type_assignment);
+	}
+	ofs << "}\n";
+	closeNamespace(ofs);
+}
+void Generator::generateBuilderDeclaration(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	ofs
+		<< "class " << type_assignment.getName() << "Builder : private Vlinder::Rubicon::DERDecoder\n"
+		<< "{\n" 
+		<< "public :\n"
+		<< "\tvoid reset();\n"
+		<< "\n"
+		<< "\ttemplate < typename InputIterator >\n"
+		<< "\t" << type_assignment.getName() << " operator()(InputIterator &first, InputIterator last) {}\n"
+		<< "\n"
+		<< "protected:\n"
+		<< "\tvirtual void onEndOfContents() override;\n"
+		<< "\tvirtual void onInteger(Vlinder::Rubicon::Integer const &value) override;\n"
+		<< "\tvirtual void onEnumerated(int value) override;\n"
+		<< "\tvirtual void onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last) override;\n"
+		<< "\tvirtual void onOctetString(bool final, unsigned char *first, unsigned char *last) override;\n"
+		<< "\tvirtual void onNull() override;\n"
+		<< "\tvirtual void onBeginSequence() override;\n"
+		<< "\tvirtual void onEndSequence() override;\n"
+		<< "\tvirtual void onBeginSet() override;\n"
+		<< "\tvirtual void onEndSet() override;\n"
+		<< "\tvirtual void onBoolean(bool val) override;\n"
+		<< "\tvirtual void onReal(double val) override;\n"
+		<< "\n"
+		<< "private :\n"
+		<< "\tenum struct State {\n"
+		<< "\t\t  initial__\n"
+		<< "\t\t};\n"
+		<< "\n"
+		<< "\tbool expectInteger() const;\n"
+		<< "\tbool expectEnumerated() const;\n"
+		<< "\tbool expectBitString() const;\n"
+		<< "\tbool expectOctetString() const;\n"
+		<< "\tbool expectNull() const;\n"
+		<< "\tbool expectBeginSequence() const;\n"
+		<< "\tbool expectEndSequence() const;\n"
+		<< "\tbool expectBeginSet() const;\n"
+		<< "\tbool expectEndSet() const;\n"
+		<< "\tbool expectBoolean() const;\n"
+		<< "\tbool expectReal() const;\n"
+		<< "\n"
+		<< "\tState state_;\n"
+		<< "};\n"
+		;
+}
+void Generator::generateBuilderImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	ofs
+		<< "void " << type_assignment.getName() << "Builder::reset()\n"
+		<< "{\n"
+		<< "\tstate_ = State::initial__;\n"
+		<< "\tDERDecoder::reset();\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndOfContents()/* override*/\n"
+		<< "{\n"
+		<< "\tthrow EncodingError(\"Invalid DER: end-of-contents found.\");\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onInteger(Integer const &value)/* override*/\n\n"
+		<< "{\n"
+		<< "\tif (!expectInteger())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected Integer\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEnumerated(int value)/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectEnumerated())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected Enumerated\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last)/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectBitString())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected BitString\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onOctetString(bool final, unsigned char *first, unsigned char *last)/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectOctetString())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected OctetString\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onNull()/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectNull())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected Null\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBeginSequence()/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectBeginSequence())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected start-of-sequence\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndSequence()/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectEndSequence())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected end-of-sequence\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBeginSet()/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectBeginSet())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected start-of-set\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndSet()/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectEndSet())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected end-of-set\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBoolean(bool val)/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectBoolean())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected Boolean\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "/*virtual */void " << type_assignment.getName() << "Builder::onReal(double val)/* override*/\n"
+		<< "{\n"
+		<< "\tif (!expectReal())\n"
+		<< "\t{\n"
+		<< "\t\tthrow EncodingError(\"Unexpected Real\");\n"
+		<< "\t}\n"
+		<< "\telse\n"
+		<< "\t{ /* all is well */ }\n"
+		<< "}\n"
+		<< "\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectInteger() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectEnumerated() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectBitString() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectOctetString() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectNull() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectBeginSequence() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectEndSequence() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectBeginSet() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectEndSet() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectBoolean() const { return false; }\n"
+		<< "bool " << type_assignment.getName() << "Builder::expectReal() const { return false; }\n"
+		<< "\n"
+		;
 }
 void Generator::generateCMakeLists() const
 {
@@ -247,8 +511,6 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment con
 		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
 	}
 	ofs <<
-		"#include \"rubicon/derencoder.hpp\"\n"
-		"#include \"rubicon/derdecoder.hpp\"\n"
 		"#include \"rubicon/types.hpp\"\n"
 		;
 	ofs << "\n";
@@ -263,6 +525,10 @@ void Generator::generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignme
 		"#include \"rubicon/types.hpp\"\n"
 		;
 	ofs << "\n";
+}
+void Generator::generateHeaderForwardDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	ofs << "namespace Vlinder { namespace Rubicon { class DEREncoder; }}\n";
 }
 void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
@@ -355,7 +621,6 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 	ofs <<
 		"public :\n"
 		"\t" << type_assignment.getName() << "() = default;\n"
-		"\t" << type_assignment.getName() << "(Vlinder::Rubicon::DERDecoder &der_decoder);\n"
 		;
 	type_assignment.generateAlternateConstructorDeclarations(ofs);
 	ofs << 	"\tvirtual ~" << type_assignment.getName() << "()" <<  (type_assignment.hasOptionalMembers() ? "" : " = default") << ";\n"

@@ -33,6 +33,11 @@ private :
 	void generateHeader(ValueAssignment const &value_assignment);
 	void generateImplementation(TypeAssignment const &type_assignment);
 	void generateImplementation(ValueAssignment const &value_assignment);
+	void generateFactory();
+	void generateFactoryHeader();
+	void generateFactoryImplementation();
+	void generateBuilderDeclaration(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateBuilderImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateCMakeLists() const;
 
 	void generatePreamble(std::ostream &ofs) const;
@@ -41,6 +46,7 @@ private :
 	void closeIncludeGuard(std::ostream &ofs) const;
 	void generateHeaderIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;
+	void generateHeaderForwardDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateImplementationIncludeDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateImplementationUsingDirectives(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateImplementationIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const;

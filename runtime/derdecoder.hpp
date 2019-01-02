@@ -68,6 +68,7 @@ public :
 		}
 	}
 	
+protected :
 	virtual void onEndOfContents() = 0;
 	virtual void onInteger(Integer const &value) = 0;
 	virtual void onEnumerated(int value) = 0;
