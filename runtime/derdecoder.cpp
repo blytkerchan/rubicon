@@ -7,6 +7,7 @@ using namespace std;
 namespace Vlinder { namespace Rubicon {
 void DERDecoder::reset()
 {
+	done_ = false;
 	state_ = State::expect_type__;
 	parse_buffer_size_ = 0;
 	length_ = 0;

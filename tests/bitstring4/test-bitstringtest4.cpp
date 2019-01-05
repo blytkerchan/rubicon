@@ -20,6 +20,7 @@ int main()
 	auto encoded(encode());
 
 	auto beg(encoded.begin());
-	ASN1::decodeT2(beg, encoded.end());
+	auto decoded(ASN1::decodeT2(beg, encoded.end()));
+	return decoded == ASN1::c ? 0 : 1;
 }
 

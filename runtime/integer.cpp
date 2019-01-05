@@ -1,6 +1,9 @@
 #include "integer.hpp"
 #include "exceptions.hpp"
 #include "exceptions/contract.hpp"
+#include <algorithm>
+
+using namespace std;
 
 namespace Vlinder { namespace Rubicon { 
 Integer::Integer(char value) : signed_(true), size_(0) { set(value); }
@@ -16,18 +19,28 @@ Integer::Integer(long long value) : signed_(true), size_(0) { set(value);}
 Integer::Integer(unsigned long long value) : signed_(false), size_(0) { set(value);}
 #endif
 
+Integer& Integer::swap(Integer &other)
+{
+	swap_ranges(std::begin(value_), std::end(value_), std::begin(other.value_));
+	std::swap(signed_, other.signed_);
+	std::swap(size_, other.size_);
+
+	return *this;
+}
+
+
 void Integer::compact()
 {
 	while (size_ && (value_[0] == 0) && ((size_ == 1) || ((value_[1] & 0x80) == 0)))
 	{
-		std::copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
+		copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
 		--size_;
 	}
 	if (signed_)
 	{
 		while ((size_ > 1) && (value_[0] == 0xFF) && ((value_[1] & 0x80) == 0x80))
 		{
-			std::copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
+			copy_backward(value_ + 1, value_ + size_, value_ + (size_ - 1));
 			--size_;
 		}
 	}

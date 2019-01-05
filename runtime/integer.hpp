@@ -40,6 +40,8 @@ public :
 	
 	Integer& operator=(Integer const&) = default;
 	Integer& operator=(Integer&&) = default;
+
+	Integer& swap(Integer &other);
 	
 	unsigned int size() const noexcept { return size_; }
 	unsigned char const* begin() const noexcept { return value_; }

@@ -1,5 +1,6 @@
 #include "generator.hpp"
 #include <iostream>
+#include <tuple>
 #include "../exceptions/contract.hpp"
 #include "builder.hpp"
 #include <boost/filesystem.hpp>
@@ -114,6 +115,8 @@ void Generator::generateHeader(TypeAssignment const &type_assignment)
 
 	closeClassDefinition(ofs, type_assignment);
 
+	generateComparisonOperatorDeclarations(ofs, type_assignment);
+
 	closeNamespace(ofs);
 	closeIncludeGuard(ofs);
 }
@@ -151,8 +154,10 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	generateDestructorImplementation(ofs, type_assignment);
 	generateAssignmentOperatorImplementation(ofs, type_assignment);
 	generateSwapparatorImplementation(ofs, type_assignment);
+	generateCompareImplementation(ofs, type_assignment);
 	generateGetterAndSetterImplementations(ofs, type_assignment);
 	generateEncodeImplementation(ofs, type_assignment);
+	generateComparisonOperatorDefinitions(ofs, type_assignment);
 
 	closeNamespace(ofs);
 }
@@ -197,7 +202,11 @@ void Generator::generateFactoryHeader()
 	ofs << "#ifndef " << guard << "\n";
 	ofs << "#define " << guard << "\n\n";
 
+	ofs << "#include <deque>\n";
+	ofs << "#include <vector>\n";
 	ofs << "#include <rubicon/derdecoder.hpp>\n";
+	ofs << "#include <rubicon/exceptions.hpp>\n";
+	ofs << "#include <rubicon/details/any.hpp>\n";
 
 	for (auto type_assignment : builder_->getTypeAssignments())
 	{
@@ -236,7 +245,6 @@ void Generator::generateFactoryImplementation()
 
 	generatePreamble(ofs);
 	ofs << "#include \"factory.hpp\"\n";
-	ofs << "#include <rubicon/exceptions.hpp>\n";
 	ofs << "\n";
 
 	ofs << "using namespace std;\n";
@@ -261,7 +269,14 @@ void Generator::generateBuilderDeclaration(std::ostream &ofs, TypeAssignment con
 		<< "\tvoid reset();\n"
 		<< "\n"
 		<< "\ttemplate < typename InputIterator >\n"
-		<< "\t" << type_assignment.getName() << " operator()(InputIterator &first, InputIterator last) {}\n"
+		<< "\t" << type_assignment.getName() << " operator()(InputIterator &first, InputIterator last)\n"
+		<< "\t{\n"
+		<< "\t\tif (!parse(first, last))\n"
+		<< "\t\t{\n"
+		<< "\t\t\tthrow Vlinder::Rubicon::ParseError(\"Incomplete parse\");\n"
+		<< "\t\t}\n"
+		<< "\t\treturn get();\n"
+		<< "\t}\n"
 		<< "\n"
 		<< "protected:\n"
 		<< "\tvirtual void onEndOfContents() override;\n"
@@ -278,161 +293,117 @@ void Generator::generateBuilderDeclaration(std::ostream &ofs, TypeAssignment con
 		<< "\tvirtual void onReal(double val) override;\n"
 		<< "\n"
 		<< "private :\n"
-		<< "\tenum struct State {\n"
-		<< "\t\t  initial__\n"
-		<< "\t\t};\n"
+		<< "\tbool expect(unsigned int type_class, unsigned int tag) const;\n"
+		<< "\tunsigned int next(unsigned int type_class, unsigned int tag) const;\n"
+		<< "\t" << type_assignment.getName() << " get() const;\n"
 		<< "\n"
-		<< "\tbool expectInteger() const;\n"
-		<< "\tbool expectEnumerated() const;\n"
-		<< "\tbool expectBitString() const;\n"
-		<< "\tbool expectOctetString() const;\n"
-		<< "\tbool expectNull() const;\n"
-		<< "\tbool expectBeginSequence() const;\n"
-		<< "\tbool expectEndSequence() const;\n"
-		<< "\tbool expectBeginSet() const;\n"
-		<< "\tbool expectEndSet() const;\n"
-		<< "\tbool expectBoolean() const;\n"
-		<< "\tbool expectReal() const;\n"
-		<< "\n"
-		<< "\tState state_;\n"
+		<< "\tunsigned int state_ = 0;\n"
+		<< "\tstd::deque< Vlinder::Rubicon::Details::Any > constructed_;\n"
+		<< "\tstd::vector< unsigned char > cache_;\n"
 		<< "};\n"
 		;
 }
 void Generator::generateBuilderImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
 {
+	auto state_machine(type_assignment.getType()->getStateMachine());
+	assert(state_machine);
+	
+	// reset
 	ofs
 		<< "void " << type_assignment.getName() << "Builder::reset()\n"
 		<< "{\n"
-		<< "\tstate_ = State::initial__;\n"
+		<< "\tstate_ = 0;\n"
+		<< "\tconstructed_.clear();\n"
+		<< "\tcache_.clear();\n"
 		<< "\tDERDecoder::reset();\n"
 		<< "}\n"
 		<< "\n"
+		;
+	// end-of-contents
+	ofs
 		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndOfContents()/* override*/\n"
 		<< "{\n"
 		<< "\tthrow EncodingError(\"Invalid DER: end-of-contents found.\");\n"
 		<< "}\n"
 		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onInteger(Integer const &value)/* override*/\n\n"
+		;
+	// each of the primitive types, and start/end of constructed types
+	typedef tuple< string, string, string, int, int, string > EntryType;
+	EntryType entries[] = {
+		  {"onInteger", "Integer const &value", "Unexpected Integer", 0, 2, ""}
+		, {"onEnumerated", "int value", "Unexpected Enumerated", 0, 10, ""}
+		, {"onBitString", "bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last", "Unexpected BitString", 0, 3,
+			"\tcache_.insert(cache_.end(), first, last);\n"
+			"\tif (!final)\n"
+			"\t{\n"
+				"\t\tif (unused_bits != 0) throw ParseError(\"unused bits in partial bit string\");\n"
+				"\t\treturn;\n"
+			"\t}\n"
+			"\telse\n"
+			"\t{ /* this is final */ }\n"
+			"\tif (unused_bits > 7) throw ParseError(\"too many unused bits in bit string\");\n"
+			"\tBitString value(BitString::build(cache_, unused_bits));\n"
+			"\tcache_.clear();\n"
+			}
+		, {"onOctetString", "bool final, unsigned char *first, unsigned char *last", "Unexpected OctetString", 0, 4, "\tvoid *value(nullptr);/*TODO*/\n"}
+		, {"onNull", "", "Unexpected Null", 0, 5, "\tvoid *value(nullptr);\n"}
+		, {"onBeginSequence", "", "Unexpected start-of-sequence", 0, 16, "\tvoid *value(nullptr);/*TODO*/\n"}
+		, {"onEndSequence", "", "Unexpected end-of-sequence", 0, 0, "\tvoid *value(nullptr);/*TODO*/\n"}
+		, {"onBeginSet", "", "Unexpected start-of-set", 0, 17, "\tvoid *value(nullptr);/*TODO*/\n"}
+		, {"onEndSet", "", "Unexpected end-of-set", 0, 0, "\tvoid *value(nullptr);/*TODO*/\n"}
+		, {"onBoolean", "bool value", "Unexpected boolean", 0, 1, ""}
+		, {"onReal", "double value", "Unexpected real", 0, 9, ""}
+		};
+	for (auto entry : entries)
+	{
+		ofs
+			<< "/*virtual */void " << type_assignment.getName() << "Builder::" << get< 0 >(entry) << "(" << get< 1 >(entry) << ")/* override*/\n"
+			<< "{\n"
+			<< "\tif (!expect(" << get< 3 >(entry) << ", " << get< 4 >(entry) << "))\n"
+			<< "\t{\n"
+			<< "\t\tthrow EncodingError(\"" << get< 2 >(entry) << "\");\n"
+			<< "\t}\n"
+			<< "\telse\n"
+			<< "\t{ /* all is well */ }\n"
+			<< get< 5 >(entry)
+			<< "\tconstructed_.push_back(value);\n"
+			<< "\tstate_ = next(" << get< 3 >(entry) << ", " << get< 4 >(entry) << ");\n"
+			<< "\tdone_ = (state_ >= " << state_machine->state_count_ << ");\n"
+			<< "}\n"
+			<< "\n"
+			;
+	}
+	// state machine management
+	ofs
+		<< "bool " << type_assignment.getName() << "Builder::expect(unsigned int type_class, unsigned int tag) const\n"
 		<< "{\n"
-		<< "\tif (!expectInteger())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected Integer\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
+		<< "\treturn false\n"
+		;
+	for (auto state : state_machine->states_)
+	{
+		ofs << "\t\t|| ((state_ == " << state.state_ << ") && (type_class == " << state.type_class_ << ") && (tag == " << state.tag_ << "))\n";
+	}
+	ofs
+		<< "\t\t;\n"
 		<< "}\n"
 		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEnumerated(int value)/* override*/\n"
+		<< "unsigned int " << type_assignment.getName() << "Builder::next(unsigned int type_class, unsigned int tag) const\n"
 		<< "{\n"
-		<< "\tif (!expectEnumerated())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected Enumerated\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
+		;
+	for (auto state : state_machine->states_)
+	{
+		ofs << "\tif ((state_ == " << state.state_ << ") && (type_class == " << state.type_class_ << ") && (tag == " << state.tag_ << ")) return " << state.next_state_ << ";\n";
+	}
+	ofs
 		<< "}\n"
 		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last)/* override*/\n"
+		;
+	// get the results
+	ofs
+		<< type_assignment.getName() << " " << type_assignment.getName() << "Builder::get() const\n"
 		<< "{\n"
-		<< "\tif (!expectBitString())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected BitString\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
+		<< "\treturn Vlinder::Rubicon::Details::any_cast< " << type_assignment.getType()->getTypeName() << " >(constructed_.back());\n"
 		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onOctetString(bool final, unsigned char *first, unsigned char *last)/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectOctetString())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected OctetString\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onNull()/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectNull())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected Null\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBeginSequence()/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectBeginSequence())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected start-of-sequence\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndSequence()/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectEndSequence())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected end-of-sequence\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBeginSet()/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectBeginSet())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected start-of-set\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onEndSet()/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectEndSet())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected end-of-set\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onBoolean(bool val)/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectBoolean())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected Boolean\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "/*virtual */void " << type_assignment.getName() << "Builder::onReal(double val)/* override*/\n"
-		<< "{\n"
-		<< "\tif (!expectReal())\n"
-		<< "\t{\n"
-		<< "\t\tthrow EncodingError(\"Unexpected Real\");\n"
-		<< "\t}\n"
-		<< "\telse\n"
-		<< "\t{ /* all is well */ }\n"
-		<< "}\n"
-		<< "\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectInteger() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectEnumerated() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectBitString() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectOctetString() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectNull() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectBeginSequence() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectEndSequence() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectBeginSet() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectEndSet() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectBoolean() const { return false; }\n"
-		<< "bool " << type_assignment.getName() << "Builder::expectReal() const { return false; }\n"
 		<< "\n"
 		;
 }
@@ -543,6 +514,7 @@ void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssign
 	}
 	else
 	{ /* no optional members, no need for unique_ptr */ }
+	ofs << "#include <rubicon/derencoder.hpp>\n";
 	ofs << "\n";
 }
 void Generator::generateImplementationUsingDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
@@ -630,6 +602,8 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 		"\t" << type_assignment.getName() << "& operator=(" << type_assignment.getName() << " &&other) = default;\n"
 		"\t" << type_assignment.getName() << "& swap(" << type_assignment.getName() << " &other);\n"
 		"\n"
+		"\tint compare(" << type_assignment.getName() << " const &other) const;\n"
+		"\n"
 		;
 	ofs << "\n";
 	type_assignment.generateHeaderGettersAndSetters(ofs);
@@ -686,6 +660,31 @@ void Generator::generateDeclaration(std::ostream &os, ValueAssignment const &val
 void Generator::generateDefinition(std::ostream &os, ValueAssignment const &value_assignment) const
 {
 	value_assignment.generateDefinition(os);
+}
+void Generator::generateComparisonOperatorDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	string operators[] = { "==", "!=", "<", "<=", ">", ">=" };
+	for (auto op : operators)
+	{
+		ofs << "bool operator" << op << "(" << type_assignment.getName() << " const &lhs, " << type_assignment.getName() << " const &rhs);\n";
+	}
+}
+void Generator::generateCompareImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	type_assignment.generateCompareImplementation(ofs);
+}
+void Generator::generateComparisonOperatorDefinitions(std::ostream &ofs, TypeAssignment const &type_assignment) const
+{
+	string operators[] = { "==", "!=", "<", "<=", ">", ">=" };
+	for (auto op : operators)
+	{
+		ofs
+			<< "bool operator" << op << "(" << type_assignment.getName() << " const &lhs, " << type_assignment.getName() << " const &rhs)\n"
+			<< "{\n"
+			<< "\treturn lhs.compare(rhs) " << op << " 0;\n"
+			<< "}\n"
+			;
+	}
 }
 }}}
 

@@ -67,6 +67,9 @@ private :
 	void generateEncodeImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const;
 	void generateDefinition(std::ostream &os, ValueAssignment const &value_assignment) const;
+	void generateComparisonOperatorDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateCompareImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
+	void generateComparisonOperatorDefinitions(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 
 	bool okay_ = true;
 	std::string output_directory_name_;

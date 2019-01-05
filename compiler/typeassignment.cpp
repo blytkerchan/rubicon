@@ -64,6 +64,13 @@ void TypeAssignment::generateEncodeImplementation(std::ostream &ofs) const
 	type_descriptor_->generateEncodeImplementation(ofs);
 	ofs << "}\n";
 }
+void TypeAssignment::generateCompareImplementation(std::ostream &ofs) const
+{
+	ofs << "int " << getName() << "::compare(" << getName() << " const &other) const\n";
+	ofs << "{\n";
+	type_descriptor_->generateCompareImplementation(ofs);
+	ofs << "}\n";
+}
 }}}
 
 

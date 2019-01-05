@@ -8,6 +8,7 @@
 #include "sourcelocation.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+struct StateMachine;
 class TypeDescriptor
 {
 public :
@@ -37,13 +38,18 @@ public :
 	virtual void generateDestructorImplementation(std::ostream &os) const {}
 	virtual void generateSwapparatorImplementation(std::ostream &os) const {}
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const {}
+	virtual void generateCompareImplementation(std::ostream &os) const {}
 
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) = 0;
 
 	SourceLocation getSourceLocation() const { return source_location_; }
 
+	std::shared_ptr< StateMachine > getStateMachine() const { return state_machine_; }
+	void setStateMachine(StateMachine const &state_machine);
+
 private :
 	SourceLocation source_location_;
+	std::shared_ptr< StateMachine > state_machine_;
 };
 }}}
 

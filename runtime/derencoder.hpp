@@ -47,6 +47,18 @@ public :
 		encodeBitString_(iter, unused_bits, first, last);
 	}
 
+	void encodeInteger(Integer value)
+	{
+		auto iter(std::back_inserter(*buffer_));
+		encodeInteger_(iter, value);
+	}
+
+	void encodeEnumerated(Integer value)
+	{
+		auto iter(std::back_inserter(*buffer_));
+		encodeEnumerated_(iter, value);
+	}
+
 private :
 	template < typename OutputIterator >
 	static void encodeEndOfContents(OutputIterator &out)
@@ -65,7 +77,7 @@ private :
 	}
 	
 	template < typename OutputIterator >
-	static void encodeInteger(OutputIterator &out, Integer value)
+	static void encodeInteger_(OutputIterator &out, Integer value)
 	{
 		*out++ = 0x02;
 		value.compact();
@@ -74,13 +86,12 @@ private :
 	}
 	
 	template < typename OutputIterator >
-	static void encodeEnumerated(OutputIterator &out, int value)
+	static void encodeEnumerated_(OutputIterator &out, Integer value)
 	{
 		*out++ = 0x0A;
-		Integer value_as_integer(value);
-		value_as_integer.compact();
-		encodeLength(out, value_as_integer.size());
-		out = std::copy(value_as_integer.begin(), value_as_integer.end(), out);
+		value.compact();
+		encodeLength(out, value.size());
+		out = std::copy(value.begin(), value.end(), out);
 	}
 	
 	template < typename OutputIterator, typename MultiPassInputIterator >

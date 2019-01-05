@@ -40,6 +40,7 @@ public :
 	void generateSwapparatorImplementation(std::ostream &os) const;
 	void generateGetterAndSetterImplementations(std::ostream &ofs) const;
 	void generateEncodeImplementation(std::ostream &ofs) const;
+	void generateCompareImplementation(std::ostream &ofs) const;
 
 private :
 	SourceLocation source_location_;

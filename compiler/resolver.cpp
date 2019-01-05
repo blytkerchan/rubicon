@@ -27,6 +27,16 @@ Resolver const& Resolver::operator()(TypeAssignment &type_assignment)
 {
 	ScopedContext context(contexts_, resolve__);
 	type_assignment.setType(resolve(type_assignment.getType()));
+	if (contexts_.size() == 1)
+	{
+		state_machine_builder_.reset();
+		contexts_.back().mode_ = build_decoder_state_machine__;
+		type_assignment.setType(resolve(type_assignment.getType()));
+		state_machine_builder_.commit();
+		type_assignment.getType()->setStateMachine(state_machine_builder_.get());
+	}
+	else
+	{ /* recursing */ }
 	return *this;
 }
 Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
@@ -38,70 +48,81 @@ Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
 shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 {
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
-	if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
-	if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); // can't select from a bit string
-
-	assert(contexts_.back().mode_ == resolve__);
-	// recursion detection
-	if (find_if(contexts_.begin(), contexts_.end(), [&](auto context){ return context.ptr_ == &bit_string_type; }) != contexts_.end())
+	else if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
+	else if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); // can't select from a bit string
+	else if (contexts_.back().mode_ == build_decoder_state_machine__)
 	{
-		emitError(bit_string_type.getSourceLocation(), "Recursive BIT STRING definition detected");
-		throw RecursiveDefinition("Recursive BIT STRING");
+		state_machine_builder_.addState(0, 3);
 	}
 	else
-	{ /* all is well */ }
-	ScopedContext context(contexts_, Context(contexts_.back().mode_, &bit_string_type));
-	
-	bool done(false);
-	do
 	{
-		// this could be more efficient, by picking up where we left off, but the code would be more complex and this is mostly a one-shot deal
-		auto which(
-			  find_if(
-				  bit_string_type.named_bits_.begin()
-				, bit_string_type.named_bits_.end()
-				, [](auto named_bit){ return named_bit.bit_ == numeric_limits< unsigned int >::max(); }
-				)
-			);
-		if (which != bit_string_type.named_bits_.end())
+		assert(contexts_.back().mode_ == resolve__);
+		// recursion detection
+		if (find_if(contexts_.begin(), contexts_.end(), [&](auto context){ return context.ptr_ == &bit_string_type; }) != contexts_.end())
 		{
-			auto value_assignments(listener_->getValueAssignments());
-			auto name(which->name_);
-			auto value_assignment(find_if(value_assignments.begin(), value_assignments.end(), [name](auto value_assignment){ return value_assignment.getName() == name; }));
-			if (value_assignment != value_assignments.end())
+			emitError(bit_string_type.getSourceLocation(), "Recursive BIT STRING definition detected");
+			throw RecursiveDefinition("Recursive BIT STRING");
+		}
+		else
+		{ /* all is well */ }
+		ScopedContext context(contexts_, Context(contexts_.back().mode_, &bit_string_type));
+		
+		bool done(false);
+		do
+		{
+			// this could be more efficient, by picking up where we left off, but the code would be more complex and this is mostly a one-shot deal
+			auto which(
+				find_if(
+					bit_string_type.named_bits_.begin()
+					, bit_string_type.named_bits_.end()
+					, [](auto named_bit){ return named_bit.bit_ == numeric_limits< unsigned int >::max(); }
+					)
+				);
+			if (which != bit_string_type.named_bits_.end())
 			{
-				// we now have a value assignment for the name, but we need to make sure it's an integer of some sort before we go
-				// any further. Integers come in several shapes and sizes, so we should not expect the type here to directly be an
-				// integer: it may well be a NamedType that is a NamedType that is .... an integer. If that is the case, however, 
-				// resolving it should get us where we need to be.
-				// Note that if the user had the bad taste of doing a recursive construct of some sort, we might crash.
-				// something like
-				//     MyBitString ::= BIT STRING (my-value)
-				//     my-value MyBitString ::= my-value
-				// would do that. We can take care of this (later) by doing a proper dependency analysis and bail out if there are
-				// any circular dependencies.
-				ScopedContext context(contexts_, collapse__);
-				auto type(resolve(value_assignment->getType()));
-				if (dynamic_pointer_cast< IntegerType >(type))
+				auto value_assignments(listener_->getValueAssignments());
+				auto name(which->name_);
+				auto value_assignment(find_if(value_assignments.begin(), value_assignments.end(), [name](auto value_assignment){ return value_assignment.getName() == name; }));
+				if (value_assignment != value_assignments.end())
 				{
-					// now that we know that it's an integer, we have to resolve the value itself so we can get to a literal
-					auto value(resolve(value_assignment->getValue()));
-					auto integer_value(dynamic_pointer_cast< IntegerValue >(value));
-					if (integer_value)
+					// we now have a value assignment for the name, but we need to make sure it's an integer of some sort before we go
+					// any further. Integers come in several shapes and sizes, so we should not expect the type here to directly be an
+					// integer: it may well be a NamedType that is a NamedType that is .... an integer. If that is the case, however, 
+					// resolving it should get us where we need to be.
+					// Note that if the user had the bad taste of doing a recursive construct of some sort, we might crash.
+					// something like
+					//     MyBitString ::= BIT STRING (my-value)
+					//     my-value MyBitString ::= my-value
+					// would do that. We can take care of this (later) by doing a proper dependency analysis and bail out if there are
+					// any circular dependencies.
+					ScopedContext context(contexts_, collapse__);
+					auto type(resolve(value_assignment->getType()));
+					if (dynamic_pointer_cast< IntegerType >(type))
 					{
-						if (integer_value->getValue() < 0)
+						// now that we know that it's an integer, we have to resolve the value itself so we can get to a literal
+						auto value(resolve(value_assignment->getValue()));
+						auto integer_value(dynamic_pointer_cast< IntegerValue >(value));
+						if (integer_value)
 						{
-							emitError(which->source_location_, "%s refers to a negative integer value", name.c_str());
-							throw UndefinedReference("undefined reference");
-						}
-						else if (integer_value->getValue() >= numeric_limits< unsigned int >::max())
-						{
-							emitError(which->source_location_, "%s refers to an integer value that is too large", name.c_str());
-							throw UndefinedReference("undefined reference");
+							if (integer_value->getValue() < 0)
+							{
+								emitError(which->source_location_, "%s refers to a negative integer value", name.c_str());
+								throw UndefinedReference("undefined reference");
+							}
+							else if (integer_value->getValue() >= numeric_limits< unsigned int >::max())
+							{
+								emitError(which->source_location_, "%s refers to an integer value that is too large", name.c_str());
+								throw UndefinedReference("undefined reference");
+							}
+							else
+							{
+								which->bit_ = (decltype(which->bit_))integer_value->getValue();
+							}
 						}
 						else
 						{
-							which->bit_ = (decltype(which->bit_))integer_value->getValue();
+							emitError(which->source_location_, "%s does not refer to an integer value", name.c_str());
+							throw UndefinedReference("undefined reference");
 						}
 					}
 					else
@@ -112,30 +133,27 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 				}
 				else
 				{
-					emitError(which->source_location_, "%s does not refer to an integer value", name.c_str());
+					emitError(which->source_location_, "undefined reference to %s", name.c_str());
 					throw UndefinedReference("undefined reference");
 				}
 			}
 			else
 			{
-				emitError(which->source_location_, "undefined reference to %s", name.c_str());
-				throw UndefinedReference("undefined reference");
+				done = true;
 			}
-		}
-		else
-		{
-			done = true;
-		}
-	} while (!done);
+		} while (!done);
+	}
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(CharacterStringType &character_string_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// For character strings, the Listener does everything that needs to be done
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	if (contexts_.back().mode_ == clone_if_choice__)
 	{
 		return make_shared< ChoiceType >(choice_type);
@@ -184,6 +202,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case clone_if_choice__ :
@@ -228,6 +247,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// When cloning choices, we do not need to go any further than this, unless the underlying type is a CHOICE, in which case we will return a clone of the choice.
 	// Regardless of what we're doing, we need to resolve the type name to make sure it exists.
 	auto type_assignments(listener_->getTypeAssignments());
@@ -297,6 +317,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -312,6 +333,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_type_reference)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
@@ -326,6 +348,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_t
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_time_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -348,6 +371,9 @@ shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 	case resolve__ :
 	case clone_if_choice__ :
 		return shared_ptr< TypeDescriptor >();
+	case build_decoder_state_machine__ :
+		state_machine_builder_.addState(0, 2);
+		return shared_ptr< TypeDescriptor >();
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
@@ -356,6 +382,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// if resolving the underlying type does not return the same pointer as we had, that means it's been cloned. A named
 	// type is never a top-level type, however, because that is not possible within the grammar of ASN.1 (X.680), so we
 	// can safely replace what we had with the clone without cloning ourselves.
@@ -366,6 +393,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_descriptor_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
@@ -380,6 +408,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_desc
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -395,6 +424,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -424,6 +454,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_set_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
@@ -438,6 +469,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_set_of_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
@@ -452,6 +484,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -468,6 +501,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_constraint)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -484,6 +518,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_con
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
@@ -498,6 +533,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UTCTimeType &utc_time_type)
 {
+	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :

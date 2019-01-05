@@ -34,6 +34,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
         os << "\tVlinder::Rubicon::BitString::encode(der_encoder);\n";
 }
+/*virtual */void BitStringType::generateCompareImplementation(std::ostream &os) const/* override*/
+{
+        os << "\treturn Vlinder::Rubicon::BitString::compare(other);\n";
+}
 
 }}}
 

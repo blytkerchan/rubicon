@@ -25,6 +25,8 @@ public :
 	BitString& operator=(BitString &&other) = default;
 	BitString& swap(BitString &other) { value_.swap(other.value_); return *this; }
 
+	int compare(BitString const &other) const;
+
 	void encode(DEREncoder &der_encoder) const;
 
 	const_iterator begin() const { return value_.begin(); }
@@ -45,9 +47,17 @@ public :
 	void clearBit(size_type index) { value_[index] = false; }
 	void toggleBit(size_type index) { value_[index] = !value_[index]; }
 
+	static BitString build(std::vector< unsigned char > const &octets, unsigned int unused_bits);
 private :
 	std::vector< bool > value_;
 };
+bool operator==(BitString const &lhs, BitString const &rhs);
+bool operator!=(BitString const &lhs, BitString const &rhs);
+bool operator<(BitString const &lhs, BitString const &rhs);
+bool operator<=(BitString const &lhs, BitString const &rhs);
+bool operator>(BitString const &lhs, BitString const &rhs);
+bool operator>=(BitString const &lhs, BitString const &rhs);
+
 }}
 
 #endif

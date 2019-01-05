@@ -23,6 +23,22 @@ BitString::BitString(initializer_list< unsigned char > initializer_list, unsigne
 		);
 	value_.resize(value_.size() - trailing_bits);
 }
+int BitString::compare(BitString const &other) const
+{
+	auto my_curr(value_.begin());
+	auto other_curr(other.value_.begin());
+	auto const my_end(value_.end());
+	auto const other_end(other.value_.end());
+
+	while ((my_curr != my_end) && (other_curr != other_end))
+	{
+		int cmp(((int)(*other_curr++)) - ((int)(*my_curr++)));
+		if (cmp) return cmp;
+	}
+	if (other_curr != other_end) return 1;
+	if (my_curr != my_end) return -1;
+	return 0;
+}
 void BitString::encode(DEREncoder &der_encoder) const
 {
 	unsigned char char_value(0);
@@ -53,5 +69,31 @@ void BitString::encode(DEREncoder &der_encoder) const
 	der_encoder.encodeBitString(bits_remaining % 8, bstring_value.begin(), bstring_value.end());
 }
 
+/*static */BitString BitString::build(std::vector< unsigned char > const &octets, unsigned int unused_bits)
+{
+	pre_condition(unused_bits < 8);
+	pre_condition((octets.begin() != octets.end()) || (unused_bits == 0));
+	BitString retval;
+	for_each(
+		  octets.begin()
+		, octets.end()
+		, [&](unsigned char uc) -> void {
+				for (int i(0); i < 8; ++i)
+				{
+					retval.value_.push_back((uc & 0x80) == 0x80);
+					uc <<= 1;
+				}
+			}
+		);
+	retval.value_.resize(retval.value_.size() - unused_bits);
+
+	return retval;
+}
+bool operator==(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) == 0; }
+bool operator!=(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) != 0; }
+bool operator<(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) < 0; }
+bool operator<=(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) <= 0; }
+bool operator>(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) > 0; }
+bool operator>=(BitString const &lhs, BitString const &rhs) { return lhs.compare(rhs) >= 0; }
 }}
 

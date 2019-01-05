@@ -22,7 +22,7 @@ public :
 	template < typename InputIterator >
 	bool parse(InputIterator &first, InputIterator last)
 	{
-		while (1)
+		while (!done_)
 		{
 			switch (state_)
 			{
@@ -66,6 +66,7 @@ public :
 			}
 			}
 		}
+		return true;
 	}
 	
 protected :
@@ -224,11 +225,13 @@ private :
 				onEndOfContents();
 				return true;
 			case 0x01 : // boolean
+			{
 				if (length_ != 1) throw EncodingError("Wrong length for Boolean value");
 				if (first == last) return false; // no input, but an error 
 				unsigned char value(*first++);
 				onBoolean(0 != value);
 				return true;
+			}
 			case 0x02 : // integer
 				return parseInteger(first, last);
 			case 0x0A : // enumerated
@@ -294,7 +297,7 @@ private :
 		} while ((first != last) && (parse_buffer_size_ != length_));
 		if (parse_buffer_size_ == length_)
 		{
-			onInteger(Integer(parse_buffer_, parse_buffer_ + parse_buffer_size_));
+			onInteger(Integer(true, parse_buffer_, parse_buffer_ + parse_buffer_size_));
 			parse_buffer_size_ = 0;
 			return true;
 		}
@@ -347,7 +350,7 @@ private :
 		// from the input. The first byte contains the number of bits that are not
 		// used in the final byte. We only pass this to onBitString if we're
 		// passing the final byte as well. 
-		if (first != last) return false;
+		if (first == last) return false;
 		uint64_t parse_buffer_size(parse_buffer_size_);
 		auto avail(sizeof(parse_buffer_) - 1/* for the leading octet, which were need to preserve */);
 		do 
@@ -476,7 +479,7 @@ private :
 			}
 			end = parse_buffer_ + parse_buffer_size_;
 			
-			double value(buildDouble(sign, Integer(beg, end), base, scale_factor, exponent));
+			double value(buildDouble(sign, Integer(false, beg, end), base, scale_factor, exponent));
 			onReal(value);
 			length_ = 0;
 			parse_buffer_size_ = 0;
@@ -545,6 +548,8 @@ private :
 	uint64_t length_stack_[RUBICON_STACK_SIZE];
 	Type type_stack_[RUBICON_STACK_SIZE];
 	uint64_t stack_depth_ = 0;
+protected :
+	bool done_ = false;
 };
 }}
 

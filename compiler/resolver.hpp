@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <deque>
+#include "statemachinebuilder.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class BitStringType;
@@ -64,6 +65,7 @@ private :
 		, collapse__		// collapse to the leaf primitive (has no effect on non-primitive types)
 		, clone_if_choice__	// clone if the type is a CHOICE, so we can tag it
 		, get_selected_type__
+		, build_decoder_state_machine__
 		};
 	struct Context
 	{
@@ -100,6 +102,7 @@ private :
 	Listener *listener_;
 	Contexts contexts_;
 	unsigned int next_clone_id_ = 0;
+	StateMachineBuilder state_machine_builder_;
 };
 }}}
 

@@ -188,6 +188,9 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/setofvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/setvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/sourcelocation.hpp
+	${PROJECT_SOURCE_DIR}/compiler/statemachine.hpp
+	${PROJECT_SOURCE_DIR}/compiler/statemachinebuilder.cpp
+	${PROJECT_SOURCE_DIR}/compiler/statemachinebuilder.hpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tag.hpp
@@ -240,6 +243,8 @@ add_library(rubicon SHARED
 	runtime/derdecoder.cpp
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
+	runtime/details/any.cpp
+	runtime/details/any.hpp
 	runtime/details/buffer.hpp
 	runtime/integer.cpp
 	runtime/integer.hpp

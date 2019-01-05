@@ -15,6 +15,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << typeid(*this).name() << " generateDataMembers(os)"<< endl;
 }
+void TypeDescriptor::setStateMachine(StateMachine const &state_machine)
+{
+	state_machine_ = make_shared< StateMachine >(state_machine);
+}
 }}}
 
 
