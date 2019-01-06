@@ -26,7 +26,6 @@ public :
 	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
-	virtual void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
 private :

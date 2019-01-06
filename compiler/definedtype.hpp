@@ -17,7 +17,7 @@ struct DefinedType : TypeDescriptor
 	virtual bool hasTypeName() const override { return true; }
 	virtual std::string getTypeName() const override { return type_name_; }
 
-	virtual void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const override;
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
 	std::string type_name_;
 };

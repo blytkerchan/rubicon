@@ -309,7 +309,7 @@ private :
 	template < typename InputIterator >
 	bool parseEnumerated(InputIterator &first, InputIterator last)
 	{
-		// enumerated values are parsers as int values and may not be larger than
+		// enumerated values are parsed as int values and may not be larger than
 		// sizeof(int). They are signed (because nothing I've seen in X.690
 		// indicates they aren't) so we do sign extension.
 		if (length_ > sizeof(int)) throw EncodingError("enumerated value too large");

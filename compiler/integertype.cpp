@@ -3,9 +3,9 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*virtual */void IntegerType::generateEncodeImplementation(ostream &os, string const &instance_name) const/* override*/
+/*virtual */void IntegerType::generateEncodeImplementation(ostream &os) const/* override*/
 {
-	os << "//TODO int" << endl;
+        os << "\tder_encoder.encodeInteger(*this);\n";
 }
 }}}
 

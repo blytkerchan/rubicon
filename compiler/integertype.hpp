@@ -14,8 +14,7 @@ struct IntegerType : EnumeratedType
 	{ /* no-op */ }
 
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
-	virtual void generateEncodeImplementation(std::ostream &os, std::string const &instance_name) const override;
-	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::Integer"; }
+	virtual void generateEncodeImplementation(std::ostream &os) const override;
 };
 }}}
 
