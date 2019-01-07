@@ -145,6 +145,15 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 	}
 	return shared_ptr< TypeDescriptor >();
 }
+shared_ptr< TypeDescriptor > Resolver::resolve(BooleanType &bit_string_type)
+{
+	//TODO
+	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
+	else if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
+	else if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >();
+	else if (contexts_.back().mode_ == build_decoder_state_machine__) return shared_ptr< TypeDescriptor >();
+	else return shared_ptr< TypeDescriptor >();
+}
 shared_ptr< TypeDescriptor > Resolver::resolve(CharacterStringType &character_string_type)
 {
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet

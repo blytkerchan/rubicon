@@ -119,6 +119,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.cpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/booleantype.cpp
+	${PROJECT_SOURCE_DIR}/compiler/booleantype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/booleanvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/builder.cpp
 	${PROJECT_SOURCE_DIR}/compiler/builder.hpp
@@ -240,6 +242,8 @@ set_source_files_properties(
 add_library(rubicon SHARED
 	runtime/bitstring.cpp
 	runtime/bitstring.hpp
+	runtime/boolean.cpp
+	runtime/boolean.hpp
 	runtime/derdecoder.cpp
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp

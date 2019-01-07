@@ -52,6 +52,7 @@ private :
 	std::shared_ptr< TypeDescriptor > parseType(asn1Parser::TypeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseBuiltinType(asn1Parser::Builtin_typeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseBitStringType(asn1Parser::Bit_string_typeContext *ctx);
+	std::shared_ptr< TypeDescriptor > parseBooleanType(asn1Parser::Builtin_typeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseCharacterStringType(asn1Parser::Character_string_typeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseChoiceType(asn1Parser::Choice_typeContext *ctx);
 	NamedType parseNamedType(asn1Parser::Named_typeContext *ctx);

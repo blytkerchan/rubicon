@@ -10,8 +10,7 @@ class PrimitiveType : public TypeDescriptor
 {
 public :
 	enum Primitive {
-		  boolean__
-		, date__
+		  date__
 		, date_time__
 		, duration__
 		, embedded_pdv__

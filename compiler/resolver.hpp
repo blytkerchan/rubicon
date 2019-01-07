@@ -7,6 +7,7 @@
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class BitStringType;
+class BooleanType;
 class CharacterStringType;
 class ChoiceType;
 class ConstrainedType;
@@ -40,6 +41,7 @@ public :
 	Resolver const& operator()(ValueAssignment &value_assignment);
 
 	std::shared_ptr< TypeDescriptor > resolve(BitStringType &bit_string_type);
+	std::shared_ptr< TypeDescriptor > resolve(BooleanType &bit_string_type);
 	std::shared_ptr< TypeDescriptor > resolve(CharacterStringType &character_string_type);
 	std::shared_ptr< TypeDescriptor > resolve(ChoiceType &choice_type);
 	std::shared_ptr< TypeDescriptor > resolve(ConstrainedType &constrained_type);

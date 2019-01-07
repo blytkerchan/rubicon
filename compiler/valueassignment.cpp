@@ -11,7 +11,7 @@ void ValueAssignment::generateDeclaration(std::ostream &os) const
 }
 void ValueAssignment::generateDefinition(std::ostream &os) const
 {
-    os << type_->getTypeName() << " " << name_ << "(" << value_->generateInstance() << ");\n";
+    os << type_->getTypeName() << " " << alg::replace_all_copy(name_, "-", "_") << "(" << value_->generateInstance() << ");\n";
 }
 }}}
 

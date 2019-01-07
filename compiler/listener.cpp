@@ -3,6 +3,7 @@
 #include "../tracing.hpp"
 #include "bitstringtype.hpp"
 #include "bitstringvalue.hpp"
+#include "booleantype.hpp"
 #include "booleanvalue.hpp"
 #include "characterstringtype.hpp"
 #include "choicetype.hpp"
@@ -337,7 +338,7 @@ shared_ptr< TypeDescriptor > Listener::parseBuiltinType(asn1Parser::Builtin_type
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return ctx->bit_string_type()			? parseBitStringType(ctx->bit_string_type())
-		: ctx->BOOLEAN_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::boolean__)
+		: ctx->BOOLEAN_RW()			? parseBooleanType(ctx)
 		: ctx->character_string_type()		? parseCharacterStringType(ctx->character_string_type())
 		: ctx->choice_type()			? parseChoiceType(ctx->choice_type())
 		: ctx->DATE_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::date__)
@@ -360,6 +361,10 @@ shared_ptr< TypeDescriptor > Listener::parseBuiltinType(asn1Parser::Builtin_type
 		: ctx->TIME_OF_DAY_RW()			? make_shared< PrimitiveType >(ctx, PrimitiveType::time_of_day__)
 		: shared_ptr< TypeDescriptor >(make_shared< UnknownType >(ctx)) // the explicit construction is a hint for the compiler to resolve the types in the tree of ternary operators
 		;
+}
+shared_ptr< TypeDescriptor > Listener::parseBooleanType(asn1Parser::Builtin_typeContext *ctx)
+{
+	return make_shared< BooleanType >(ctx);
 }
 shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string_typeContext *ctx)
 {

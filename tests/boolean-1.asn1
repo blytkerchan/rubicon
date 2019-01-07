@@ -1,0 +1,4 @@
+BooleanTest1 DEFINITIONS ::=
+BEGIN
+    test-value BOOLEAN ::= TRUE
+END

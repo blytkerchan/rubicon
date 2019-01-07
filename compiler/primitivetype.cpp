@@ -7,8 +7,6 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	switch (primitive_)
 	{
-	case boolean__ :
-		return "bool";
 	case date__ :
 	case date_time__ :
 	case time__ :

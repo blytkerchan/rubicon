@@ -12,7 +12,7 @@ public :
 
 	std::string getTypeName() const override { return "Boolean"; }
 
-	std::string generateInstance() const override { return "/*TODO*/"; }
+	std::string generateInstance() const override { return value_ ? "true" : "false"; }
 
 private :
 	bool value_;
