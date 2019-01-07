@@ -1,0 +1,4 @@
+BooleanTest3 DEFINITIONS ::=
+BEGIN
+	Employed ::= BOOLEAN
+END

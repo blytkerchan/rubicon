@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.10)
+project(BooleanTest3)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_subdirectory(asn1)
+add_executable(booleantest3 test-boolean3.cpp)
+target_link_libraries(booleantest3 booleantest3-asn1 exceptions)
