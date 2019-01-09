@@ -250,8 +250,12 @@ add_library(rubicon SHARED
 	runtime/details/any.cpp
 	runtime/details/any.hpp
 	runtime/details/buffer.hpp
+	runtime/factory.cpp
+	runtime/factory.hpp
 	runtime/integer.cpp
 	runtime/integer.hpp
+	runtime/octetstring.cpp
+	runtime/octetstring.hpp
 	)
 target_link_libraries(rubicon exceptions)
 set_target_properties(rubicon PROPERTIES SOVERSION 1)
