@@ -17,7 +17,11 @@ public :
 
 	OctetString() = default;
 	OctetString(size_type size, bool value = false) : value_(size, value) { /* no-op */ }
-	OctetString(std::initializer_list< unsigned char > initializer_list, unsigned int trailing_bits);
+	OctetString(std::initializer_list< unsigned char > initializer_list);
+	template < typename I >
+	OctetString(I first, I last)
+		: value_(first, last)
+	{ /* no-op */ }
 	virtual ~OctetString() = default;
 	OctetString(OctetString const &other) = default;
 	OctetString& operator=(OctetString const &other) = default;
