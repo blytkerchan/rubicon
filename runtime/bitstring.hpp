@@ -1,6 +1,7 @@
 #ifndef vlinder_rubicon_bitstring_hpp
 #define vlinder_rubicon_bitstring_hpp
 
+#include "exceptions/contract.hpp"
 #include <initializer_list>
 #include <vector>
 
@@ -18,6 +19,24 @@ public :
 	BitString() = default;
 	BitString(size_type size, bool value = false) : value_(size, value) { /* no-op */ }
 	BitString(std::initializer_list< unsigned char > initializer_list, unsigned int trailing_bits);
+	template < typename I >
+	BitString(I first, I last, unsigned int trailing_bits)
+	{
+		pre_condition(trailing_bits < 8);
+		pre_condition((first != last) || (trailing_bits == 0));
+		for_each(
+			  first
+			, last
+			, [&](unsigned char uc) -> void {
+					for (int i(0); i < 8; ++i)
+					{
+						value_.push_back((uc & 0x80) == 0x80);
+						uc <<= 1;
+					}
+				}
+			);
+		value_.resize(value_.size() - trailing_bits);
+	}
 	virtual ~BitString() = default;
 	BitString(BitString const &other) = default;
 	BitString& operator=(BitString const &other) = default;

@@ -4,6 +4,7 @@
 #include "bitstring.hpp"
 #include "boolean.hpp"
 #include "integer.hpp"
+#include "null.hpp"
 #include "octetstring.hpp"
 #include "real.hpp"
 

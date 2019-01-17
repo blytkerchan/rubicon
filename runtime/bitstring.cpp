@@ -1,6 +1,5 @@
 #include "bitstring.hpp"
 #include "derencoder.hpp"
-#include "exceptions/contract.hpp"
 #include <algorithm>
 
 using namespace std;

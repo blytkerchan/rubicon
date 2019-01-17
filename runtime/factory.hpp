@@ -3,6 +3,7 @@
 
 #include "types.hpp"
 #include "derdecoder.hpp"
+#include "details/any.hpp"
 
 namespace Vlinder { namespace Rubicon {
 namespace Details {
@@ -19,6 +20,7 @@ public :
         template < typename InputIterator >
         Integer buildInteger(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_integer__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
@@ -28,6 +30,7 @@ public :
         template < typename InputIterator >
         BitString buildBitString(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_bitstring__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
@@ -37,6 +40,7 @@ public :
         template < typename InputIterator >
         OctetString buildOctetString(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_octetstring__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
@@ -44,17 +48,19 @@ public :
 		return get< OctetString >();
         }
         template < typename InputIterator >
-        void buildNull(InputIterator &first, InputIterator last)
+        Null buildNull(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_null__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
 		}
-		return get< void >();
+		return get< Null >();
         }
         template < typename InputIterator >
         Boolean buildBoolean(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_boolean__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
@@ -64,15 +70,16 @@ public :
         template < typename InputIterator >
         Real buildReal(InputIterator &first, InputIterator last)
         {
+                state_ = decoding_real__;
 		if (!parse(first, last))
 		{
 			throw Vlinder::Rubicon::ParseError("Incomplete parse");
 		}
-		return get< Integer >();
+		return get< Real >();
         }
 
         template < typename T >
-        T get() const { return T(); }
+        T get() const { return any_cast< T >(value_); }
 
 protected :
 	virtual void onEndOfContents() override;
@@ -87,6 +94,20 @@ protected :
 	virtual void onEndSet() override;
 	virtual void onBoolean(bool val) override;
 	virtual void onReal(double val) override;
+
+private :
+        enum State {
+                  decoding_integer__
+                , decoding_enumerated__
+                , decoding_bitstring__
+                , decoding_octetstring__
+                , decoding_null__
+                , decoding_boolean__
+                , decoding_real__
+                };
+
+        Details::Any value_;
+        State state_;
 };
 }        
 template < typename InputIterator >
@@ -108,7 +129,7 @@ OctetString decodeOctetString(InputIterator &first, InputIterator last)
         return builder.buildOctetString(first, last);
 }
 template < typename InputIterator >
-void decodeNull(InputIterator &first, InputIterator last)
+Null decodeNull(InputIterator &first, InputIterator last)
 {
         Details::Builder builder;
         return builder.buildNull(first, last);
