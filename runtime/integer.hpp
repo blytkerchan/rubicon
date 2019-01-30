@@ -57,6 +57,9 @@ public :
 
 	bool negative() const;
 	
+	bool operator!() const;
+	explicit operator bool () const;
+
 private :
 	template < typename I >
 	void set(I i)

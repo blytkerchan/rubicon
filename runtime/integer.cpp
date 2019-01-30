@@ -62,5 +62,17 @@ bool Integer::negative() const
 {
 	return signed_ && ((value_[0] & 0x80) == 0x80);
 }
+
+bool Integer::operator!() const
+{
+	bool retval(true);
+	for_each(value_, value_ + size_, [&retval](auto v){ if (v) retval = false; });
+	return retval;
+}
+/*explicit */Integer::operator bool () const
+{
+	return !!*this;
+}
+
 }}
 
