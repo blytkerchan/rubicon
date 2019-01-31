@@ -14,17 +14,17 @@ public :
 	Integer(Integer const&) = default;
 	Integer(Integer&&) = default;
 	
-	Integer(char value);
-	Integer(unsigned char value);
-	Integer(short value);
-	Integer(unsigned short value);
-	Integer(int value);
-	Integer(unsigned int value);
-	Integer(long value);
-	Integer(unsigned long value);
+	explicit Integer(char value);
+	explicit Integer(unsigned char value);
+	explicit Integer(short value);
+	explicit Integer(unsigned short value);
+	explicit Integer(int value);
+	explicit Integer(unsigned int value);
+	explicit Integer(long value);
+	explicit Integer(unsigned long value);
 #ifdef RUBICON_HAVE_LONG_LONG
-	Integer(long long value);
-	Integer(unsigned long long value);
+	explicit Integer(long long value);
+	explicit Integer(unsigned long long value);
 #endif
 	template < typename InputIterator >
 	Integer(bool is_signed, InputIterator first, InputIterator last)

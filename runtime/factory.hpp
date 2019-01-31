@@ -28,6 +28,16 @@ public :
 		return get< Integer >();
         }
         template < typename InputIterator >
+        int buildEnumerated(InputIterator &first, InputIterator last)
+        {
+                state_ = decoding_enumerated__;
+		if (!parse(first, last))
+		{
+			throw Vlinder::Rubicon::ParseError("Incomplete parse");
+		}
+		return get< int >();
+        }
+        template < typename InputIterator >
         BitString buildBitString(InputIterator &first, InputIterator last)
         {
                 state_ = decoding_bitstring__;
@@ -115,6 +125,12 @@ Integer decodeInteger(InputIterator &first, InputIterator last)
 {
         Details::Builder builder;
         return builder.buildInteger(first, last);
+}
+template < typename InputIterator >
+int decodeEnumerated(InputIterator &first, InputIterator last)
+{
+        Details::Builder builder;
+        return builder.buildEnumerated(first, last);
 }
 template < typename InputIterator >
 BitString decodeBitString(InputIterator &first, InputIterator last)

@@ -324,7 +324,7 @@ private :
 		{
 			int value(parse_buffer_[0] & 0x80 ? ~0 : 0);
 			for (
-				  unsigned char *value_byte(parse_buffer_ + 1)
+				  unsigned char *value_byte(parse_buffer_)
 				; value_byte != (parse_buffer_ + parse_buffer_size_)
 				; ++value_byte
 				)
