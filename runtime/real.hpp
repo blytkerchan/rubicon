@@ -23,6 +23,7 @@ public :
 	
 	int compare(Real const &other) const;
 	
+	explicit operator double () const { return value_; }
 private :
 	double value_;
 };

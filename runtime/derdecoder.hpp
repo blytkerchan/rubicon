@@ -499,10 +499,10 @@ private :
 		// final chunk when calling onOctetString. Having the limitation of using
 		// input iterator (which by definition can only be read from once) means
 		// we read in chunks no bigger than our parse buffer. 
+		uint64_t initial_parse_buffer_size(parse_buffer_size_);
+		uint64_t working_length(std::min(length_ - initial_parse_buffer_size, sizeof(parse_buffer_)));
 		while (first != last)
 		{
-			uint64_t initial_parse_buffer_size(parse_buffer_size_);
-			uint64_t working_length(std::min(length_ - initial_parse_buffer_size, sizeof(parse_buffer_)));
 			// there is no combination of std::copy and std::copy_n that works for
 			// this particular situation, where I want to copy up to n elements
 			// from a range, so I'll have to write an actual copying loop by hand :(
@@ -511,13 +511,13 @@ private :
 				parse_buffer_[i++] = *first++;
 				++parse_buffer_size_;
 			}
-			onOctetString(
-				  parse_buffer_size_ == length_
-				, parse_buffer_
-				, parse_buffer_ + working_length
-				);
 		}
 		bool const done(parse_buffer_size_ == length_);
+		onOctetString(
+			  done
+			, parse_buffer_
+			, parse_buffer_ + working_length
+			);
 		if (done)
 		{
 			parse_buffer_size_ = 0;

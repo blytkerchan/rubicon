@@ -808,4 +808,606 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
 			}
                 }
         }
+        GIVEN( "an octet string { 09 00 } (which encodes a real value positive 0)" ) {
+                vector< unsigned char > octets{ 0x09, 0x00 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        auto try_real(decodeReal(iter, octets.end()));
+			THEN( "it's a real'" ) {
+                                REQUIRE(!(double)try_real);
+			}
+                }
+        }
+        GIVEN( "an octet string { 09 01 40 } (which encodes a real value positive infinity)" ) {
+                vector< unsigned char > octets{ 0x09, 0x01, 0x40 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        auto try_real(decodeReal(iter, octets.end()));
+			THEN( "it's a real'" ) {
+                                REQUIRE((double)try_real);
+			}
+                }
+        }
+        GIVEN( "an octet string { 09 01 41 } (which encodes a real value negative infinity)" ) {
+                vector< unsigned char > octets{ 0x09, 0x01, 0x41 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        auto try_real(decodeReal(iter, octets.end()));
+			THEN( "it's a real'" ) {
+                                REQUIRE((double)try_real);
+			}
+                }
+        }
+        GIVEN( "an octet string { 09 01 42 } (which encodes a real value NaN)" ) {
+                vector< unsigned char > octets{ 0x09, 0x01, 0x42 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        auto try_real(decodeReal(iter, octets.end()));
+			THEN( "it's a real'" ) {
+                                REQUIRE((double)try_real);
+			}
+                }
+        }
+        GIVEN( "an octet string { 04 00 } (which encodes an empty octet string)" ) {
+                vector< unsigned char > octets{ 0x04, 0x00 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        THEN( "we have an octet string" ) {
+                                REQUIRE(try_octet_string.empty());
+                        }
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_real(decodeReal(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+        }
+        GIVEN( "an octet string { 04 03 02 01 00 } (which encodes a three-octet octet string)" ) {
+                vector< unsigned char > octets{ 0x04, 0x03, 0x02, 0x01, 0x00 };
+                WHEN( "we try to decode it as a boolean" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_boolean(decodeBoolean(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+	        }
+                WHEN( "we try to decode it as an integer" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_integer(decodeInteger(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an enumerated value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_enumerated(decodeEnumerated(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a bit string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_bit_string(decodeBitString(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as an octet string" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        auto try_octet_string(decodeOctetString(iter, octets.end()));
+                        THEN( "we have an octet string" ) {
+                                REQUIRE(try_octet_string.size() == 3);
+                        }
+                }
+                WHEN( "we try to decode it as a null value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_null(decodeNull(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+                WHEN( "we try to decode it as a real value" ) {
+                        auto iter(octets.begin());
+                        bool caught(false);
+                        try
+                        {
+                                auto try_real(decodeReal(iter, octets.end()));
+                        }
+                        catch (ParseError const &e)
+                        {
+                                caught = true;
+                        }
+			THEN( "it fails" ) {
+                                REQUIRE(caught);
+			}
+                }
+        }
 }
