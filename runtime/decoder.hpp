@@ -7,15 +7,15 @@
 
 namespace Vlinder { namespace Rubicon {
 namespace Details {
-class Builder : DERDecoder
+class Decoder : DERDecoder
 {
 public :
-        Builder() = default;
-        ~Builder() = default;
-        Builder(Builder const&) = delete;
-        Builder& operator=(Builder const &) = delete;
-        Builder(Builder &&) = default;
-        Builder& operator=(Builder &&) = default;
+        Decoder() = default;
+        ~Decoder() = default;
+        Decoder(Decoder const&) = delete;
+        Decoder& operator=(Decoder const &) = delete;
+        Decoder(Decoder &&) = default;
+        Decoder& operator=(Decoder &&) = default;
 
         template < typename InputIterator >
         Integer buildInteger(InputIterator &first, InputIterator last)
@@ -123,43 +123,43 @@ private :
 template < typename InputIterator >
 Integer decodeInteger(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildInteger(first, last);
 }
 template < typename InputIterator >
 int decodeEnumerated(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildEnumerated(first, last);
 }
 template < typename InputIterator >
 BitString decodeBitString(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildBitString(first, last);
 }
 template < typename InputIterator >
 OctetString decodeOctetString(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildOctetString(first, last);
 }
 template < typename InputIterator >
 Null decodeNull(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildNull(first, last);
 }
 template < typename InputIterator >
 Boolean decodeBoolean(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildBoolean(first, last);
 }
 template < typename InputIterator >
 Real decodeReal(InputIterator &first, InputIterator last)
 {
-        Details::Builder builder;
+        Details::Decoder builder;
         return builder.buildReal(first, last);
 }
 }}

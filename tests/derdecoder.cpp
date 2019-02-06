@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "runtime/factory.hpp"
+#include "runtime/decoder.hpp"
 
 using namespace std;
 using namespace Vlinder::Rubicon;

@@ -244,14 +244,14 @@ add_library(rubicon SHARED
 	runtime/bitstring.hpp
 	runtime/boolean.cpp
 	runtime/boolean.hpp
+	runtime/decoder.cpp
+	runtime/decoder.hpp
 	runtime/derdecoder.cpp
 	runtime/derdecoder.hpp
 	runtime/derencoder.hpp
 	runtime/details/any.cpp
 	runtime/details/any.hpp
 	runtime/details/buffer.hpp
-	runtime/factory.cpp
-	runtime/factory.hpp
 	runtime/integer.cpp
 	runtime/integer.hpp
 	runtime/null.hpp

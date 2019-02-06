@@ -1,15 +1,15 @@
-#include "factory.hpp"
+#include "decoder.hpp"
 #include "exceptions.hpp"
 #include <vector>
 
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Details {
-/*virtual */void Builder::onEndOfContents()/* override*/
+/*virtual */void Decoder::onEndOfContents()/* override*/
 {
         throw std::logic_error("Not supported for this builder");
 }
-/*virtual */void Builder::onInteger(Integer const &value)/* override*/
+/*virtual */void Decoder::onInteger(Integer const &value)/* override*/
 {
         if (state_ != decoding_integer__)
         {
@@ -21,7 +21,7 @@ namespace Vlinder { namespace Rubicon { namespace Details {
 		done_ = true;
         }
 }
-/*virtual */void Builder::onEnumerated(int value)/* override*/
+/*virtual */void Decoder::onEnumerated(int value)/* override*/
 {
         if (state_ != decoding_enumerated__)
         {
@@ -33,7 +33,7 @@ namespace Vlinder { namespace Rubicon { namespace Details {
 		done_ = true;
         }
 }
-/*virtual */void Builder::onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last)/* override*/
+/*virtual */void Decoder::onBitString(bool final, unsigned int unused_bits, unsigned char *first, unsigned char *last)/* override*/
 {
         if (state_ != decoding_bitstring__)
         {
@@ -54,7 +54,7 @@ namespace Vlinder { namespace Rubicon { namespace Details {
                 }
         }
 }
-/*virtual */void Builder::onOctetString(bool final, unsigned char *first, unsigned char *last)/* override*/
+/*virtual */void Decoder::onOctetString(bool final, unsigned char *first, unsigned char *last)/* override*/
 {
         if (state_ != decoding_octetstring__)
         {
@@ -75,7 +75,7 @@ namespace Vlinder { namespace Rubicon { namespace Details {
                 }
         }
 }
-/*virtual */void Builder::onNull()/* override*/
+/*virtual */void Decoder::onNull()/* override*/
 {
         if (state_ != decoding_null__)
         {
@@ -87,23 +87,23 @@ namespace Vlinder { namespace Rubicon { namespace Details {
 		done_ = true;
 	}
 }
-/*virtual */void Builder::onBeginSequence()/* override*/
+/*virtual */void Decoder::onBeginSequence()/* override*/
 {
 	throw ParseError("Unexpected start of sequence");
 }
-/*virtual */void Builder::onEndSequence()/* override*/
+/*virtual */void Decoder::onEndSequence()/* override*/
 {
 	throw ParseError("Unexpected end of sequence");
 }
-/*virtual */void Builder::onBeginSet()/* override*/
+/*virtual */void Decoder::onBeginSet()/* override*/
 {
 	throw ParseError("Unexpected start of set");
 }
-/*virtual */void Builder::onEndSet()/* override*/
+/*virtual */void Decoder::onEndSet()/* override*/
 {
 	throw ParseError("Unexpected end of set");
 }
-/*virtual */void Builder::onBoolean(bool val)/* override*/
+/*virtual */void Decoder::onBoolean(bool val)/* override*/
 {
         if (state_ != decoding_boolean__)
         {
@@ -115,7 +115,7 @@ namespace Vlinder { namespace Rubicon { namespace Details {
 		done_ = true;
 	}
 }
-/*virtual */void Builder::onReal(double val)/* override*/
+/*virtual */void Decoder::onReal(double val)/* override*/
 {
         if (state_ != decoding_real__)
         {
