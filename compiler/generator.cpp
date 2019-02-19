@@ -395,6 +395,7 @@ void Generator::generateBuilderImplementation(std::ostream &ofs, TypeAssignment 
 		ofs << "\tif ((state_ == " << state.state_ << ") && (type_class == " << state.type_class_ << ") && (tag == " << state.tag_ << ")) return " << state.next_state_ << ";\n";
 	}
 	ofs
+		<< "\treturn -1;\n"
 		<< "}\n"
 		<< "\n"
 		;
