@@ -33,9 +33,9 @@ private :
 	void generateHeader(ValueAssignment const &value_assignment);
 	void generateImplementation(TypeAssignment const &type_assignment);
 	void generateImplementation(ValueAssignment const &value_assignment);
-	void generateFactory();
-	void generateFactoryHeader();
-	void generateFactoryImplementation();
+	void generateDecoder();
+	void generateDecoderHeader();
+	void generateDecoderImplementation();
 	void generateBuilderDeclaration(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateBuilderImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const;
 	void generateCMakeLists() const;

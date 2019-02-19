@@ -37,7 +37,7 @@ Generator& Generator::operator()(Builder const &builder, bool output_dependencie
 		{ /* don't output dependencies */ }
 		outputTypes();
 		outputValues();
-		generateFactory();
+		generateDecoder();
 		generateCMakeLists();
 	}
 	else
@@ -179,15 +179,15 @@ void Generator::generateImplementation(ValueAssignment const &value_assignment)
 
 	closeNamespace(ofs);
 }
-void Generator::generateFactory()
+void Generator::generateDecoder()
 {
-	generateFactoryHeader();
-	generateFactoryImplementation();
+	generateDecoderHeader();
+	generateDecoderImplementation();
 }
-void Generator::generateFactoryHeader()
+void Generator::generateDecoderHeader()
 {
 	bfs::path const directory(getOutputDirectoryName());
-	bfs::path const filename(directory / "factory.hpp");
+	bfs::path const filename(directory / "decoder.hpp");
 	generated_files_.push_back(filename);
 
 	ofstream ofs(filename.string(), ofstream::trunc);
@@ -197,7 +197,7 @@ void Generator::generateFactoryHeader()
 	string const guard(
 		string("generated_")
 		+ alg::replace_all_copy(alg::to_lower_copy(getNamespaceName()), "::", "_")
-		+ "_factory_hpp"
+		+ "_decoder_hpp"
 		);
 	ofs << "#ifndef " << guard << "\n";
 	ofs << "#define " << guard << "\n\n";
@@ -236,15 +236,15 @@ void Generator::generateFactoryHeader()
 
 	ofs << "\n#endif\n";
 }
-void Generator::generateFactoryImplementation()
+void Generator::generateDecoderImplementation()
 {
 	bfs::path const directory(getOutputDirectoryName());
-	bfs::path const filename(directory / "factory.cpp");
+	bfs::path const filename(directory / "decoder.cpp");
 	generated_files_.push_back(filename);
 	ofstream ofs(filename.string(), ofstream::trunc);
 
 	generatePreamble(ofs);
-	ofs << "#include \"factory.hpp\"\n";
+	ofs << "#include \"decoder.hpp\"\n";
 	ofs << "\n";
 
 	ofs << "using namespace std;\n";
