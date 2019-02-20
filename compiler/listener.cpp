@@ -902,7 +902,8 @@ Tag Listener::parseTag(asn1Parser::TagContext *ctx)
 			;
 		if (the_class == Tag::Class::universal__)
 		{
-			emitWarning(ctx->category(), "The \"Class\" shall not be UNIVERSAL except for types defined in X.680. This may cause errors interoperating with other encoders/decoders.");
+			emitError(ctx->category(), "The \"Class\" shall not be UNIVERSAL except for types defined in X.680.");
+			throw ParseError("UNIVERSAL class used for user-defined tag");
 		}
 		else
 		{ /* OK */ }
