@@ -34,6 +34,42 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	return retval;
 }
 
+/*virtual */Tag ChoiceType::getTag() const/* override*/
+{
+	Tag retval(Tag::universal__, 0);
+	struct TypeVisitor : static_visitor<>
+	{
+		TypeVisitor(Tag &retval)
+			: retval_(retval)
+		{ /* no-op */ }
+
+		void operator()(NamedType const &named_type) const
+		{
+			Tag tag(named_type.getTag());
+			if (tag.class_ != Tag::universal__)
+			{
+				retval_ = tag;
+			}
+			else
+			{ /* no change */ }
+		}
+		void operator()(VersionedTypeList const &versioned_type_list) const
+		{
+			for_each(versioned_type_list.second.begin(), versioned_type_list.second.end(), *this);
+		}
+
+		Tag &retval_;
+	};
+	
+	for (auto type : alternative_types_)
+	{
+		apply_visitor(TypeVisitor(retval), type);
+	}
+
+	retval.class_number_ = 0/* zero is reserved for encodings, but in this context this function is called to know the class, not the number */;
+	return retval;
+}
+
 /*virtual */void ChoiceType::generateEncodeImplementation(std::ostream &os) const/* override*/
 {
 	os << "//TODO" << endl;

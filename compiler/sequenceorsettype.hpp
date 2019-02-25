@@ -9,6 +9,7 @@
 #include <set>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class AutoTagVisitor;
 class SequenceOrSetType : public TypeDescriptor
 {
 public :
@@ -28,6 +29,7 @@ public :
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
 		virtual bool isOptional() const = 0;
 		virtual bool hasDefaultValue() const { false; }
+		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) = 0;
 
 		SourceLocation source_location_;
 	};
@@ -46,6 +48,7 @@ public :
 		virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 		virtual std::string getTypeName() const override { return type_->getTypeName(); }
 		virtual bool isOptional() const override { return false; };
+		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 
 		Type type_;
 	};
@@ -84,6 +87,7 @@ public :
 		void generateMemberDeclarations(std::ostream &os) const;
 		void generateGetterImplementation(std::string const &type_name, std::ostream &os) const;
 		void generateSetterImplementation(std::string const &type_name, std::ostream &os) const;
+		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 
 		static std::string toVariableName(std::string const &name);
 		static std::string toMemberName(std::string const &name);
@@ -104,7 +108,9 @@ public :
 		, component_types_(component_types)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return { Tag::universal__, is_set_ ? 17U : 16U }; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
+	void visit(AutoTagVisitor &visitor);
 	virtual std::set< std::string > getDependencies() const override;
 	virtual std::set< std::string > getStrongDependencies() const override;
 	virtual std::set< std::string > getWeakDependencies() const override;
@@ -117,6 +123,7 @@ public :
 	virtual void generateDestructorImplementation(std::ostream &os) const override;
 	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
+	bool isSet() const { return is_set_; }
 
 private :
 	bool is_set_ = false;

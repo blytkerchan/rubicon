@@ -6,6 +6,7 @@
 #include <iostream>
 #include "resolver.hpp"
 #include "sourcelocation.hpp"
+#include "tag.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct StateMachine;
@@ -16,6 +17,7 @@ public :
 		: source_location_(source_location)
 	{ /* no-op */ }
 	virtual bool requireExplicitTag() const { return false; }
+	virtual Tag getTag() const = 0;
 	virtual bool hasTypeName() const { return false; }
 	virtual std::string getTypeName() const { return std::string(); }
 	virtual std::set< std::string > getDependencies() const { return std::set< std::string >(); }

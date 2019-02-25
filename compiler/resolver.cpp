@@ -2,6 +2,7 @@
 #include "../runtime/exceptions.hpp"
 #include "../exceptions/contract.hpp"
 #include "../tracing.hpp"
+#include "autotagvisitor.hpp"
 #include "bitstringtype.hpp"
 #include "choicetype.hpp"
 #include "constrainedtype.hpp"
@@ -25,10 +26,21 @@ Resolver::Resolver(Listener *listener)
 
 Resolver const& Resolver::operator()(TypeAssignment &type_assignment)
 {
+	// Make sure everything resolves. May be called recursively.
 	ScopedContext context(contexts_, resolve__);
 	type_assignment.setType(resolve(type_assignment.getType()));
 	if (contexts_.size() == 1)
 	{
+		// if we're not being called recursively, we can now:
+		// 1. apply auto-tagging
+		if (listener_->getTagDefault() == Listener::TagDefault::automatic_tags__)
+		{
+			contexts_.back().mode_ = auto_tag__;
+			type_assignment.setType(resolve(type_assignment.getType()));
+		}
+		else
+		{ /* no automatic tagging */ }
+		// 2. build the decoder state machine
 		state_machine_builder_.reset();
 		contexts_.back().mode_ = build_decoder_state_machine__;
 		type_assignment.setType(resolve(type_assignment.getType()));
@@ -47,6 +59,7 @@ Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
 	else if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
 	else if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); // can't select from a bit string
@@ -147,6 +160,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(BooleanType &bit_string_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	//TODO
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
 	else if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
@@ -156,12 +170,14 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BooleanType &bit_string_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(CharacterStringType &character_string_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// For character strings, the Listener does everything that needs to be done
 	return shared_ptr< TypeDescriptor >();
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	if (contexts_.back().mode_ == clone_if_choice__)
 	{
@@ -211,6 +227,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -256,6 +273,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// When cloning choices, we do not need to go any further than this, unless the underlying type is a CHOICE, in which case we will return a clone of the choice.
 	// Regardless of what we're doing, we need to resolve the type name to make sure it exists.
@@ -326,6 +344,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -342,6 +361,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_type_reference)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -357,6 +377,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_t
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_time_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -373,6 +394,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -391,6 +413,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// if resolving the underlying type does not return the same pointer as we had, that means it's been cloned. A named
 	// type is never a top-level type, however, because that is not possible within the grammar of ASN.1 (X.680), so we
@@ -402,6 +425,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_descriptor_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -417,6 +441,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_desc
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -433,6 +458,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -470,6 +496,17 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 	case collapse__ :
 	case clone_if_choice__ :
 		return shared_ptr< TypeDescriptor >();
+	case auto_tag__ :
+	{
+		// The visitor does everything that needs to be done for auto-tagging. As long as it evaluates to true, it
+		// has more to do, so we just keep running it on the type
+		AutoTagVisitor visitor(sequence_or_set_type.isSet());
+		while (visitor)
+		{
+			visitor(sequence_or_set_type);
+		}
+		break;
+	}
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
@@ -478,6 +515,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_set_of_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -493,6 +531,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -510,6 +549,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_constraint)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -527,6 +567,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_con
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -542,6 +583,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UTCTimeType &utc_time_type)
 {
+	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{

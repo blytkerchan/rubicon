@@ -37,6 +37,7 @@ public :
 		, named_bits_(named_bits)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return { Tag::universal__, 3 }; }
 	virtual std::vector< std::string > getPublicParents() const override { return std::vector< std::string >{ "Vlinder::Rubicon::BitString" }; }
 
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::BitString"; }

@@ -33,6 +33,7 @@ struct SequenceOrSetOfType : TypeDescriptor
 		, named_type_(std::move(type))
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return { Tag::universal__, is_set_ ? 17U : 16U }; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;

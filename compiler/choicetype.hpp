@@ -22,6 +22,7 @@ public :
 	{ /* no-op */ }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 
+	virtual Tag getTag() const override;
 	virtual bool requireExplicitTag() const override { return true; }
 	virtual std::set< std::string > getDependencies() const;
 

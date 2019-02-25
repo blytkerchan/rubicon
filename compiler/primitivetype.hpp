@@ -29,6 +29,7 @@ public :
 		, primitive_(primitive)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override;
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual std::string getTypeName() const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;

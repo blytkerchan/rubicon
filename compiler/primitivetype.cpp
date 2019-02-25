@@ -3,6 +3,38 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+/*virtual */Tag PrimitiveType::getTag() const/* override*/
+{
+	switch (primitive_)
+	{
+	case date__ :
+		return { Tag::universal__, 31 };
+	case date_time__ :
+		return { Tag::universal__, 33 };
+	case duration__ :
+		return { Tag::universal__, 34 };
+	case embedded_pdv__ :
+		return { Tag::universal__, 11 };
+	case external__ :
+		return { Tag::universal__, 8 };
+	case object_identifier__ :
+		return { Tag::universal__, 6 };
+	case octet_string__ :
+		return { Tag::universal__, 4 };
+	case oid_iri__ :
+		return { Tag::universal__, 35 };
+	case null__ :
+		return { Tag::universal__, 5 };
+	case relative_oid_iri__ :
+		return { Tag::universal__, 36 };
+	case relative_oid__ :
+		return { Tag::universal__, 13 };
+	case time__ :
+		return { Tag::universal__, 14 };
+	case time_of_day__ :
+		return { Tag::universal__, 32 };
+	}
+}
 /*virtual */std::string PrimitiveType::getTypeName() const/* override*/
 {
 	switch (primitive_)

@@ -63,11 +63,12 @@ public :
 
 private :
 	enum Mode {
-		  resolve__		// make sure all the names resolve, and we have everything we need to generate code
-		, collapse__		// collapse to the leaf primitive (has no effect on non-primitive types)
-		, clone_if_choice__	// clone if the type is a CHOICE, so we can tag it
-		, get_selected_type__
-		, build_decoder_state_machine__
+		  resolve__				// make sure all the names resolve, and we have everything we need to generate code
+		, collapse__				// collapse to the leaf primitive (has no effect on non-primitive types)
+		, clone_if_choice__			// clone if the type is a CHOICE, so we can tag it
+		, get_selected_type__			// retrieve the selected type
+		, auto_tag__				// apply automatic tagging
+		, build_decoder_state_machine__		// build the decoder state machine for the current type
 		};
 	struct Context
 	{

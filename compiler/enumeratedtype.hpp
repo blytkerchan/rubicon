@@ -19,6 +19,7 @@ public :
 		, extensible_(extensible)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return { Tag::universal__, 10 }; }
 	virtual std::vector< std::string > getPublicParents() const override { return std::vector< std::string >{ "Vlinder::Rubicon::Integer" }; }
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::Integer"; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }

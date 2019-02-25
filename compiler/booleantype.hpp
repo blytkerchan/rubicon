@@ -8,6 +8,7 @@ class BooleanType : public TypeDescriptor
 {
 public :
 	BooleanType(SourceLocation const &source_location);
+	virtual Tag getTag() const override { return { Tag::universal__, 1 }; }
 	virtual std::string getTypeName() const override;
 	virtual std::vector< std::string > getPublicParents() const override;
 	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;

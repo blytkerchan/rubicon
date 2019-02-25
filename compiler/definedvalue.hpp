@@ -12,6 +12,11 @@ public :
 		, name_(name)
 	{ /* no-op */ }
 
+	bool operator==(DefinedValue const &other) const
+	{
+		return name_ == other.name_;
+	}
+
 	std::string getTypeName() const override { return typeid(*this).name(); }
 	std::string generateInstance() const override { return name_; /*TODO may need some formatting*/ }
 

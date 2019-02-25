@@ -26,6 +26,7 @@ struct TypeWithConstraint : TypeDescriptor
 		, named_type_(type)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return type_->getTag(); }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }

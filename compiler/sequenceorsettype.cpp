@@ -1,6 +1,7 @@
 #include "sequenceorsettype.hpp"
 #include <algorithm>
 #include <stack>
+#include "autotagvisitor.hpp"
 
 using namespace std;
 
@@ -8,6 +9,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void SequenceOrSetType::ComponentType::generateInstance(ostream &os, string const &instance_name) const
 {
 	os << "\t" << getTypeName() << " " << (isOptional() ? "*" : "") << instance_name << ";\n";
+}
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(AutoTagVisitor &visitor)
+{
+	return visitor.visit(*this);
 }
 void SequenceOrSetType::NamedComponentType::generateHeaderGetterAndSetter(ostream &os) const
 {
@@ -92,6 +97,15 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 /*static */string SequenceOrSetType::NamedComponentType::toMemberName(string const &name)
 {
 	return toVariableName(name) + "_";
+}
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::NamedComponentType::visit(AutoTagVisitor &visitor)
+{
+	return visitor.visit(*this);
+}
+
+void SequenceOrSetType::visit(AutoTagVisitor &visitor)
+{
+	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
 }
 
 /*virtual */set< string > SequenceOrSetType::getDependencies() const

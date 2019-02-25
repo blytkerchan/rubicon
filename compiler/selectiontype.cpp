@@ -4,18 +4,27 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*TODO I don't remember enough about this code to know if the three following functions are implemented correctly*/
+/*TODO I don't remember enough about this code to know if the four following functions are implemented correctly
+ *     Pretty sure they're not: type_ should be a ChoiceType (if it's not, validation should have failed before any of
+ *     these are called) and the identifier we carry here (selection_) contains the name of the ChoiceType component 
+ *     type (member) that is selected. The getTag function should return the tag for that type, the hasTypeName function
+ *     should return whether that selected type has a name, etc. I should really implement getType(), then implement the
+ *     others as a function of getType(). */
+/*virtual */Tag SelectionType::getTag() const/* override*/
+{
+	return type_->getTag(); // probably wrong
+}
 /*virtual */bool SelectionType::hasTypeName() const/* override*/
 {
-	return type_->hasTypeName();
+	return type_->hasTypeName(); // probably wrong
 }
 /*virtual */std::shared_ptr< TypeDescriptor > SelectionType::getType() const
 {
-	return type_;
+	return type_; // probably wrong
 }
 /*virtual */std::string SelectionType::getTypeName() const/* override*/
 {
-	return type_->getTypeName();
+	return type_->getTypeName(); // probably wrong
 }
 /*virtual */void SelectionType::generateEncodeImplementation(std::ostream &os) const/* override*/
 {

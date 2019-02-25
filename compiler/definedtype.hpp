@@ -13,6 +13,7 @@ struct DefinedType : TypeDescriptor
 		, type_name_(type_name)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { throw std::logic_error("I should not have to answer this"); }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return true; }
 	virtual std::string getTypeName() const override { return type_name_; }

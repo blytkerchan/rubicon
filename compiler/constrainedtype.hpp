@@ -15,6 +15,7 @@ public :
 		, constraint_(constraint)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return type_->getTag(); }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 

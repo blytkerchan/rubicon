@@ -2,6 +2,7 @@
 #define rubicon_compiler_taggedtype_hpp
 
 #include "tag.hpp"
+#include "typedescriptor.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 struct TaggedType : TypeDescriptor
@@ -14,6 +15,7 @@ struct TaggedType : TypeDescriptor
 		, type_(type)
 	{ /* no-op */ }
 
+	virtual Tag getTag() const override { return tag_; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }

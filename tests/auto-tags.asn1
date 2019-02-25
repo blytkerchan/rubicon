@@ -1,0 +1,12 @@
+-- This test tests automatic tagging: the sequence below is not valid
+-- without automatic tagging, because all of the members are of the
+-- same type, are optional and are not tagged.
+AutoTaggingModule DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+	EXPORTS ALL;
+	MySequenceTye ::= SEQUENCE
+	{
+		firstValue INTEGER OPTIONAL,
+		secondValue INTEGER OPTIONAL,
+		thirdValue INTEGER OPTIONAL
+	}
+END

@@ -115,6 +115,8 @@ foreach(src_file ${preproc-SRC})
 endforeach()
 set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/arcidentifier.hpp
+	${PROJECT_SOURCE_DIR}/compiler/autotagvisitor.cpp
+	${PROJECT_SOURCE_DIR}/compiler/autotagvisitor.hpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/bitstringvalue.cpp
