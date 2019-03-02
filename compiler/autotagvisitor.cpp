@@ -107,22 +107,6 @@ AutoTagVisitor::Step AutoTagVisitor::next() const
 	}
 	return final__;
 }
-#if 0
-/*static */void AutoTagVisitor::emitWarning(SourceLocation const &source_location, char const *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	tracer__->trace(1, TRACE_ERROR)("%s:%u:%u: warning: ", source_location.filename_.c_str(), source_location.line_, source_location.offset_)(fmt, ap)("\n");
-	va_end(ap);
-}
-/*static */void AutoTagVisitor::emitError(SourceLocation const &source_location, char const *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	tracer__->trace(1, TRACE_ERROR)("%s:%u:%u: error: ", source_location.filename_.c_str(), source_location.line_, source_location.offset_)(fmt, ap)("\n");
-	va_end(ap);
-}
-#endif
 }}}
 
 
