@@ -131,6 +131,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/choicetype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/choicetype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/choicevalue.hpp
+	${PROJECT_SOURCE_DIR}/compiler/componentsofresolutionvisitor.cpp
+	${PROJECT_SOURCE_DIR}/compiler/componentsofresolutionvisitor.hpp
 	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/constrainedtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/constraint.hpp

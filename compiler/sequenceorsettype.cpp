@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <stack>
 #include "autotagvisitor.hpp"
+#include "componentsofresolutionvisitor.hpp"
 
 using namespace std;
 
@@ -11,6 +12,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	os << "\t" << getTypeName() << " " << (isOptional() ? "*" : "") << instance_name << ";\n";
 }
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(AutoTagVisitor &visitor)
+{
+	return visitor.visit(*this);
+}
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(ComponentsOfResolutionVisitor &visitor)
 {
 	return visitor.visit(*this);
 }
@@ -102,10 +107,82 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 {
 	return visitor.visit(*this);
 }
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::NamedComponentType::visit(ComponentsOfResolutionVisitor &visitor)
+{
+	return visitor.visit(*this);
+}
+
+/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getDependencies() const/* override*/
+{
+	assert(!"This should not be called");
+	return std::set< std::string >();
+}
+/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getStrongDependencies() const/* override*/
+{
+	assert(!"This should not be called");
+	return std::set< std::string >();
+}
+/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getWeakDependencies() const/* override*/
+{
+	assert(!"This should not be called");
+	return std::set< std::string >();
+}
+/* virtual */bool SequenceOrSetType::ComponentTypeList::hasTypeName() const/* override*/
+{
+	assert(!"This should not be called");
+	return false;
+}
+/* virtual */std::string SequenceOrSetType::ComponentTypeList::getTypeName() const/* override*/
+{
+	assert(!"This should not be called");
+	return std::string();
+}
+/* virtual */bool SequenceOrSetType::ComponentTypeList::isOptional() const/* override*/
+{
+	assert(!"This should not be called");
+	return false;
+}
+/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(AutoTagVisitor &visitor)/* override*/
+{
+	assert(!"This should not be called");
+	return std::shared_ptr< ComponentType >();
+}
+/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(ComponentsOfResolutionVisitor &visitor)/* override*/
+{
+	assert(!"This should not be called");
+	return std::shared_ptr< ComponentType >();
+}
 
 void SequenceOrSetType::visit(AutoTagVisitor &visitor)
 {
 	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
+}
+
+void SequenceOrSetType::visit(ComponentsOfResolutionVisitor &visitor)
+{
+	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
+}
+void SequenceOrSetType::flatten()
+{
+	decltype(component_types_) new_component_types;
+	for (auto component_type : component_types_)
+	{
+		assert(!dynamic_pointer_cast< ComponentsOfType >(component_type));
+		if (dynamic_pointer_cast< NamedComponentType >(component_type))
+		{
+			new_component_types.push_back(component_type);
+		}
+		else if (dynamic_pointer_cast< ComponentTypeList >(component_type))
+		{
+			auto component_type_list(static_pointer_cast< ComponentTypeList >(component_type));
+			copy(component_type_list->components_.begin(), component_type_list->components_.end(), back_inserter(new_component_types));
+		}
+		else
+		{
+			assert(!"This code should be unreachable");
+		}
+	}
+	component_types_ = new_component_types;
 }
 
 /*virtual */set< string > SequenceOrSetType::getDependencies() const

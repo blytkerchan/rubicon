@@ -1,0 +1,11 @@
+ComponentsOf DEFINITIONS ::=
+BEGIN
+	Type1 ::= SEQUENCE {
+		value1 INTEGER,
+		COMPONENTS OF Type2
+	}
+	Type2 ::= SEQUENCE {
+		value1 INTEGER,
+		COMPONENTS OF Type1
+	}
+END

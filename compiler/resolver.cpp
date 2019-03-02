@@ -5,6 +5,7 @@
 #include "autotagvisitor.hpp"
 #include "bitstringtype.hpp"
 #include "choicetype.hpp"
+#include "componentsofresolutionvisitor.hpp"
 #include "constrainedtype.hpp"
 #include "definedtype.hpp"
 #include "generalizedtimetype.hpp"
@@ -493,6 +494,12 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 	switch (contexts_.back().mode_)
 	{
 	case resolve__ :
+	{
+		ComponentsOfResolutionVisitor visitor(*listener_);
+		visitor(sequence_or_set_type);
+		sequence_or_set_type.flatten();
+		return shared_ptr< TypeDescriptor >();
+	}
 	case collapse__ :
 	case clone_if_choice__ :
 		return shared_ptr< TypeDescriptor >();
