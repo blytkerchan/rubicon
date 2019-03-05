@@ -490,9 +490,18 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_set_type)
 {
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
+	case build_decoder_state_machine__ :
+	{
+		/* Before we an tell the state machine builder what to build, we need to know three things:
+		 * 1. how many members does the sequence or set have?
+		 * 2. how many of have tags already defined for them?
+		 * 3. for those that do not have tags already defined for them, what are the tags going to be?
+		 * 4. what are all the permutations we can expect to find those tags in in the input? */
+		auto component_type_count(sequence_or_set_type.getComponentTypeCount());
+		return shared_ptr< TypeDescriptor >();
+	}
 	case resolve__ :
 	{
 		ComponentsOfResolutionVisitor visitor(*listener_);

@@ -154,6 +154,7 @@ public :
 	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
 	bool isSet() const { return is_set_; }
+	ComponentTypes::size_type getComponentTypeCount() const noexcept { return component_types_.size(); } 
 
 private :
 	bool is_set_ = false;
