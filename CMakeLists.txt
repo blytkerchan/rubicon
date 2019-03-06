@@ -199,6 +199,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/statemachinebuilder.hpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/tag.cpp
 	${PROJECT_SOURCE_DIR}/compiler/tag.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tuple.hpp
 	${PROJECT_SOURCE_DIR}/compiler/typeassignment.cpp

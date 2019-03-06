@@ -15,23 +15,21 @@ struct Tag
 		, private__
 		, context_specific__
 		};
-	Tag(Class a_class, unsigned int class_number)
-		: class_(a_class)
-		, class_number_(class_number)
-	{ /* no-op */ }
-	Tag(Class a_class, DefinedValue const &class_number)
-		: class_(a_class)
-		, class_number_(class_number)
-	{ /* no-op */ }
 
-	bool operator==(Tag const &other) const
-	{
-		return (class_ == other.class_) && (class_number_ == other.class_number_);
-	}
+	Tag(Class a_class, unsigned int class_number);
+	Tag(Class a_class, DefinedValue const &class_number);
+
+	int compare(Tag const &other) const;
 
 	Class class_;
 	boost::variant< unsigned int, DefinedValue > class_number_;
 };
+bool operator==(Tag const &lhs, Tag const &rhs);
+bool operator!=(Tag const &lhs, Tag const &rhs);
+bool operator<(Tag const &lhs, Tag const &rhs);
+bool operator<=(Tag const &lhs, Tag const &rhs);
+bool operator>(Tag const &lhs, Tag const &rhs);
+bool operator>=(Tag const &lhs, Tag const &rhs);
 }}}
 
 #endif
