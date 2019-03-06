@@ -494,12 +494,98 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 	{
 	case build_decoder_state_machine__ :
 	{
-		/* Before we an tell the state machine builder what to build, we need to know three things:
-		 * 1. how many members does the sequence or set have?
-		 * 2. how many of have tags already defined for them?
-		 * 3. for those that do not have tags already defined for them, what are the tags going to be?
-		 * 4. what are all the permutations we can expect to find those tags in in the input? */
-		auto component_type_count(sequence_or_set_type.getComponentTypeCount());
+		auto component_types(sequence_or_set_type.getComponentTypes());
+		{	// sanity check: at this point, all component types should be NamedTypes
+			auto found(
+				find_if(
+					  component_types.begin()
+					, component_types.end()
+					, [](decltype(component_types)::value_type const &component_type){
+							return dynamic_pointer_cast< SequenceOrSetType::NamedComponentType >(component_type).get() == nullptr;
+						}
+					)
+				);
+			if (found != component_types.end())
+			{
+				emitError((*found)->getSourceLocation(), "Unresolved component type");
+				throw InvalidDefinition("Unresolved component type");
+			}
+			else
+			{ /* all is well */ }
+		}
+		{	// sanity check: none of the component type tags should be Universal:0
+			auto found(
+				  find_if(
+					  component_types.begin()
+					, component_types.end()
+					, [](decltype(component_types)::value_type const &component_type){
+							return component_type->getTag() == Tag(Tag::universal__, 0);
+						}
+					)
+				);
+			if (found != component_types.end())
+			{
+				emitError((*found)->getSourceLocation(), "Unresolved component type");
+				throw InvalidDefinition("Unresolved component type");
+			}
+			else
+			{ /* all is well */ }
+		}
+		if (sequence_or_set_type.isSet())
+		{
+			state_machine_builder_.commit();
+			set< Tag > tags;
+			for (auto component_type : component_types)
+			{
+				Tag tag(component_type->getTag());
+				if (tags.find(tag) != tags.end()) // sanity check: none of the types should have the same tag
+				{
+					emitError(component_type->getSourceLocation(), "Duplicate tag. Please us automatic tagging or tag manually.");
+					throw InvalidDefinition("Duplicate tag");
+				}
+				else
+				{ /* OK so far */ }
+				tags.insert(tag);
+				state_machine_builder_.addToState(tag.class_, boost::get< unsigned int >(tag.class_number_));
+			}
+			state_machine_builder_.commit();
+		}
+		else
+		{	// sequence
+			state_machine_builder_.commit();
+			typedef decltype(component_types)::const_iterator Iterator;
+			for (
+				  Iterator first(component_types.begin())
+				; first != component_types.end()
+				; ++first
+				)
+			{
+				if ((*first)->optional())
+				{
+					set< Tag > tags;
+					for (Iterator curr(first); curr != component_types.end(); ++curr)
+					{
+						Tag tag((*curr)->getTag());
+						if (tags.find(tag) != tags.end()) // sanity check: none of the types should have the same tag
+						{
+							emitError((*curr)->getSourceLocation(), "Duplicate tag. Please us automatic tagging or tag manually.");
+							throw InvalidDefinition("Duplicate tag");
+						}
+						else
+						{ /* OK so far */ }
+						tags.insert(tag);
+						state_machine_builder_.addToState(tag.class_, boost::get< unsigned int >(tag.class_number_));
+						if (!(*curr)->optional()) break;
+					}
+					state_machine_builder_.commit();
+				}
+				else
+				{
+					Tag tag((*first)->getTag());
+					state_machine_builder_.addState(tag.class_, boost::get< unsigned int >(tag.class_number_));
+				}
+			}
+		}
 		return shared_ptr< TypeDescriptor >();
 	}
 	case resolve__ :

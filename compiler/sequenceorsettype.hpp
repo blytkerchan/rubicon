@@ -34,6 +34,7 @@ public :
 		virtual bool hasDefaultValue() const { false; }
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) = 0;
+		virtual Tag getTag() const noexcept = 0;
 
 		SourceLocation source_location_;
 	};
@@ -55,6 +56,7 @@ public :
 		virtual bool optional() const override { return false; };
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual Tag getTag() const noexcept override { return type_->getTag(); }
 
 		Type type_;
 	};
@@ -96,6 +98,7 @@ public :
 		void generateSetterImplementation(std::string const &type_name, std::ostream &os) const;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual Tag getTag() const noexcept override { return named_type_.getTag(); }
 
 		static std::string toVariableName(std::string const &name);
 		static std::string toMemberName(std::string const &name);
@@ -123,6 +126,7 @@ public :
 		virtual bool optional() const override;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual Tag getTag() const noexcept override { return Tag(Tag::universal__, 0); }
 
 		ComponentTypes components_;
 	};

@@ -3,7 +3,7 @@
 -- same type, are optional and are not tagged.
 AutoTaggingModule DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 	EXPORTS ALL;
-	MySequenceTye ::= SEQUENCE
+	MySequenceType ::= SEQUENCE
 	{
 		firstValue INTEGER OPTIONAL,
 		secondValue INTEGER OPTIONAL,
