@@ -9,7 +9,7 @@ using namespace std;
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void SequenceOrSetType::ComponentType::generateInstance(ostream &os, string const &instance_name) const
 {
-	os << "\t" << getTypeName() << " " << (isOptional() ? "*" : "") << instance_name << ";\n";
+	os << "\t" << getTypeName() << " " << (optional() ? "*" : "") << instance_name << ";\n";
 }
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(AutoTagVisitor &visitor)
 {
@@ -23,7 +23,7 @@ void SequenceOrSetType::NamedComponentType::generateHeaderGetterAndSetter(ostrea
 {
 	string name(getName());
 	name[0] = toupper(name[0]);
-	os << "\t" << getTypeName() << ((isOptional() && !hasDefaultValue()) ? " const* " : " ") << "get" << name << "() const;\n";
+	os << "\t" << getTypeName() << ((optional() && !hasDefaultValue()) ? " const* " : " ") << "get" << name << "() const;\n";
 	os << "\t" << "void set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ");\n";
 }
 void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string const &type_name, ostream &os) const
@@ -31,10 +31,10 @@ void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string 
 	string name(getName());
 	name[0] = toupper(name[0]);
 	os <<
-		getTypeName() << ((isOptional() && !hasDefaultValue()) ? " const* " : " ") << type_name <<  "::get" << name << "() const\n"
+		getTypeName() << ((optional() && !hasDefaultValue()) ? " const* " : " ") << type_name <<  "::get" << name << "() const\n"
 		"{\n"
 		;
-	if (isOptional() && hasDefaultValue())
+	if (optional() && hasDefaultValue())
 	{
 		os << "\treturn " << toMemberName(getName()) << " ? " << toMemberName(getName()) << " : " << default_value_->generateInstance() << "\n";
 	}
@@ -53,7 +53,7 @@ void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string 
 		"void " << type_name <<  "::set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ")\n"
 		"{\n"
 		;
-	if (isOptional())
+	if (optional())
 	{
 		os <<
 			"\tusing namespace std;\n"
@@ -79,7 +79,7 @@ void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string 
 }
 void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const
 {
-	os << "\t" << getTypeName() << (isOptional() ? " *" : " ") << toMemberName(getName()) << ";\n";
+	os << "\t" << getTypeName() << (optional() ? " *" : " ") << toMemberName(getName()) << ";\n";
 }
 /*static */string SequenceOrSetType::NamedComponentType::toVariableName(string const &name)
 {
@@ -137,7 +137,7 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	assert(!"This should not be called");
 	return std::string();
 }
-/* virtual */bool SequenceOrSetType::ComponentTypeList::isOptional() const/* override*/
+/* virtual */bool SequenceOrSetType::ComponentTypeList::optional() const/* override*/
 {
 	assert(!"This should not be called");
 	return false;
@@ -264,7 +264,7 @@ void SequenceOrSetType::flatten()
 	bool retval(false);
 	for (auto component_type : component_types_)
 	{
-		retval |= component_type->isOptional();
+		retval |= component_type->optional();
 	}	
 
 	return retval;
@@ -307,7 +307,7 @@ void SequenceOrSetType::flatten()
 		stack< string > optional_members;
 		for (auto component_type : component_types_)
 		{
-			if (component_type->isOptional())
+			if (component_type->optional())
 			{
 				auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
 				if (named_component_type)
@@ -338,7 +338,7 @@ void SequenceOrSetType::flatten()
 		stack< string > optional_members;
 		for (auto component_type : component_types_)
 		{
-			if (component_type->isOptional())
+			if (component_type->optional())
 			{
 				auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
 				if (named_component_type)
@@ -374,7 +374,7 @@ void SequenceOrSetType::flatten()
 		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
 		if (named_component_type)
 		{
-			if (component_type->isOptional())
+			if (component_type->optional())
 			{
 				os << "\tswap(" << NamedComponentType::toMemberName(named_component_type->getName()) << ", other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
 			}

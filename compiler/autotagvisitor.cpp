@@ -72,7 +72,7 @@ shared_ptr< SequenceOrSetType::ComponentType > AutoTagVisitor::visit(SequenceOrS
 			}
 			else
 			{ /* no need to check */ }
-			latest_member_.optional_ = named_component_type.isOptional();
+			latest_member_.optional_ = named_component_type.optional();
 			latest_member_.tag_ = named_component_type.named_type_.getTag();
 		}
 	case tag_types__ :

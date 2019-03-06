@@ -30,7 +30,7 @@ public :
 		virtual bool hasTypeName() const = 0;
 		virtual std::string getTypeName() const = 0;
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
-		virtual bool isOptional() const = 0;
+		virtual bool optional() const = 0;
 		virtual bool hasDefaultValue() const { false; }
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) = 0;
@@ -48,11 +48,11 @@ public :
 		virtual bool root() const noexcept override { return false; }
 		virtual void setRoot(bool value) noexcept override { assert(!value); }
 		virtual std::set< std::string > getDependencies() const override { return hasTypeName() ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
-		virtual std::set< std::string > getStrongDependencies() const override { return (!isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
-		virtual std::set< std::string > getWeakDependencies() const override { return (isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getStrongDependencies() const override { return (!optional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getWeakDependencies() const override { return (optional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
 		virtual bool hasTypeName() const override { return type_->hasTypeName(); }
 		virtual std::string getTypeName() const override { return type_->getTypeName(); }
-		virtual bool isOptional() const override { return false; };
+		virtual bool optional() const override { return false; };
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
 
@@ -82,13 +82,13 @@ public :
 		virtual bool root() const noexcept override { return root_; }
 		virtual void setRoot(bool value) noexcept override { root_ = value; }
 		virtual std::set< std::string > getDependencies() const override { return hasTypeName() ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
-		virtual std::set< std::string > getStrongDependencies() const override { return (!isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
-		virtual std::set< std::string > getWeakDependencies() const override { return (isOptional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getStrongDependencies() const override { return (!optional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
+		virtual std::set< std::string > getWeakDependencies() const override { return (optional() && hasTypeName()) ? std::set< std::string >{ getTypeName() } : std::set< std::string >(); }
 		virtual bool hasTypeName() const override { return named_type_.hasTypeName(); }
 		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
 		std::string getName() const { return named_type_.getName(); }
 		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { /*named_type_.generateEncodeImplementation(os, member_name);*/ }
-		virtual bool isOptional() const override { return optional_; }
+		virtual bool optional() const override { return optional_; }
 		virtual bool hasDefaultValue() const override { return (bool)default_value_; }
 		void generateHeaderGetterAndSetter(std::ostream &os) const;
 		void generateMemberDeclarations(std::ostream &os) const;
@@ -120,7 +120,7 @@ public :
 		virtual std::set< std::string > getWeakDependencies() const override;
 		virtual bool hasTypeName() const override;
 		virtual std::string getTypeName() const override;
-		virtual bool isOptional() const override;
+		virtual bool optional() const override;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
 
@@ -154,7 +154,7 @@ public :
 	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
 	bool isSet() const { return is_set_; }
-	ComponentTypes::size_type getComponentTypeCount() const noexcept { return component_types_.size(); } 
+	ComponentTypes getComponentTypes() const noexcept { return component_types_; } 
 
 private :
 	bool is_set_ = false;
