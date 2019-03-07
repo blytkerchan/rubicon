@@ -121,50 +121,50 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	return visitor.visit(*this);
 }
 
-/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getDependencies() const/* override*/
+/* virtual */set< string > SequenceOrSetType::ComponentTypeList::getDependencies() const/* override*/
 {
 	assert(!"This should not be called");
-	return std::set< std::string >();
+	return set< string >();
 }
-/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getStrongDependencies() const/* override*/
+/* virtual */set< string > SequenceOrSetType::ComponentTypeList::getStrongDependencies() const/* override*/
 {
 	assert(!"This should not be called");
-	return std::set< std::string >();
+	return set< string >();
 }
-/* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getWeakDependencies() const/* override*/
+/* virtual */set< string > SequenceOrSetType::ComponentTypeList::getWeakDependencies() const/* override*/
 {
 	assert(!"This should not be called");
-	return std::set< std::string >();
+	return set< string >();
 }
 /* virtual */bool SequenceOrSetType::ComponentTypeList::hasTypeName() const/* override*/
 {
 	assert(!"This should not be called");
 	return false;
 }
-/* virtual */std::string SequenceOrSetType::ComponentTypeList::getTypeName() const/* override*/
+/* virtual */string SequenceOrSetType::ComponentTypeList::getTypeName() const/* override*/
 {
 	assert(!"This should not be called");
-	return std::string();
+	return string();
 }
 /* virtual */bool SequenceOrSetType::ComponentTypeList::optional() const/* override*/
 {
 	assert(!"This should not be called");
 	return false;
 }
-/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(AutoTagVisitor &visitor)/* override*/
+/* virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(AutoTagVisitor &visitor)/* override*/
 {
 	assert(!"This should not be called");
-	return std::shared_ptr< ComponentType >();
+	return shared_ptr< ComponentType >();
 }
-/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(ComponentsOfResolutionVisitor &visitor)/* override*/
+/* virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(ComponentsOfResolutionVisitor &visitor)/* override*/
 {
 	assert(!"This should not be called");
-	return std::shared_ptr< ComponentType >();
+	return shared_ptr< ComponentType >();
 }
-/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(TagResolutionVisitor &visitor)/* override*/
+/* virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(TagResolutionVisitor &visitor)/* override*/
 {
 	assert(!"This should not be called");
-	return std::shared_ptr< ComponentType >();
+	return shared_ptr< ComponentType >();
 }
 
 void SequenceOrSetType::visit(AutoTagVisitor &visitor)

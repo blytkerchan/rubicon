@@ -409,7 +409,7 @@ shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string
 				}
 				else
 				{ /* all is well */ }
-				if (integer_value->getValue() > std::numeric_limits< decltype(decltype(named_bits)::value_type::bit_) >::max())
+				if (integer_value->getValue() > numeric_limits< decltype(decltype(named_bits)::value_type::bit_) >::max())
 				{
 					SourceLocation source_location(named_bit);
 					tracer__->trace(1, TRACE_ERROR, "%s:%u:%u: %s refers to a value that is too large to be a bit index\n", source_location.filename_.c_str(), source_location.line_, source_location.offset_, named_bit->defined_value()->IDENTIFIER()->getText().c_str());
@@ -426,7 +426,7 @@ shared_ptr< TypeDescriptor > Listener::parseBitStringType(asn1Parser::Bit_string
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< BitStringType >(ctx, named_bits);
 }
-std::shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser::Character_string_typeContext *ctx)
+shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser::Character_string_typeContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -498,7 +498,7 @@ std::shared_ptr< TypeDescriptor > Listener::parseCharacterStringType(asn1Parser:
 	}
 }
 
-std::shared_ptr< TypeDescriptor > Listener::parseChoiceType(asn1Parser::Choice_typeContext *ctx)
+shared_ptr< TypeDescriptor > Listener::parseChoiceType(asn1Parser::Choice_typeContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -553,7 +553,7 @@ NamedType Listener::parseNamedType(asn1Parser::Named_typeContext *ctx)
 	auto type(parseType(ctx->type()));
 	return NamedType(ctx, name, type);
 }
-std::shared_ptr< TypeDescriptor > Listener::parseEnumeratedType(asn1Parser::Enumerated_typeContext *ctx)
+shared_ptr< TypeDescriptor > Listener::parseEnumeratedType(asn1Parser::Enumerated_typeContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1356,7 +1356,7 @@ shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
 			value /= 10;
 		}
 		value += whole_part;
-		double const e(std::pow(10, negative_exponent ? -((int)exponent) : (int)exponent));
+		double const e(pow(10, negative_exponent ? -((int)exponent) : (int)exponent));
 		value *= e;
 		return make_shared< RealValue >(ctx, value);
 	}

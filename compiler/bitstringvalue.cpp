@@ -39,7 +39,7 @@ BitStringValue::BitStringValue(SourceLocation const &source_location, Directory 
 	 * 22.20 The CONTAINING alternative shall be used if there 
 	 * is a contents constraint on the bitstring type which does
 	 * not contain ENCODED BY. */
-	throw std::logic_error("Not yet implemented");
+	throw logic_error("Not yet implemented");//TODO
 }
 BitStringValue::BitStringValue(SourceLocation const &source_location, Directory const &directory, shared_ptr< TypeDescriptor > const &type, vector< string > const &identifiers)
 	: Value(source_location)

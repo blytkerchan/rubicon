@@ -36,15 +36,15 @@ Builder& Builder::operator()(istream &is)
 	return *this;
 }
 
-std::string Builder::getModuleName() const
+string Builder::getModuleName() const
 {
 	return listener_->getModuleName();
 }
-std::vector< TypeAssignment > Builder::getTypeAssignments() const
+vector< TypeAssignment > Builder::getTypeAssignments() const
 {
 	return listener_->getTypeAssignments();
 }
-std::vector< ValueAssignment > Builder::getValueAssignments() const
+vector< ValueAssignment > Builder::getValueAssignments() const
 {
 	return listener_->getValueAssignments();
 }

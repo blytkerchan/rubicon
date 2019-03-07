@@ -67,6 +67,13 @@ shared_ptr< SequenceOrSetType::ComponentType > TagResolutionVisitor::visit(Seque
                                 done = true;
                         }
                 } while(!done && tries);
+                if (!done)
+                {
+                        emitError(source_location, "Value not found: %s", identifier.c_str());
+                        throw InvalidDefinition("Value not found");
+                }
+                else
+                { /* all is well */ }
         }
         else
         { /* unsigned int */ }

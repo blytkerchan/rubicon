@@ -11,7 +11,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << typeid(*this).name() << " generateEncodeImplementation(os)"<< endl;
 }
-/*virtual */void TypeDescriptor::generateDataMembers(std::ostream &os) const
+/*virtual */void TypeDescriptor::generateDataMembers(ostream &os) const
 {
 	os << typeid(*this).name() << " generateDataMembers(os)"<< endl;
 }

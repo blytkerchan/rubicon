@@ -70,7 +70,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	return retval;
 }
 
-/*virtual */void ChoiceType::generateEncodeImplementation(std::ostream &os) const/* override*/
+/*virtual */void ChoiceType::generateEncodeImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO" << endl;
 }
@@ -80,7 +80,7 @@ unsigned int ChoiceType::getCloneID() const
 	return clone_id_;
 }
 
-std::string ChoiceType::getCloneName() const
+string ChoiceType::getCloneName() const
 {
 	pre_condition(isClone());
 	return clone_name_;

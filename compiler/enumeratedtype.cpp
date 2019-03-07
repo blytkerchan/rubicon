@@ -5,11 +5,11 @@ using namespace std;
 namespace alg = boost::algorithm;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*virtual */void EnumeratedType::generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const/* override*/
+/*virtual */void EnumeratedType::generateAlternateConstructorDeclarations(ostream &os, string const &class_name) const/* override*/
 {
         os << "\t" << class_name << "(Vlinder::Rubicon::Integer const &value);\n";
 }
-/*virtual */void EnumeratedType::generatePublicStaticMembers(std::ostream &os) const/* override*/
+/*virtual */void EnumeratedType::generatePublicStaticMembers(ostream &os) const/* override*/
 {
         for_each(
                   values_.begin()
@@ -19,22 +19,22 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
                         }
                 );
 }
-/*virtual */void EnumeratedType::generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const/* override*/
+/*virtual */void EnumeratedType::generateAlternateConstructorImplementations(ostream &os, string const &class_name) const/* override*/
 {
         os << class_name << "::" << class_name << "(Vlinder::Rubicon::Integer const &value)\n"
                 << "\t: Vlinder::Rubicon::Integer(value)\n"
                 << "{ /* no-op */ }\n"
                 ;
 }
-/*virtual */void EnumeratedType::generateSwapparatorImplementation(std::ostream &os) const/* override*/
+/*virtual */void EnumeratedType::generateSwapparatorImplementation(ostream &os) const/* override*/
 {
         os << "\tVlinder::Rubicon::Integer::swap(other);\n";
 }
-/*virtual */void EnumeratedType::generateEncodeImplementation(std::ostream &os) const/* override*/
+/*virtual */void EnumeratedType::generateEncodeImplementation(ostream &os) const/* override*/
 {
         os << "\tder_encoder.encodeEnumerated(*this);\n";
 }
-/*virtual */void EnumeratedType::generateCompareImplementation(std::ostream &os) const/* override*/
+/*virtual */void EnumeratedType::generateCompareImplementation(ostream &os) const/* override*/
 {
 	os << "\treturn Vlinder::Rubicon::Integer::compare(other);\n";
 }

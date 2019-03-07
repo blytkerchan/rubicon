@@ -221,7 +221,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 		case 1 : // VersionedTypeList
 			// we don't do versioned type lists yet, so fall through to the logic error
 		default :
-			throw std::logic_error("Unexpected type in variant");
+			throw logic_error("Unexpected type in variant");
 		}
 	}
 	//TODO step 2

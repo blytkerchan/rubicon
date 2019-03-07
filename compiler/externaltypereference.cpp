@@ -3,7 +3,7 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-/*virtual */void ExternalTypeReference::generateEncodeImplementation(std::ostream &os) const/* override*/
+/*virtual */void ExternalTypeReference::generateEncodeImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO" << endl;
 }

@@ -260,7 +260,7 @@ void Generator::generateDecoderImplementation()
 	ofs << "}\n";
 	closeNamespace(ofs);
 }
-void Generator::generateBuilderDeclaration(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateBuilderDeclaration(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs
 		<< "class " << type_assignment.getName() << "Builder : private Vlinder::Rubicon::DERDecoder\n"
@@ -303,7 +303,7 @@ void Generator::generateBuilderDeclaration(std::ostream &ofs, TypeAssignment con
 		<< "};\n"
 		;
 }
-void Generator::generateBuilderImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateBuilderImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	auto state_machine(type_assignment.getType()->getStateMachine());
 	assert(state_machine);
@@ -457,7 +457,7 @@ void Generator::openIncludeGuard(ostream &ofs, TypeAssignment const &type_assign
 	ofs << "#ifndef " << guard << "\n";
 	ofs << "#define " << guard << "\n\n";
 }
-void Generator::openIncludeGuard(std::ostream &ofs, ValueAssignment const &value_assignment) const
+void Generator::openIncludeGuard(ostream &ofs, ValueAssignment const &value_assignment) const
 {
 	string const guard(
 		  string("generated_")
@@ -487,7 +487,7 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment con
 		;
 	ofs << "\n";
 }
-void Generator::generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignment const &value_assignment) const
+void Generator::generateHeaderIncludeDirectives(ostream &ofs, ValueAssignment const &value_assignment) const
 {
 	for (auto dependency : value_assignment.getDependencies())
 	{
@@ -498,7 +498,7 @@ void Generator::generateHeaderIncludeDirectives(std::ostream &ofs, ValueAssignme
 		;
 	ofs << "\n";
 }
-void Generator::generateHeaderForwardDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateHeaderForwardDeclarations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	ofs << "namespace Vlinder { namespace Rubicon { class DEREncoder; }}\n";
 }
@@ -646,23 +646,23 @@ void Generator::generateSwapparatorImplementation(ostream &ofs, TypeAssignment c
 {
 	type_assignment.generateSwapparatorImplementation(ofs);
 }
-void Generator::generateGetterAndSetterImplementations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateGetterAndSetterImplementations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateGetterAndSetterImplementations(ofs);
 }
-void Generator::generateEncodeImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateEncodeImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateEncodeImplementation(ofs);
 }
-void Generator::generateDeclaration(std::ostream &os, ValueAssignment const &value_assignment) const
+void Generator::generateDeclaration(ostream &os, ValueAssignment const &value_assignment) const
 {
 	value_assignment.generateDeclaration(os);
 }
-void Generator::generateDefinition(std::ostream &os, ValueAssignment const &value_assignment) const
+void Generator::generateDefinition(ostream &os, ValueAssignment const &value_assignment) const
 {
 	value_assignment.generateDefinition(os);
 }
-void Generator::generateComparisonOperatorDeclarations(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateComparisonOperatorDeclarations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	string operators[] = { "==", "!=", "<", "<=", ">", ">=" };
 	for (auto op : operators)
@@ -670,11 +670,11 @@ void Generator::generateComparisonOperatorDeclarations(std::ostream &ofs, TypeAs
 		ofs << "bool operator" << op << "(" << type_assignment.getName() << " const &lhs, " << type_assignment.getName() << " const &rhs);\n";
 	}
 }
-void Generator::generateCompareImplementation(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateCompareImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateCompareImplementation(ofs);
 }
-void Generator::generateComparisonOperatorDefinitions(std::ostream &ofs, TypeAssignment const &type_assignment) const
+void Generator::generateComparisonOperatorDefinitions(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	string operators[] = { "==", "!=", "<", "<=", ">", ">=" };
 	for (auto op : operators)

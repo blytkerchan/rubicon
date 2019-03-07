@@ -1,7 +1,9 @@
 #include "typeassignment.hpp"
 
+using namespace std;
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-void TypeAssignment::generateCopyConstructorImplementation(std::ostream &os) const
+void TypeAssignment::generateCopyConstructorImplementation(ostream &os) const
 {
 	if (hasOptionalMembers())
 	{
@@ -12,11 +14,11 @@ void TypeAssignment::generateCopyConstructorImplementation(std::ostream &os) con
 	else
 	{ /* no optional members - default copy constructor */ }
 }
-void TypeAssignment::generateAlternateConstructorImplementations(std::ostream &os) const
+void TypeAssignment::generateAlternateConstructorImplementations(ostream &os) const
 {
 	type_descriptor_->generateAlternateConstructorImplementations(os, name_);
 }
-void TypeAssignment::generateDestructorImplementation(std::ostream &os) const
+void TypeAssignment::generateDestructorImplementation(ostream &os) const
 {
 	if (hasOptionalMembers())
 	{
@@ -27,7 +29,7 @@ void TypeAssignment::generateDestructorImplementation(std::ostream &os) const
 	else
 	{ /* no optional members - default copy constructor */ }
 }
-void TypeAssignment::generateAssignmentOperatorImplementation(std::ostream &os) const
+void TypeAssignment::generateAssignmentOperatorImplementation(ostream &os) const
 {
 	if (hasOptionalMembers())
 	{
@@ -41,7 +43,7 @@ void TypeAssignment::generateAssignmentOperatorImplementation(std::ostream &os) 
 	else
 	{ /* no optional members - default copy constructor */ }
 }
-void TypeAssignment::generateSwapparatorImplementation(std::ostream &os) const
+void TypeAssignment::generateSwapparatorImplementation(ostream &os) const
 {
 	os <<
 		getName() << "& " << getName() << "::swap(" << getName() << " &other)\n"
@@ -53,18 +55,18 @@ void TypeAssignment::generateSwapparatorImplementation(std::ostream &os) const
 		"}\n"
 		;
 }
-void TypeAssignment::generateGetterAndSetterImplementations(std::ostream &ofs) const
+void TypeAssignment::generateGetterAndSetterImplementations(ostream &ofs) const
 {
 	type_descriptor_->generateGetterAndSetterImplementations(getName(), ofs);
 }
-void TypeAssignment::generateEncodeImplementation(std::ostream &ofs) const
+void TypeAssignment::generateEncodeImplementation(ostream &ofs) const
 {
 	ofs << "void " << getName() << "::encode(DEREncoder &der_encoder) const\n";
 	ofs << "{\n";
 	type_descriptor_->generateEncodeImplementation(ofs);
 	ofs << "}\n";
 }
-void TypeAssignment::generateCompareImplementation(std::ostream &ofs) const
+void TypeAssignment::generateCompareImplementation(ostream &ofs) const
 {
 	ofs << "int " << getName() << "::compare(" << getName() << " const &other) const\n";
 	ofs << "{\n";

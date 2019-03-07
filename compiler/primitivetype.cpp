@@ -35,7 +35,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 		return { Tag::universal__, 32 };
 	}
 }
-/*virtual */std::string PrimitiveType::getTypeName() const/* override*/
+/*virtual */string PrimitiveType::getTypeName() const/* override*/
 {
 	switch (primitive_)
 	{
@@ -61,7 +61,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	}
 	throw logic_error("Unknown primitive type");
 }
-/*virtual */void PrimitiveType::generateCopyConstructorImplementation(std::ostream &os) const/* override*/
+/*virtual */void PrimitiveType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	cout << "//TODO " << typeid(*this).name() << endl;
 }

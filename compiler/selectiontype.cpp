@@ -18,19 +18,19 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	return type_->hasTypeName(); // probably wrong
 }
-/*virtual */std::shared_ptr< TypeDescriptor > SelectionType::getType() const
+/*virtual */shared_ptr< TypeDescriptor > SelectionType::getType() const
 {
 	return type_; // probably wrong
 }
-/*virtual */std::string SelectionType::getTypeName() const/* override*/
+/*virtual */string SelectionType::getTypeName() const/* override*/
 {
 	return type_->getTypeName(); // probably wrong
 }
-/*virtual */void SelectionType::generateEncodeImplementation(std::ostream &os) const/* override*/
+/*virtual */void SelectionType::generateEncodeImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }
-/*virtual */void SelectionType::generateCopyConstructorImplementation(std::ostream &os) const/* override*/
+/*virtual */void SelectionType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }

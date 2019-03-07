@@ -29,7 +29,7 @@ void AutoTagVisitor::operator()(shared_ptr< SequenceOrSetType::ComponentType > &
 }
 shared_ptr< SequenceOrSetType::ComponentType > AutoTagVisitor::visit(SequenceOrSetType::ComponentsOfType &components_of_type)
 {
-	throw std::logic_error("ComponentsOfType should have been resolved by now");
+	throw logic_error("ComponentsOfType should have been resolved by now");
 	return shared_ptr< SequenceOrSetType::ComponentType >();
 }
 shared_ptr< SequenceOrSetType::ComponentType > AutoTagVisitor::visit(SequenceOrSetType::NamedComponentType &named_component_type)
