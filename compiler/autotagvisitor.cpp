@@ -75,6 +75,7 @@ shared_ptr< SequenceOrSetType::ComponentType > AutoTagVisitor::visit(SequenceOrS
 			latest_member_.optional_ = named_component_type.optional();
 			latest_member_.tag_ = named_component_type.named_type_.getTag();
 		}
+		break;
 	case tag_types__ :
 		named_component_type.named_type_.setType(
 			  make_shared< TaggedType >(
