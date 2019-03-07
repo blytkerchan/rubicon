@@ -18,6 +18,7 @@ public :
 	{ /* no-op */ }
 	virtual bool requireExplicitTag() const { return false; }
 	virtual Tag getTag() const = 0;
+	virtual void setTag(Tag const &tag);
 	virtual bool hasTypeName() const { return false; }
 	virtual std::string getTypeName() const { return std::string(); }
 	virtual std::set< std::string > getDependencies() const { return std::set< std::string >(); }

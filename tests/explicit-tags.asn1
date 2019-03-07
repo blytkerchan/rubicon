@@ -1,0 +1,12 @@
+ExplicitTaggingModule DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+	EXPORTS ALL;
+
+	one INTEGER ::= 1
+	two INTEGER ::= 2
+	MySequenceType ::= SEQUENCE
+	{
+		firstValue [one] INTEGER OPTIONAL,
+		secondValue [two] INTEGER OPTIONAL,
+		thirdValue [3] INTEGER OPTIONAL
+	}
+END

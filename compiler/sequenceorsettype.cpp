@@ -3,6 +3,7 @@
 #include <stack>
 #include "autotagvisitor.hpp"
 #include "componentsofresolutionvisitor.hpp"
+#include "tagresolutionvisitor.hpp"
 
 using namespace std;
 
@@ -16,6 +17,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	return visitor.visit(*this);
 }
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(ComponentsOfResolutionVisitor &visitor)
+{
+	return visitor.visit(*this);
+}
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(TagResolutionVisitor &visitor)
 {
 	return visitor.visit(*this);
 }
@@ -111,6 +116,10 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 {
 	return visitor.visit(*this);
 }
+/*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::NamedComponentType::visit(TagResolutionVisitor &visitor)
+{
+	return visitor.visit(*this);
+}
 
 /* virtual */std::set< std::string > SequenceOrSetType::ComponentTypeList::getDependencies() const/* override*/
 {
@@ -152,6 +161,11 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	assert(!"This should not be called");
 	return std::shared_ptr< ComponentType >();
 }
+/* virtual */std::shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(TagResolutionVisitor &visitor)/* override*/
+{
+	assert(!"This should not be called");
+	return std::shared_ptr< ComponentType >();
+}
 
 void SequenceOrSetType::visit(AutoTagVisitor &visitor)
 {
@@ -162,6 +176,11 @@ void SequenceOrSetType::visit(ComponentsOfResolutionVisitor &visitor)
 {
 	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
 }
+void SequenceOrSetType::visit(TagResolutionVisitor &visitor)
+{
+	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
+}
+
 void SequenceOrSetType::flatten()
 {
 	decltype(component_types_) new_component_types;

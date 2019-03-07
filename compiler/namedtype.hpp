@@ -18,6 +18,7 @@ public :
 		, type_(type)
 	{ /* no-op */ }
 
+	void setTag(Tag const &tag) { type_->setTag(tag); }
 	virtual Tag getTag() const override { return type_->getTag(); }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual bool hasTypeName() const override { return type_->hasTypeName(); }

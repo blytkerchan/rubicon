@@ -201,6 +201,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/taggedtype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tag.cpp
 	${PROJECT_SOURCE_DIR}/compiler/tag.hpp
+	${PROJECT_SOURCE_DIR}/compiler/tagresolutionvisitor.cpp
+	${PROJECT_SOURCE_DIR}/compiler/tagresolutionvisitor.hpp
 	${PROJECT_SOURCE_DIR}/compiler/tuple.hpp
 	${PROJECT_SOURCE_DIR}/compiler/typeassignment.cpp
 	${PROJECT_SOURCE_DIR}/compiler/typeassignment.hpp

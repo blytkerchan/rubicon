@@ -3,6 +3,10 @@
 using namespace std;
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+/*virtual */void TypeDescriptor::setTag(Tag const &tag)
+{
+	assert(!"This should not be called");
+}
 /*virtual */void TypeDescriptor::generateEncodeImplementation(ostream &os) const
 {
 	os << typeid(*this).name() << " generateEncodeImplementation(os)"<< endl;

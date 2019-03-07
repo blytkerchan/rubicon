@@ -17,6 +17,7 @@
 #include "typeassignment.hpp"
 #include "utctimetype.hpp"
 #include "valueassignment.hpp"
+#include "tagresolutionvisitor.hpp"
 
 using namespace std;
 
@@ -590,9 +591,15 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 	}
 	case resolve__ :
 	{
-		ComponentsOfResolutionVisitor visitor(*listener_);
-		visitor(sequence_or_set_type);
-		sequence_or_set_type.flatten();
+		{ // resolve COMPONENTS OF
+			ComponentsOfResolutionVisitor visitor(*listener_);
+			visitor(sequence_or_set_type);
+			sequence_or_set_type.flatten();
+		}
+		{ // resolve defined values in tags
+			TagResolutionVisitor visitor(*listener_);
+			visitor(sequence_or_set_type);
+		}
 		return shared_ptr< TypeDescriptor >();
 	}
 	case collapse__ :

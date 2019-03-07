@@ -20,6 +20,7 @@ public :
 	virtual std::string getTypeName() const = 0;
 
 	virtual std::string generateInstance() const = 0;
+	SourceLocation getSourceLocation() const { return source_location_; }
 
 	SourceLocation source_location_;
 
