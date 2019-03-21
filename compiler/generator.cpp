@@ -400,10 +400,12 @@ void Generator::generateBuilderImplementation(ostream &ofs, TypeAssignment const
 		<< "\n"
 		;
 	// get the results
+	auto const type(type_assignment.getType());
+	auto const type_name(type->getTypeName().empty() ? type_assignment.getName() : type->getTypeName());
 	ofs
 		<< type_assignment.getName() << " " << type_assignment.getName() << "Builder::get() const\n"
 		<< "{\n"
-		<< "\treturn Vlinder::Rubicon::Details::any_cast< " << type_assignment.getType()->getTypeName() << " >(constructed_.back());\n"
+		<< "\treturn Vlinder::Rubicon::Details::any_cast< " << type_name << " >(constructed_.back());\n"
 		<< "}\n"
 		<< "\n"
 		;
