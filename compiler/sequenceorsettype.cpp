@@ -382,12 +382,6 @@ void SequenceOrSetType::flatten()
 }
 /*virtual */void SequenceOrSetType::generateSwapparatorImplementation(ostream &os) const/* override*/
 {
-	if (hasOptionalMembers())
-	{
-		os << "\tusing namespace std;\n";
-	}
-	else
-	{ /* won't use std::swap */ }
 	for (auto component_type : component_types_)
 	{
 		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
@@ -395,7 +389,7 @@ void SequenceOrSetType::flatten()
 		{
 			if (component_type->optional())
 			{
-				os << "\tswap(" << NamedComponentType::toMemberName(named_component_type->getName()) << ", other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
+				os << "\tstd::swap(" << NamedComponentType::toMemberName(named_component_type->getName()) << ", other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
 			}
 			else
 			{
