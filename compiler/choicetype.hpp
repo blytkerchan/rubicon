@@ -13,7 +13,8 @@ class Resolver;
 class ChoiceType : public TypeDescriptor
 {
 public :
-	typedef std::vector< boost::variant< NamedType, VersionedTypeList > > AlternativeTypes;
+	typedef boost::variant< NamedType, VersionedTypeList > AlternativeType;
+	typedef std::vector< AlternativeType > AlternativeTypes;
 
 	ChoiceType(SourceLocation const &source_location, AlternativeTypes const &alternative_types, bool extensible)
 		: TypeDescriptor(source_location)

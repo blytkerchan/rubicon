@@ -1,4 +1,5 @@
 #include "selectiontype.hpp"
+#include "choicetype.hpp"
 #include <iostream>
 
 using namespace std;
@@ -20,6 +21,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 }
 /*virtual */shared_ptr< TypeDescriptor > SelectionType::getType() const
 {
+	assert(dynamic_pointer_cast< ChoiceType >(type_) == static_pointer_cast< ChoiceType >(type_));
 	return type_; // probably wrong
 }
 /*virtual */string SelectionType::getTypeName() const/* override*/

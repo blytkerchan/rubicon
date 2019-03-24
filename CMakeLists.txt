@@ -128,6 +128,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/builder.hpp
 	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/characterstringtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/choiceselectionvisitor.cpp
+	${PROJECT_SOURCE_DIR}/compiler/choiceselectionvisitor.hpp
 	${PROJECT_SOURCE_DIR}/compiler/choicetype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/choicetype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/choicevalue.hpp
