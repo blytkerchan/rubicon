@@ -1,0 +1,13 @@
+skip,asn1-file,expect-fail,module,clean,directory,build-only
+False,auto-tags.asn1,False,AutoTaggingModule,True
+False,bitstring-1.asn1,False,BitStringTest1,True
+False,bitstring-2.asn1,False,BitStringTest2,True
+False,bitstring-3.asn1,False,BitStringTest3,True
+False,bitstring-4.asn1,False,BitStringTest4,True,bitstring4,False
+False,boolean-1.asn1,False,BooleanTest1,True,boolean1,True
+False,boolean-2.asn1,False,BooleanTest2,True
+False,boolean-3.asn1,False,BooleanTest3,True,boolean3,True
+False,components-of.asn1,False,ComponentsOf,True
+False,explicit-tags.asn1,False,ExplicitTaggingModule,True
+False,invalid-bitstring-1.asn1,True
+
