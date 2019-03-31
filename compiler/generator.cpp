@@ -425,6 +425,9 @@ void Generator::generateCMakeLists() const
 		<< "project(" << builder_->getModuleName() << ")\n"
 		<< "set(CMAKE_CXX_STANDARD 14)\n"
 		<< "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+		<< "find_package(exceptions CONFIG REQUIRED)\n"
+		<< "find_package(rubicon CONFIG REQUIRED)\n"
+		<< "include_directories(${rubicon_INCLUDE_DIR})\n"
 		<< "add_library(" << alg::to_lower_copy(builder_->getModuleName()) << "-asn1\n"
 		;
 	for_each(
@@ -435,7 +438,7 @@ void Generator::generateCMakeLists() const
 			}
 		);
 	ofs << "\t)\n";
-	ofs << "target_link_libraries(" << alg::to_lower_copy(builder_->getModuleName()) << "-asn1 rubicon)\n";
+	ofs << "target_link_libraries(" << alg::to_lower_copy(builder_->getModuleName()) << "-asn1 Vlinder::rubicon)\n";
 }
 void Generator::generatePreamble(ostream &ofs) const
 {
