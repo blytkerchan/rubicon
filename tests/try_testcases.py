@@ -21,7 +21,9 @@ def main(argv):
     parser.add_argument("filename", help=".csv file to parse")
     parser.add_argument("-c", "--asn1c", help="path to asn1c", default="./asn1c")
     parser.add_argument("-k", "--keep-going", help="keep going if one of the tests fails", action='store_true')
+    parser.add_argument("-s", "--stage", help="staging directory")
     args = parser.parse_args(args_to_parse)
+    stage = os.path.abspath(args.stage) if args.stage else None
     try:
         with open(args.filename, newline='') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=',')
@@ -33,7 +35,7 @@ def main(argv):
                     continue
                 print("Running test {}".format(count))
                 dir_prefix = os.path.dirname(args.filename) + "/"
-                this_test_result = try_testcase(dir_prefix + row['asn1-file'], args.asn1c, row['module'], dir_prefix + row['directory'] if row['directory'] else None, True if row['clean'] == 'True' else False, True if row['build-only'] == 'True' else False, args_to_not_parse)
+                this_test_result = try_testcase(dir_prefix + row['asn1-file'], args.asn1c, row['module'], dir_prefix + row['directory'] if row['directory'] else None, True if row['clean'] == 'True' else False, True if row['build-only'] == 'True' else False, args_to_not_parse, stage)
                 if row['expect-fail'] == "True":
                     if this_test_result != 0:
                         print("SUCCESS: expected fail for test {}".format(count))

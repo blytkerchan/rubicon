@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 from run_compiler import run_compiler, TestFailure
-from try_build import try_build, CMakeFailure, MakeFailure
+from try_build import try_build, CMakeFailure, MakeFailure, find_exceptions_cmake, find_rubicon_cmake
 
 def copytree(src, dst, symlinks=False):
     names = os.listdir(src)
@@ -43,12 +43,18 @@ def setup_testcase(source_directory, testcase_directory):
     build_directory = testcase_directory + "/.build"
     os.makedirs(build_directory, exist_ok=True)
 
-def build_testcase(testcase_directory):
+def build_testcase(testcase_directory, stage):
     build_directory = testcase_directory + "/.build"
     cwd = os.getcwd()
     try:
+        if stage:
+            exceptions_cmake = find_exceptions_cmake(stage)
+            rubicon_cmake = find_rubicon_cmake(stage)
+            stage_arguments = ['-Dexceptions_DIR=' + os.path.dirname(exceptions_cmake), '-Drubicon_DIR=' + os.path.dirname(rubicon_cmake)]
+        else:
+            stage_arguments = []
         os.chdir(build_directory)
-        with subprocess.Popen(['cmake', '..'], stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+        with subprocess.Popen(['cmake'] + stage_arguments + ['..'], stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
             proc.wait()
             if proc.returncode != 0:
                 raise CMakeFailure("Failed to run CMake in " + build_directory)
@@ -71,7 +77,7 @@ def run_testcase(testcase_directory):
     finally:
         os.chdir(cwd)
 
-def try_testcase(filename, asn1c, module, source_directory, clean, build_only, extra_args):
+def try_testcase(filename, asn1c, module, source_directory, clean, build_only, extra_args, stage):
     cwd = os.getcwd()
     retval = 0
     try:
@@ -80,7 +86,7 @@ def try_testcase(filename, asn1c, module, source_directory, clean, build_only, e
         if compile_result['return-code'] == 0:
             print("OK")
             print("Building generated code (stand-alone)... ", end='', flush=True)
-            try_build(compile_result['output-directory'], clean)
+            try_build(compile_result['output-directory'], clean, stage)
             print("OK")
             if source_directory:
                 os.chdir(cwd)
@@ -88,7 +94,7 @@ def try_testcase(filename, asn1c, module, source_directory, clean, build_only, e
                 setup_testcase(source_directory, os.path.abspath(compile_result['output-directory'] + "/.."))
                 print("OK")
                 print("Building the test case... ", end='', flush=True)
-                build_testcase(os.path.abspath(compile_result['output-directory'] + "/.."))
+                build_testcase(os.path.abspath(compile_result['output-directory'] + "/.."), stage)
                 print("OK")
                 if not build_only:
                     print("Running the test case... ", end='', flush=True)
@@ -114,13 +120,15 @@ def main(argv):
         args_to_not_parse = []
     parser = argparse.ArgumentParser(description="Run asn1c and check the results")
     parser.add_argument("filename", help=".asn file to parse")
-    parser.add_argument("-c", "--asn1c", help="path to asn1c", default="./asn1c")
-    parser.add_argument("-m", "--module", help="expected module name")
     parser.add_argument("-C", "--clean", help="clean before building asn1c output", action='store_true')
-    parser.add_argument("-d", "--source-directory", help="source directory to copy into the generated files")
     parser.add_argument("-b", "--build-only", help="build-only test", action='store_true')
+    parser.add_argument("-c", "--asn1c", help="path to asn1c", default="./asn1c")
+    parser.add_argument("-d", "--source-directory", help="source directory to copy into the generated files")
+    parser.add_argument("-m", "--module", help="expected module name")
+    parser.add_argument("-s", "--stage", help="staging directory")
     args = parser.parse_args(args_to_parse)
-    return(try_testcase(args.filename, args.asn1c, args.module, args.source_directory, args.clean, args.build_only, args_to_not_parse))
+    stage = os.path.abspath(args.stage) if args.stage else None
+    return(try_testcase(args.filename, args.asn1c, args.module, args.source_directory, args.clean, args.build_only, args_to_not_parse, stage))
 
 if __name__ == "__main__":
     exit(main(sys.argv))
