@@ -3,7 +3,7 @@ project(Rubicon VERSION 1.0.00)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/settings.cmake)
-
+include(GNUInstallDirs)
 find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 
 set(CPACK_PACKAGE_NAME rubicon)
@@ -272,19 +272,50 @@ set_target_properties(rubicon PROPERTIES SOVERSION 1)
 set_target_properties(rubicon PROPERTIES VERSION ${PROJECT_VERSION})
 install(
 	TARGETS asn1c asn1p
+	EXPORT RubiconTargets
 	RUNTIME DESTINATION bin
 	)
 install(
 	TARGETS rubicon
+	EXPORT RubiconTargets
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
-	DESTINATION lib
+	INCLUDES DESTINATION include
 	)
 install(
 	DIRECTORY runtime/
 	DESTINATION include/rubicon
 	FILES_MATCHING PATTERN "*.hpp"
 	)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/rubicon/rubicon-config-version.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+export(EXPORT RubiconTargets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/rubicon/rubicon-targets.cmake"
+	NAMESPACE Vlinder::
+)
+configure_file(rubicon-config.cmake "${CMAKE_CURRENT_BINARY_DIR}/rubicon/rubicon-config.cmake"
+	COPYONLY
+)
+
+set(ConfigPackageLocation lib/cmake/rubicon)
+install(EXPORT RubiconTargets
+	FILE rubicon-targets.cmake
+	NAMESPACE Vlinder::
+	DESTINATION ${ConfigPackageLocation}
+)
+install(
+	FILES "${CMAKE_CURRENT_BINARY_DIR}/rubicon/rubicon-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/rubicon/rubicon-config-version.cmake"
+	DESTINATION ${ConfigPackageLocation}
+	COMPONENT Devel
+)
+target_include_directories(rubicon INTERFACE "$<INSTALL_INTERFACE:include>")
+
 add_executable(test_rubicon
 	tests/bitstring.cpp
 	tests/catch.hpp
