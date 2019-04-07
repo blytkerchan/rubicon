@@ -23,7 +23,16 @@ and the vlinder/antlr4 Docker appliance
 
 ## Notes about building
 
-* Parallel builds are broken at the moment. This is due to the way part of the code is generated, and how part of the C++ runtime for the code generator is built as an "external" dependency.
+* Parallel builds are broken at the moment. This is due to the way part of the code is generated, and how part of the C++ runtime for the code generator is built as an "external" dependency. If someone wants to contribute a fix, please feel free to do so. You will need to fill out a CLA and a copyright disclaimer before I can look at any contributions, though.
+
+## Running the test cases
+
+The test cases need to believe Rubicon is installed in order to work. They don't need Rubicon to be installed on the system, though: just staging it is sufficient. To stage Rubicon to run the test cases, ddo the following:
+
+ $ make && make install DESTDIR=stage
+ $ path/to/tests/try\_testcases.py path/to/tests/testcases.csv -s stage
+
+At the time of this writing, one test case is *expected* to fail: it tests that the compiler detects an error in the input file. By the time you read this, there may be more of those.
 
 ## About ASN.1
 
