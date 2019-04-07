@@ -8,6 +8,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void EnumeratedType::generateAlternateConstructorDeclarations(ostream &os, string const &class_name) const/* override*/
 {
         os << "\t" << class_name << "(Vlinder::Rubicon::Integer const &value);\n";
+        os << "\texplicit " << class_name << "(unsigned int value);\n";
 }
 /*virtual */void EnumeratedType::generatePublicStaticMembers(ostream &os) const/* override*/
 {
@@ -22,6 +23,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void EnumeratedType::generateAlternateConstructorImplementations(ostream &os, string const &class_name) const/* override*/
 {
         os << class_name << "::" << class_name << "(Vlinder::Rubicon::Integer const &value)\n"
+                << "\t: Vlinder::Rubicon::Integer(value)\n"
+                << "{ /* no-op */ }\n"
+                ;
+        os << "/*explicit */" << class_name << "::" << class_name << "(unsigned int value)\n"
                 << "\t: Vlinder::Rubicon::Integer(value)\n"
                 << "{ /* no-op */ }\n"
                 ;
