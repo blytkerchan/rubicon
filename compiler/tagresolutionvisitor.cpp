@@ -27,6 +27,20 @@ shared_ptr< SequenceOrSetType::ComponentType > TagResolutionVisitor::visit(Seque
 }
 shared_ptr< SequenceOrSetType::ComponentType > TagResolutionVisitor::visit(SequenceOrSetType::NamedComponentType &named_component_type)
 {
+        if (!named_component_type.tagged())
+        {
+                auto type_name(named_component_type.getTypeName());
+                auto underlying_type(directory_.findType(type_name));
+                if (!underlying_type)
+                {
+                        throw UnresolvedReference(type_name);
+                }
+                else
+                { /* all is well */ }
+                named_component_type.setTag(underlying_type->getTag());
+        }
+        else
+        { /* it knows its tag */ }
         auto tag(named_component_type.getTag());
         assert((tag.class_number_.which() == 0) || (tag.class_number_.which() == 1));
         if (tag.class_number_.which() == 1) // defined value

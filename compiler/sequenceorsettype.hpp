@@ -104,6 +104,7 @@ public :
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) override;
 		virtual Tag getTag() const noexcept override { return named_type_.getTag(); }
 		void setTag(Tag const &tag) { named_type_.setTag(tag); }
+		bool tagged() const { return named_type_.tagged(); }
 
 		static std::string toVariableName(std::string const &name);
 		static std::string toMemberName(std::string const &name);
