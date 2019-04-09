@@ -508,7 +508,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 				);
 			if (found != component_types.end())
 			{
-				emitError((*found)->getSourceLocation(), "Unresolved component type");
+				emitError((*found)->getSourceLocation(), "Unresolved component type: %s", (*found)->hasTypeName() ? (*found)->getTypeName().c_str() : "<unknown>");
 				throw InvalidDefinition("Unresolved component type");
 			}
 			else
@@ -526,7 +526,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 				);
 			if (found != component_types.end())
 			{
-				emitError((*found)->getSourceLocation(), "Unresolved component type");
+				emitError((*found)->getSourceLocation(), "Unresolved component type: %s", (*found)->hasTypeName() ? (*found)->getTypeName().c_str() : "<unknown>");
 				throw InvalidDefinition("Unresolved component type");
 			}
 			else
