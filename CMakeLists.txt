@@ -24,6 +24,11 @@ include(CPack)
 
 enable_testing()
 
+if (CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi -Werror")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi -Werror")
+endif()
+
 include(ExternalProject)
 ExternalProject_Add(antlr4
 	DOWNLOAD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen -d
