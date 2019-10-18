@@ -32,7 +32,7 @@ public :
 		virtual std::string getTypeName() const = 0;
 		virtual void generateInstance(std::ostream &os, std::string const &instance_name) const;
 		virtual bool optional() const = 0;
-		virtual bool hasDefaultValue() const { false; }
+		virtual bool hasDefaultValue() const { return false; }
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) = 0;

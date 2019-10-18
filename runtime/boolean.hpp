@@ -12,7 +12,7 @@ public :
 	Boolean& operator=(Boolean const &other) = default;
 	Boolean(Boolean &&other) = default;
 	Boolean& operator=(Boolean &&other) = default;
-	Boolean& operator=(bool value) { value_ = value; }
+	Boolean& operator=(bool value) { value_ = value; return *this; }
 	Boolean& swap(Boolean &other);
 
 	explicit operator bool () const { return value_; }

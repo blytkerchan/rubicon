@@ -267,23 +267,27 @@ private :
 				throw EncodingError("unknown type");
 			}
 		}
+		return true;
 	}
 	
 	template < typename InputIterator >
 	bool parseApplicationValue(InputIterator &first, InputIterator last)
 	{
+throw std::logic_error("Not yet implemented");
 	}
 	
 	template < typename InputIterator >
 	bool parseContextSpecificValue(InputIterator &first, InputIterator last)
 	{
+throw std::logic_error("Not yet implemented");
 	}
 	
 	template < typename InputIterator >
 	bool parsePrivateValue(InputIterator &first, InputIterator last)
 	{
+throw std::logic_error("Not yet implemented");
 	}
-	
+
 	template < typename InputIterator >
 	bool parseInteger(InputIterator &first, InputIterator last)
 	{
@@ -500,7 +504,7 @@ private :
 		// input iterator (which by definition can only be read from once) means
 		// we read in chunks no bigger than our parse buffer. 
 		uint64_t initial_parse_buffer_size(parse_buffer_size_);
-		uint64_t working_length(std::min(length_ - initial_parse_buffer_size, sizeof(parse_buffer_)));
+		uint64_t working_length(std::min< uint64_t >(length_ - initial_parse_buffer_size, sizeof(parse_buffer_)));
 		while (first != last)
 		{
 			// there is no combination of std::copy and std::copy_n that works for

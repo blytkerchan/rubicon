@@ -14,6 +14,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 TagResolutionVisitor const& TagResolutionVisitor::operator()(SequenceOrSetType &sequence_or_set_type)
 {
         sequence_or_set_type.visit(*this);
+	return *this;
 }
 void TagResolutionVisitor::operator()(shared_ptr< SequenceOrSetType::ComponentType > &component_type)
 {

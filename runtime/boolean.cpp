@@ -12,6 +12,7 @@ Boolean::Boolean(bool value/* = false*/)
 Boolean& Boolean::swap(Boolean &other)
 {
 	std::swap(value_, other.value_);
+	return *this;
 }
 int Boolean::compare(Boolean const &other) const
 {

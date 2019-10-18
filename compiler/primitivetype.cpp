@@ -33,6 +33,8 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 		return { Tag::universal__, 14 };
 	case time_of_day__ :
 		return { Tag::universal__, 32 };
+	default:
+		throw std::logic_error("Unknown tag type");
 	}
 }
 /*virtual */string PrimitiveType::getTypeName() const/* override*/
