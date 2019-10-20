@@ -1,0 +1,197 @@
+CommonNametest { iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) vlinder-software(49974) security(0) protocols(0) sneaky-intermediate-tapeworm(0) }
+
+-- Definitions are organized into sections: upper bounds, types, ...
+-- Definitions within each section appear in alphabetical order
+-- prefixes: 
+--     curve == Elliptic Curve
+--     hmac == keyed-hash MAC
+--     ea == encryption algorithm
+--     mda == message digest algorithm
+--     sa == signature algorithm;
+--     ub == upper bound;
+DEFINITIONS ::= BEGIN
+	-- ===================================================================
+	-- upper bounds
+	ub-common-name-length INTEGER ::= 64 -- with current adjectives and animals, max length is 51
+	ub-database-key-length INTEGER ::= 128 -- no idea if this is actually the largest these can be...
+	ub-directory-uti-length INTEGER ::= 128 -- no idea if this is actually the largest these can be...
+	ub-privatebasekey-count INTEGER ::= 128
+	ub-privatekey-count INTEGER ::= 128
+	ub-publicbasekey-count INTEGER ::= 128
+	ub-publickey-count INTEGER ::= 128
+	ub-signature-count INTEGER ::= 128
+
+	-- ===================================================================
+	-- Principal types
+	object-sneaky-immediate-tapeworm OBJECT IDENTIFIER ::= { iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) vlinder-software(49974) security(0) protocols(0) sneaky-intermediate-tapeworm(0) }
+	object-current-version OBJECT IDENTIFIER ::= { object-sneaky-immediate-tapeworm 1 }
+	object-message OBJECT IDENTIFIER ::= { object-current-version 0 }
+	object-ChannelCreationRequest OBJECT IDENTIFIER ::= { object-current-version 1 }
+	ChannelCreationRequest ::= SEQUENCE {
+		version				Version DEFAULT v20180531,
+		commonName			CommonName,
+		fingerprint			KeyFingerprint,
+		publicChannelKey	PublicKey
+	}
+	EncryptedMessage ::= SEQUENCE {
+		version				Version DEFAULT v20180531,
+		hkdfHashAlgorithm	OBJECT IDENTIFIER,
+		encryptionAlgorithm	OBJECT IDENTIFIER,
+		nonce				OCTET STRING,			-- the nonce used for key derivation
+		ephemeralPublicKey	PublicKey,				-- used to create the key and the IV
+		ciphertext			OCTET STRING,
+		hmac				OCTET STRING OPTIONAL	-- only used for non-aead ciphers, uses the hmac corresponding to the hkdf hash algorithm
+	}
+	Envelope ::= SEQUENCE {
+		version			Version DEFAULT v20180531,
+		type			OBJECT IDENTIFIER,
+		message			OCTET STRING,
+		signature		Signature
+	}
+	PrivateSettings ::= SEQUENCE {
+		version					Version DEFAULT v20180531,
+		ownBaseKeys				PrivateBaseKeys,
+		otherBaseKeys			PublicBaseKeys OPTIONAL,
+		privateChannelKeys	[0] PrivateKeys OPTIONAL,
+		publicChannelKeys	[1] PublicKeys OPTIONAL,
+		commonName			[3] CommonName OPTIONAL,
+		databaseKey			[4] DatabaseKey OPTIONAL,
+		directoryURI		[5] DirectoryURI OPTIONAL
+	}
+	PublicKey ::= SEQUENCE {
+		version				Version DEFAULT v20180531,
+		algorithm			Algorithm,
+		curve				Curve,
+		value				BIT STRING,
+		keyValidityPeriod	KeyValidityPeriod,
+		signatures			Signatures
+	}
+	-- ===================================================================
+	-- Support types
+	Algorithm ::= SEQUENCE {
+		algorithm		AlgorithmIdentifier,
+		parameters		ANY DEFINED BY algorithm OPTIONAL
+	}
+	CommonName ::= PrintableString (SIZE (1..ub-common-name-length))
+	Curve ::= CurveIdentifier
+	DatabaseKey ::= PrintableString (SIZE (1..ub-database-key-length))
+	DirectoryURI ::= PrintableString (SIZE (1..ub-directory-uti-length))
+	KeyFingerprint ::= SEQUENCE {
+		algorithm		Algorithm, -- should be one of the secure hashes
+		value			BIT STRING
+	}
+	KeyPair ::= SEQUENCE {
+		privateKey		PrivateKey,
+		publicKey		PublicKey
+	}
+	KeyValidityPeriod ::= SEQUENCE {
+		notBefore		GeneralizedTime,
+		notAfter		GeneralizedTime
+	}
+	PrivateBaseKey ::= SEQUENCE {
+		localUniqueID		INTEGER,
+		keys			KeyPair,
+		commonName		CommonName OPTIONAL
+	}
+	PrivateBaseKeys ::= SEQUENCE SIZE(1..ub-privatebasekey-count) OF PrivateBaseKey
+	PrivateKey ::= SEQUENCE {
+		algorithm		Algorithm,
+		curve			Curve,
+		value			BIT STRING
+	}
+	PrivateKeys ::= SEQUENCE SIZE(1..ub-privatekey-count) OF PrivateKey
+	PublicBaseKey ::= SEQUENCE {
+		publicKey		PublicKey,
+		commonName		CommonName
+	}
+	PublicBaseKeys ::= SEQUENCE SIZE(1..ub-publicbasekey-count) OF PublicBaseKey
+	PublicKeys ::= SEQUENCE SIZE(1..ub-publickey-count) OF PublicKey
+	Signature ::= SEQUENCE {
+		algorithm		Algorithm, -- one of the sa- algos
+		r				BIT STRING,
+		s				BIT STRING,
+		keyFingerprint	KeyFingerprint,
+		timestamp		GeneralizedTime
+	}
+	Signatures ::= SEQUENCE SIZE(1..ub-signature-count) OF Signature
+	Version ::= INTEGER { v20180531(20180531) }
+	-- ===================================================================
+	-- Algorithms
+	-- generic ECC identifier
+	AlgorithmIdentifier ::= OBJECT IDENTIFIER ( alg-ecc )
+	alg-ecc OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) keytype(2) ecpublickey(1) }
+	-- ECC curves
+	CurveIdentifier ::= OBJECT IDENTIFIER ( curve-prime192v1 | curve-prime192v2 | curve-prime192v3 | curve-prime239v1 | curve-prime239v2 | curve-prime239v3 | curve-prime256v1 | curve-secp112r1 | curve-secp112r2 | curve-secp128r1 | curve-secp128r2 | curve-secp160k1 | curve-secp160r1 | curve-secp160r2 | curve-secp192k1 | curve-secp224k1 | curve-secp224r1 | curve-secp256k1 | curve-secp384r1 | curve-secp521r1 | curve-brainpoolP160r1 | curve-brainpoolP192r1 | curve-brainpoolP224r1 | curve-brainpoolP256r1 | curve-brainpoolP320r1 | curve-brainpoolP384r1 | curve-brainpoolP512r1 )
+	curve-prime192v1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 1 }
+	curve-prime192v2 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 2 }
+	curve-prime192v3 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 3 }
+	curve-prime239v1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 4 }
+	curve-prime239v2 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 5 }
+	curve-prime239v3 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 6 }
+	curve-prime256v1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) curves(3) prime(1) prime192v1(1) 7 }
+	curve-secp112r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 6 }
+	curve-secp112r2 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 7 }
+	curve-secp128r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 28 }
+	curve-secp128r2 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 29 }
+	curve-secp160k1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 9 }
+	curve-secp160r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 8 }
+	curve-secp160r2 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 30 }
+	curve-secp192k1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 31 }
+	curve-secp224k1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 32 }
+	curve-secp224r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 33 }
+	curve-secp256k1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 10 }
+	curve-secp384r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 34 }
+	curve-secp521r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) certicom(132) curve(0) 35 }
+	curve-brainpoolP160r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 1 }
+	curve-brainpoolP192r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 3 }
+	curve-brainpoolP224r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 5 }
+	curve-brainpoolP256r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 7 }
+	curve-brainpoolP320r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 9 }
+	curve-brainpoolP384r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 11 }
+	curve-brainpoolP512r1 OBJECT IDENTIFIER ::= { iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureAlgorithm(3) ecSign(2) ecStdCurvesAndGeneration(8) ellipticCurve(1) versionOne(1) 13 }
+	-- message digests (SHA-2 and SHA3 with appropriate sizes)
+	MessageDigestIdentifier ::= OBJECT IDENTIFIER ( mda-sha256 | mda-sha384 | mda-sha512 | mda-sha3-256 | mda-sha3-384 | mda-sha3-512 )
+	mda-sha256 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 1 }
+	mda-sha384 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 2 }
+	mda-sha512 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 3 }
+	mda-sha3-256 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 8 }
+	mda-sha3-384 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 9 }
+	mda-sha3-512 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 10 }
+	-- again, SHA-2 and SHA-3 with appropriate sizes
+	HMACIdentifier ::= OBJECT IDENTIFIER ( hmac-sha256 | hmac-sha384 | hmac-sha512 | hmac-sha3-256 | hmac-sha3-384 | hmac-sha3-512 )
+	hmac-sha256 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) digestAlgorithm(2) 9 }
+	hmac-sha384 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) digestAlgorithm(2) 10 }
+	hmac-sha512 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) digestAlgorithm(2) 11 }
+	hmac-sha3-256 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 14 }
+	hmac-sha3-384 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 15 }
+	hmac-sha3-512 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) hashAlgs(2) 16 }
+	-- signature algorithms
+	-- ECDSA with SHA-2 or SHA-3 with appropriate sizes
+	SignatureAlgorithmIdentifier ::= OBJECT IDENTIFIER ( sa-ecdsa-sha256 | sa-ecdsa-sha384 | sa-ecdsa-sha512 | sa-ecdsa-sha3-256 | sa-ecdsa-sha3-384 | sa-ecdsa-sha3-512 )
+	sa-ecdsa-sha256 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) signatures(4) ecdsa-with-SHA2(3) 2 }
+	sa-ecdsa-sha384 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) signatures(4) ecdsa-with-SHA2(3) 3 }
+	sa-ecdsa-sha512 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x9-62(10045) signatures(4) ecdsa-with-SHA2(3) 4 }
+	sa-ecdsa-sha3-256 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) sigAlgs(3) 10 }
+	sa-ecdsa-sha3-384 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) sigAlgs(3) 11 }
+	sa-ecdsa-sha3-512 OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) sigAlgs(3) 12 }
+	-- encryption algorithms
+	ea-aes128-ECB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 1 }
+	ea-aes128-CBC	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 2 }
+	ea-aes128-OFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 3 }
+	ea-aes128-CFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 4 }
+	ea-aes128-GCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 6 }
+	ea-aes-CCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 7 }
+	ea-aes192-ECB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 21 }
+	ea-aes192-CBC	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 22 }
+	ea-aes192-OFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 23 }
+	ea-aes192-CFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 24 }
+	ea-aes192-GCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 26 }
+	ea-aes192-CCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 27 }
+	ea-aes256-ECB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 41 }
+	ea-aes256-CBC	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 42 }
+	ea-aes256-OFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 43 }
+	ea-aes256-CFB	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 44 }
+	ea-aes256-GCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 46 }
+	ea-aes256-CCM	OBJECT IDENTIFIER ::= { joint-iso-itu-t(2) country(16) us(840) organization(1) gov(101) csor(3) nistAlgorithm(4) aes(1) 47 }
+END
+
