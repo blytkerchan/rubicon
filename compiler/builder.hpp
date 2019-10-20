@@ -20,7 +20,7 @@ public :
 	Builder& operator=(Builder const&) = delete;
 
 	explicit operator bool () const { return okay_; }
-	Builder& operator()(std::istream &is);
+	Builder& operator()(std::istream &is, bool produce_debug_output = false);
 
 	Dependencies getTypeDependencies() const { return type_dependencies_; }
 	Dependencies getValueDependencies() const { return value_dependencies_; }
@@ -33,6 +33,7 @@ private :
 	void postParseSanityCheck();
 	void resolve();
 	void scanDependencies();
+	void produceDebugOutput() const;
 
 	bool okay_ = true;
 	std::string input_filename_;

@@ -6,6 +6,7 @@
 #include "listener.hpp"
 #include "resolver.hpp"
 #include <boost/filesystem.hpp>
+#include "../tracing.hpp"
 
 using namespace antlr4;
 using namespace std;
@@ -22,7 +23,7 @@ Builder::~Builder()
 	delete listener_;
 }
 
-Builder& Builder::operator()(istream &is)
+Builder& Builder::operator()(istream &is, bool produce_debug_output/* = false*/)
 {
 	// parse everything
 	parse(is);
@@ -31,6 +32,12 @@ Builder& Builder::operator()(istream &is)
 	if (!okay_) return *this;
 	scanDependencies();
 	if (!okay_) return *this;
+	if (produce_debug_output)
+	{
+		produceDebugOutput();
+	}
+	else
+	{ /* Not asked to produce debug output */ }
 	resolve();
 
 	return *this;
@@ -121,6 +128,19 @@ void Builder::scanDependencies()
 		auto const &deps(value_assignment.getDependencies());
 		dependencies.insert(deps.begin(), deps.end());
 		value_dependencies_.add(value_assignment.getName(), dependencies.begin(), dependencies.end());
+	}
+}
+
+void Builder::produceDebugOutput() const
+{
+	tracer__->trace(1, TRACE_DEBUG, "Type assignments:\n");
+	for (auto type_assignment : listener_->getTypeAssignments())
+	{
+		tracer__->trace(1, TRACE_DEBUG, "%s:%d: %s\n", type_assignment.getSourceLocation().filename_.c_str(), type_assignment.getSourceLocation().line_, type_assignment.getName().c_str());
+	}
+	for (auto value_assignment : listener_->getValueAssignments())
+	{
+		tracer__->trace(1, TRACE_DEBUG, "%s:%d: %s\n", value_assignment.getSourceLocation().filename_.c_str(), value_assignment.getSourceLocation().line_, value_assignment.getName().c_str());
 	}
 }
 

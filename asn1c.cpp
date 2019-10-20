@@ -27,6 +27,7 @@ int main(int argc, char const **argv)
 		("namespace-prefix,n", po::value< string >(), "prefix to prepend to the namespace (defaults to none)")
 		("namespace-suffix,s", po::value< string >(), "suffix to append to the namespace (defaults to \"::ASN1\")")
 		("output-dependencies,g", "output dependencies in dot format")
+		("debug,d", "output compiler debug info")
 		;
 	po::options_description hidden_options("Hidden options");
 	hidden_options.add_options()
@@ -50,6 +51,13 @@ int main(int argc, char const **argv)
 	else
 	{ /* no help */ }
 
+	if (vm.count("debug"))
+	{
+		tracer__->setMask(tracer__->getMask() | TRACE_DEBUG);
+	}
+	else
+	{ /* no debug output */ }
+
 	if (!vm.count("input-file"))
 	{
 		cerr << "Missing input file" << endl;
@@ -69,7 +77,7 @@ int main(int argc, char const **argv)
 	{
 		cpl::Builder builder(input_filename);
 		cpl::Generator generator(vm.count("output") ? vm["output"].as< string >() : string(), namespace_prefix, namespace_suffix);
-		return generator(builder(ss), vm.count("output-dependencies") != 0) ? 0 : 1;
+		return generator(builder(ss, vm.count("debug") != 0), vm.count("output-dependencies") != 0) ? 0 : 1;
 	}
 	else return 1;
 }
