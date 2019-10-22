@@ -4,8 +4,9 @@
 #include "typedescriptor.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct UTCTimeType : TypeDescriptor
+class UTCTimeType : public TypeDescriptor
 {
+public :
 	explicit UTCTimeType(SourceLocation const &source_location)
 		: TypeDescriptor(source_location)
 	{ /* no-op */ }

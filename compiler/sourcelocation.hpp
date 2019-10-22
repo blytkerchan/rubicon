@@ -16,7 +16,7 @@ struct SourceLocation
 		, offset_(offset)
 	{ /* no-op */ }
 	SourceLocation(antlr4::ParserRuleContext *ctx)
-		: SourceLocation(ctx->getStart()->getTokenSource()->getSourceName(), ctx->getStart()->getLine(), ctx->getStart()->getCharPositionInLine())
+		: SourceLocation(ctx->getStart()->getTokenSource()->getSourceName(), static_cast< unsigned int >(ctx->getStart()->getLine()), static_cast< unsigned int >(ctx->getStart()->getCharPositionInLine()))
 	{ /* no-op */ }
 
 	std::string filename_;

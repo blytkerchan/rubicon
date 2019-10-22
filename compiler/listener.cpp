@@ -816,7 +816,7 @@ shared_ptr< TypeDescriptor > Listener::parseUsefulType(asn1Parser::Useful_typeCo
 	else
 	{
 		assert(ctx->getText() == "ObjectDescriptor");
-		return make_shared< ObjectDescriptorType >(ctx);
+		return make_shared< ObjectDescriptorType >(SourceLocation(ctx));
 	}
 }
 shared_ptr< TypeDescriptor > Listener::parseSelectionType(asn1Parser::Selection_typeContext *ctx)

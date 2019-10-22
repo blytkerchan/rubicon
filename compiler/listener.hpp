@@ -15,7 +15,7 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct RestrictedCharacterStringValue;
+class RestrictedCharacterStringValue;
 class Listener : public ::asn1BaseListener, public Directory
 {
 public :

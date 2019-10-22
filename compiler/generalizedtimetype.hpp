@@ -4,8 +4,9 @@
 #include "typedescriptor.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct GeneralizedTimeType : TypeDescriptor
+class GeneralizedTimeType : public TypeDescriptor
 {
+public :
 	explicit GeneralizedTimeType(SourceLocation const &source_location)
 		: TypeDescriptor(source_location)
 	{ /* no-op */ }

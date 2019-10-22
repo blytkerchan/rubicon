@@ -89,7 +89,7 @@ static void dissectDouble(
 	exponent -= numeric_limits< double >::digits;
 	static_assert(numeric_limits< double >::digits < numeric_limits< uint64_t >::digits, "double is expected to have a smaller mantissa than the bits in a 64-bit integer");
 	static_assert(numeric_limits< double >::radix == numeric_limits< uint64_t >::radix, "radix for double and int should be the same");
-	uint64_t mantissa_as_uint(mantissa_as_intermediate_for_integer);
+	uint64_t mantissa_as_uint(static_cast< uint64_t >(mantissa_as_intermediate_for_integer));
 	while ((mantissa_as_uint % 256) == 0)
 	{
 		exponent += 8;

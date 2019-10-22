@@ -575,7 +575,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 						else
 						{ /* OK so far */ }
 						tags.insert(tag);
-						state_machine_builder_.addToState(tag.class_, boost::get< unsigned int >(tag.class_number_), distance(first, curr));
+						state_machine_builder_.addToState(tag.class_, boost::get< unsigned int >(tag.class_number_), static_cast< int >(distance(first, curr)));
 						if (!(*curr)->optional()) break;
 					}
 					state_machine_builder_.commit();

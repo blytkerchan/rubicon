@@ -5,8 +5,9 @@
 #include "enumeratedtype.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct IntegerType : EnumeratedType
+class IntegerType : public EnumeratedType
 {
+public :
 	using EnumeratedType::Values;
 
 	IntegerType(SourceLocation const &source_location, Values const &values)

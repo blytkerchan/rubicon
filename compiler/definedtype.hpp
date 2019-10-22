@@ -6,8 +6,9 @@
 #include <string>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct DefinedType : TypeDescriptor
+class DefinedType : public TypeDescriptor
 {
+public :
 	DefinedType(SourceLocation const &source_location, std::string const &type_name)
 		: TypeDescriptor(source_location)
 		, type_name_(type_name)
@@ -23,6 +24,7 @@ struct DefinedType : TypeDescriptor
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
+private :
 	std::unique_ptr< Tag > tag_;
 	std::string type_name_;
 };

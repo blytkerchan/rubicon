@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class Dependencies

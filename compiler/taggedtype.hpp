@@ -5,8 +5,9 @@
 #include "typedescriptor.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct TaggedType : TypeDescriptor
+class TaggedType : public TypeDescriptor
 {
+public :
 	TaggedType(SourceLocation const &source_location, Tag const &tag, bool explicit_tagging, bool force_implicit_tagging, std::shared_ptr< TypeDescriptor > const &type)
 		: TypeDescriptor(source_location)
 		, tag_(tag)
@@ -22,6 +23,7 @@ struct TaggedType : TypeDescriptor
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
+private :
 	Tag tag_;
 	bool explicit_tagging_;
 	bool force_implicit_tagging_;

@@ -5,8 +5,9 @@
 #include <iostream>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct UnknownType : TypeDescriptor
+class UnknownType : public TypeDescriptor
 {
+public :
 	explicit UnknownType(SourceLocation const &source_location)
 		: TypeDescriptor(source_location)
 	{ /* no-op */ }

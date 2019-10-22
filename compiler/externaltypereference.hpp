@@ -6,8 +6,9 @@
 #include <iostream>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct ExternalTypeReference : TypeDescriptor
+class ExternalTypeReference : public TypeDescriptor
 {
+public :
 	ExternalTypeReference(SourceLocation const &source_location, std::string const &module_name, std::string const &symbol_name)
 		: TypeDescriptor(source_location)
 		, module_name_(module_name)
@@ -21,6 +22,7 @@ struct ExternalTypeReference : TypeDescriptor
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
+private :
 	std::string module_name_;
 	std::string symbol_name_;
 };

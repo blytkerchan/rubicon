@@ -21,7 +21,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -36,7 +36,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -51,7 +51,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -66,7 +66,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -81,7 +81,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -96,7 +96,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -114,7 +114,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -136,7 +136,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -151,7 +151,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -166,7 +166,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -181,7 +181,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -196,7 +196,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -214,7 +214,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -236,7 +236,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -251,7 +251,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -266,7 +266,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -281,7 +281,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -296,7 +296,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -314,7 +314,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -329,7 +329,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -351,7 +351,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -366,7 +366,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -381,7 +381,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -396,7 +396,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -414,7 +414,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -429,7 +429,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -452,7 +452,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -467,7 +467,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -482,7 +482,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -497,7 +497,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -515,7 +515,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -530,7 +530,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -545,7 +545,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -567,7 +567,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -582,7 +582,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -597,7 +597,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -615,7 +615,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -630,7 +630,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -645,7 +645,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -668,7 +668,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -683,7 +683,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -698,7 +698,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -716,7 +716,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -731,7 +731,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -746,7 +746,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -769,7 +769,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -784,7 +784,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -799,7 +799,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -817,7 +817,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -832,7 +832,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -847,7 +847,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -862,7 +862,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -877,7 +877,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -892,7 +892,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -917,7 +917,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -932,7 +932,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -947,7 +947,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -962,7 +962,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -977,7 +977,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -992,7 +992,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1017,7 +1017,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1032,7 +1032,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1047,7 +1047,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1062,7 +1062,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1077,7 +1077,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1092,7 +1092,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1117,7 +1117,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1132,7 +1132,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1147,7 +1147,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1162,7 +1162,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1177,7 +1177,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_octet_string(decodeOctetString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1192,7 +1192,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1217,7 +1217,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1232,7 +1232,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1247,7 +1247,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1262,7 +1262,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1285,7 +1285,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1300,7 +1300,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1318,7 +1318,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_boolean(decodeBoolean(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1333,7 +1333,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_integer(decodeInteger(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1348,7 +1348,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_enumerated(decodeEnumerated(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1363,7 +1363,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_bit_string(decodeBitString(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1386,7 +1386,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_null(decodeNull(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }
@@ -1401,7 +1401,7 @@ SCENARIO( "decoding an incoming octet string", "[derdecoder]" ) {
                         {
                                 auto try_real(decodeReal(iter, octets.end()));
                         }
-                        catch (ParseError const &e)
+                        catch (ParseError const &)
                         {
                                 caught = true;
                         }

@@ -9,8 +9,9 @@
 #include <memory>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct TypeWithConstraint : TypeDescriptor
+class TypeWithConstraint : public TypeDescriptor
 {
+public :
 	TypeWithConstraint(SourceLocation const &source_location, bool is_set, Constraint const &constraint, std::shared_ptr< TypeDescriptor > const &type)
 		: TypeDescriptor(source_location)
 		, is_set_(is_set)
@@ -34,6 +35,7 @@ struct TypeWithConstraint : TypeDescriptor
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
+private :
 	bool is_set_;
 	Constraint constraint_;
 	std::shared_ptr< TypeDescriptor > type_;

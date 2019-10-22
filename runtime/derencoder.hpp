@@ -255,7 +255,7 @@ private :
 	{
 		if (length <= 127)
 		{
-			*out++ = length;
+			*out++ = static_cast< Details::Buffer::value_type const >(length);
 		}
 		else 
 		{
@@ -303,7 +303,7 @@ private :
 		exponent -= std::numeric_limits< double >::digits;
 		static_assert(std::numeric_limits< double >::digits < std::numeric_limits< uint64_t >::digits, "double is expected to have a smaller mantissa than the bits in a 64-bit integer");
 		static_assert(std::numeric_limits< double >::radix == std::numeric_limits< uint64_t >::radix, "radix for double and int should be the same");
-		uint64_t mantissa_as_uint(mantissa_as_intermediate_for_integer);
+		uint64_t mantissa_as_uint(static_cast< uint64_t >(mantissa_as_intermediate_for_integer));
 		while ((mantissa_as_uint % 256) == 0)
 		{
 			exponent += 8;

@@ -6,8 +6,9 @@
 #include <string>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
-struct ObjectDescriptorType : TypeDescriptor
+class ObjectDescriptorType : public TypeDescriptor
 {
+public :
 	explicit ObjectDescriptorType(SourceLocation const &source_location)
 		: TypeDescriptor(source_location)
 	{ /* no-op */ }
