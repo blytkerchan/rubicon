@@ -80,16 +80,36 @@ void Builder::postParseSanityCheck()
 	invariant(listener_);
 	// check for duplicate symbols
 	auto type_assignments(listener_->getTypeAssignments());
-	set< string > types;
-	transform(type_assignments.begin(), type_assignments.end(), inserter(types, types.end()), [](auto type){ return type.getName(); });
-	okay_ &= type_assignments.size() == types.size();
-	//TODO: output an error message if there's a duplicate
+	map< string, unsigned int > types;
+	for_each(type_assignments.begin(), type_assignments.end(), [&types](auto type){ types[type.getName()]++; });
+    bool const duplicate_type_assignments(type_assignments.size() != types.size());
+	okay_ &= !duplicate_type_assignments;
+    if (duplicate_type_assignments)
+    {
+        auto where(find_if(types.begin(), types.end(), [](auto type) -> bool{ return type.second > 1; }));
+        tracer__->trace(1, TRACE_ERROR, "Error: mutiple definition of %s\n", where->first.c_str());
+
+        for_each(type_assignments.begin(), type_assignments.end(), [=](auto type_assignment){ tracer__->trace(1, TRACE_ERROR, "\tdefined here: %s:%u\n", type_assignment.getSourceLocation().filename_.c_str(), type_assignment.getSourceLocation().line_); });
+    }
+    else
+    { /* all is well */ }
+	
 	auto value_assignments(listener_->getValueAssignments());
-	set< string > values;
-	transform(value_assignments.begin(), value_assignments.end(), inserter(values, values.end()), [](auto value){ return value.getName(); });
-	okay_ &= value_assignments.size() == values.size();
-	//TODO: output an error message if there's a duplicate
-	// check that everything that was exported actually exists
+	map< string, unsigned int > values;
+	for_each(value_assignments.begin(), value_assignments.end(), [&values](auto value){ values[value.getName()]++; });
+	bool duplicate_value_assignments(value_assignments.size() != values.size());
+	okay_ &= !duplicate_value_assignments;
+    if (duplicate_value_assignments)
+    {
+        auto where(find_if(values.begin(), values.end(), [](auto value) -> bool{ return value.second > 1; }));
+        tracer__->trace(1, TRACE_ERROR, "Error: mutiple definition of %s\n", where->first.c_str());
+
+        for_each(value_assignments.begin(), value_assignments.end(), [=](auto value_assignment){ tracer__->trace(1, TRACE_ERROR, "\tdefined here: %s:%u\n", value_assignment.getSourceLocation().filename_.c_str(), value_assignment.getSourceLocation().line_); });
+    }
+    else
+    { /* all is well */ }
+
+    // check that everything that was exported actually exists
 	for (auto symbol : listener_->getSymbolsToExport())
 	{
 		auto which_type(types.find(symbol));
