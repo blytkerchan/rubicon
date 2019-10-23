@@ -855,8 +855,12 @@ shared_ptr< TypeDescriptor > Listener::parseContrainedType(asn1Parser::Constrain
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	assert(ctx->type_with_constraint()->constraint() && ctx->constraint());
-	auto constraint(parseConstraint(ctx->type_with_constraint() ? ctx->type_with_constraint()->constraint() : ctx->constraint()));
+	pre_condition(ctx->constraint() || (ctx->type_with_constraint() && (ctx->type_with_constraint()->constraint() || ctx->type_with_constraint()->size_constraint())));
+	auto constraint(
+          ctx->type_with_constraint() && ctx->type_with_constraint()->size_constraint()
+        ? parseSizeConstraint(ctx->type_with_constraint()->size_constraint())
+        : parseConstraint(ctx->type_with_constraint() ? ctx->type_with_constraint()->constraint() : ctx->constraint())
+        );
 	if (ctx->type_with_constraint())
 	{
 		assert(ctx->type_with_constraint()->SET_RW() || ctx->type_with_constraint()->SEQUENCE_RW());
@@ -891,6 +895,13 @@ shared_ptr< TypeDescriptor > Listener::parseReferencedType(asn1Parser::Reference
 }
 
 Constraint Listener::parseConstraint(asn1Parser::ConstraintContext *ctx)
+{
+	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
+	//TODO
+	return Constraint();
+}
+
+Constraint Listener::parseSizeConstraint(asn1Parser::Size_constraintContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	//TODO
