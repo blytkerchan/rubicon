@@ -3,6 +3,7 @@
 #include <stack>
 #include "autotagvisitor.hpp"
 #include "componentsofresolutionvisitor.hpp"
+#include "definedtyperesolutionvisitor.hpp"
 #include "tagresolutionvisitor.hpp"
 
 using namespace std;
@@ -19,6 +20,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(ComponentsOfResolutionVisitor &visitor)
 {
 	return visitor.visit(*this);
+}
+/*virtual */void SequenceOrSetType::ComponentsOfType::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
+{
+    type_->visit(visitor);
 }
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentsOfType::visit(TagResolutionVisitor &visitor)
 {
@@ -116,6 +121,10 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 {
 	return visitor.visit(*this);
 }
+/*virtual */void SequenceOrSetType::NamedComponentType::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
+{
+	visitor.visit(*this);
+}
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::NamedComponentType::visit(TagResolutionVisitor &visitor)
 {
 	return visitor.visit(*this);
@@ -161,6 +170,10 @@ void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &
 	assert(!"This should not be called");
 	return shared_ptr< ComponentType >();
 }
+/*virtual */void SequenceOrSetType::ComponentTypeList::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
+{
+	assert(!"This should not be called");
+}
 /* virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::ComponentTypeList::visit(TagResolutionVisitor &visitor)/* override*/
 {
 	assert(!"This should not be called");
@@ -173,6 +186,10 @@ void SequenceOrSetType::visit(AutoTagVisitor &visitor)
 }
 
 void SequenceOrSetType::visit(ComponentsOfResolutionVisitor &visitor)
+{
+	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
+}
+/*virtual */void SequenceOrSetType::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
 {
 	visitor = for_each(component_types_.begin(), component_types_.end(), move(visitor));
 }

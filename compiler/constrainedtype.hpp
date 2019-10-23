@@ -22,6 +22,8 @@ public :
 	std::shared_ptr< TypeDescriptor > getType() const { return type_; }
 	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
 
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	std::shared_ptr< TypeDescriptor > type_;
 	Constraint constraint_;

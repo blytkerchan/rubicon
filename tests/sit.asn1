@@ -89,7 +89,7 @@ DEFINITIONS ::= BEGIN
 		notAfter		GeneralizedTime
 	}
 	PrivateBaseKey ::= SEQUENCE {
-		localUniqueID		INTEGER,
+		localUniqueID	INTEGER,
 		keys			KeyPair,
 		commonName		CommonName OPTIONAL
 	}

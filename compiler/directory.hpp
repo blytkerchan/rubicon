@@ -19,7 +19,7 @@ public :
 	std::vector< TypeAssignment > getTypeAssignments() const;
 	std::vector< ValueAssignment > getValueAssignments() const;
 
-        std::shared_ptr< TypeDescriptor > findType(std::string const &type_name) const;
+    std::shared_ptr< TypeDescriptor > findType(std::string const &type_name) const;
 	std::shared_ptr< Value > findValue(std::string const &value_name) const;
 	
 protected :

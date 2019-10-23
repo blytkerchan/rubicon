@@ -9,6 +9,7 @@
 #include "tag.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class DefinedTypeResolutionVisitor;
 struct StateMachine;
 class TypeDescriptor
 {
@@ -44,6 +45,7 @@ public :
 	virtual void generateCompareImplementation(std::ostream &os) const {}
 
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) = 0;
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) {}
 
 	SourceLocation getSourceLocation() const { return source_location_; }
 

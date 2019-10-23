@@ -35,6 +35,8 @@ public :
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	bool is_set_;
 	Constraint constraint_;

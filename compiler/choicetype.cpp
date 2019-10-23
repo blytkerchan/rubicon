@@ -1,6 +1,7 @@
 #include "choicetype.hpp"
 #include <algorithm>
 #include "../exceptions/contract.hpp"
+#include "definedtyperesolutionvisitor.hpp"
 
 using namespace std;
 using namespace boost;
@@ -84,6 +85,30 @@ string ChoiceType::getCloneName() const
 {
 	pre_condition(isClone());
 	return clone_name_;
+}
+/*virtual */void ChoiceType::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
+{
+	struct TypeVisitor : static_visitor<>
+	{
+		TypeVisitor(DefinedTypeResolutionVisitor &visitor)
+			: visitor_(visitor)
+		{ /* no-op */ }
+		void operator()(NamedType &named_type) const
+		{
+			visitor_.visit(named_type);
+		}
+		void operator()(VersionedTypeList &versioned_type_list) const
+		{
+			for_each(versioned_type_list.second.begin(), versioned_type_list.second.end(), *this);
+		}
+
+		DefinedTypeResolutionVisitor &visitor_;
+	};
+
+	for (auto type : alternative_types_)
+	{
+		apply_visitor(TypeVisitor(visitor), type);
+	}
 }
 }}}
 

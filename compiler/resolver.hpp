@@ -37,7 +37,7 @@ class Resolver
 public :
 	Resolver(Listener *listener);
 	
-	Resolver const& operator()(TypeAssignment &type_assignment);
+	Resolver const& operator()(TypeAssignment &type_assignment, int phase = 0);
 	Resolver const& operator()(ValueAssignment &value_assignment);
 
 	std::shared_ptr< TypeDescriptor > resolve(BitStringType &bit_string_type);
@@ -63,12 +63,12 @@ public :
 
 private :
 	enum Mode {
-		  resolve__				// make sure all the names resolve, and we have everything we need to generate code
-		, collapse__				// collapse to the leaf primitive (has no effect on non-primitive types)
-		, clone_if_choice__			// clone if the type is a CHOICE, so we can tag it
-		, get_selected_type__			// retrieve the selected type
-		, auto_tag__				// apply automatic tagging
-		, build_decoder_state_machine__		// build the decoder state machine for the current type
+		  resolve__                     // make sure all the names resolve, and we have everything we need to generate code
+		, collapse__				    // collapse to the leaf primitive (has no effect on non-primitive types)
+		, clone_if_choice__			    // clone if the type is a CHOICE, so we can tag it
+		, get_selected_type__           // retrieve the selected type
+		, auto_tag__                    // apply automatic tagging
+		, build_decoder_state_machine__ // build the decoder state machine for the current type
 		};
 	struct Context
 	{
@@ -102,6 +102,7 @@ private :
 	static void emitWarning(SourceLocation const &source_location, char const *fmt, ...);
 	static void emitError(SourceLocation const &source_location, char const *fmt, ...);
 
+    int phase_ = 0;
 	Listener *listener_;
 	Contexts contexts_;
 	unsigned int next_clone_id_ = 0;

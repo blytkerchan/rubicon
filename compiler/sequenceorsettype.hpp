@@ -11,6 +11,7 @@
 namespace Vlinder { namespace Rubicon { namespace Compiler {
 class AutoTagVisitor;
 class ComponentsOfResolutionVisitor;
+class DefinedTypeResolutionVisitor;
 class TagResolutionVisitor;
 class SequenceOrSetType : public TypeDescriptor
 {
@@ -35,6 +36,7 @@ public :
 		virtual bool hasDefaultValue() const { return false; }
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) = 0;
+		virtual void visit(DefinedTypeResolutionVisitor &visitor) = 0;
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) = 0;
 		virtual Tag getTag() const noexcept = 0;
 
@@ -58,6 +60,7 @@ public :
 		virtual bool optional() const override { return false; };
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) override;
 		virtual Tag getTag() const noexcept override { return type_->getTag(); }
 
@@ -101,6 +104,7 @@ public :
 		void generateSetterImplementation(std::string const &type_name, std::ostream &os) const;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) override;
 		virtual Tag getTag() const noexcept override { return named_type_.getTag(); }
 		void setTag(Tag const &tag) { named_type_.setTag(tag); }
@@ -132,6 +136,7 @@ public :
 		virtual bool optional() const override;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
+		virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(TagResolutionVisitor &visitor) override;
 		virtual Tag getTag() const noexcept override { return Tag(Tag::universal__, 0); }
 
@@ -151,6 +156,7 @@ public :
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	void visit(AutoTagVisitor &visitor);
 	void visit(ComponentsOfResolutionVisitor &visitor);
+	virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 	void visit(TagResolutionVisitor &visitor);
 	void flatten();
 	virtual std::set< std::string > getDependencies() const override;

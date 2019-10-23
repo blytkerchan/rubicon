@@ -143,6 +143,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/constraint.hpp
 	${PROJECT_SOURCE_DIR}/compiler/definedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/definedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/definedtyperesolutionvisitor.cpp
+	${PROJECT_SOURCE_DIR}/compiler/definedtyperesolutionvisitor.hpp
 	${PROJECT_SOURCE_DIR}/compiler/definedvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/dependencies.cpp
 	${PROJECT_SOURCE_DIR}/compiler/dependencies.hpp

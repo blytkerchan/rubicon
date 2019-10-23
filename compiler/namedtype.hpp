@@ -30,6 +30,8 @@ public :
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
+    
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
 private :
 	std::string name_;

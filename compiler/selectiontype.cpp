@@ -1,4 +1,5 @@
 #include "selectiontype.hpp"
+#include "definedtyperesolutionvisitor.hpp"
 #include <iostream>
 
 using namespace std;
@@ -33,6 +34,11 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void SelectionType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO " << typeid(*this).name() << endl;
+}
+
+/*virtual */void SelectionType::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
+{
+    type_->visit(visitor); // probably wrong
 }
 
 }}}

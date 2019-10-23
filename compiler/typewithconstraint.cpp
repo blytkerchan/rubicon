@@ -11,6 +11,17 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }
+void TypeWithConstraint::visit(DefinedTypeResolutionVisitor &visitor)
+{
+    if (type_)
+    {
+        type_->visit(visitor);
+    }
+    else
+    {
+        named_type_.visit(visitor);
+    }
+}
 }}}
 
 

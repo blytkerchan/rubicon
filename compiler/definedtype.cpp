@@ -1,4 +1,5 @@
 #include "definedtype.hpp"
+#include "definedtyperesolutionvisitor.hpp"
 
 using namespace std;
 
@@ -7,7 +8,14 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
     if (!tag_)
     {
-        throw std::logic_error("I should not have to answer this");
+        if (!referenced_type_)
+        {
+            throw std::logic_error("I should not have to answer this");
+        }
+        else
+        {
+            return referenced_type_->getTag();
+        }
     }
     else
     {
@@ -23,6 +31,10 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
     return !!tag_;
 }
 /*virtual */void DefinedType::generateEncodeImplementation(ostream &os) const/* override*/ {}
+/*virtual */void DefinedType::visit(DefinedTypeResolutionVisitor& visitor)/* override*/
+{
+    visitor.visit(*this);
+}
 }}}
 
 

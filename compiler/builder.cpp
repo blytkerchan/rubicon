@@ -123,7 +123,11 @@ void Builder::resolve()
 	Resolver resolver(listener_);
 	for (auto type_assignment : listener_->getTypeAssignments())
 	{
-		resolver(type_assignment);
+		resolver(type_assignment, 1);
+	}
+	for (auto type_assignment : listener_->getTypeAssignments())
+	{
+		resolver(type_assignment, 2);
 	}
 	for (auto value_assignment : listener_->getValueAssignments())
 	{

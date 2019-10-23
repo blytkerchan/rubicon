@@ -18,6 +18,7 @@
 #include "utctimetype.hpp"
 #include "valueassignment.hpp"
 #include "tagresolutionvisitor.hpp"
+#include "definedtyperesolutionvisitor.hpp"
 
 using namespace std;
 
@@ -26,12 +27,13 @@ Resolver::Resolver(Listener *listener)
 	: listener_(listener)
 { /* no-op */ }
 
-Resolver const& Resolver::operator()(TypeAssignment &type_assignment)
+Resolver const& Resolver::operator()(TypeAssignment &type_assignment, int phase/* = 0*/)
 {
+    phase_ = phase ? phase : phase_;
 	// Make sure everything resolves. May be called recursively.
 	ScopedContext context(contexts_, resolve__);
 	type_assignment.setType(resolve(type_assignment.getType()));
-	if (contexts_.size() == 1)
+	if ((contexts_.size() == 1) && (phase == 2))
 	{
 		// if we're not being called recursively, we can now:
 		// 1. apply auto-tagging
@@ -50,7 +52,7 @@ Resolver const& Resolver::operator()(TypeAssignment &type_assignment)
 		type_assignment.getType()->setStateMachine(state_machine_builder_.get());
 	}
 	else
-	{ /* recursing */ }
+	{ /* recursing, or wrong phase */ }
 	return *this;
 }
 Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
@@ -59,8 +61,13 @@ Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
 	value_assignment.setValue(resolve(value_assignment.getValue()));
 	return *this;
 }
+shared_ptr<TypeDescriptor> Resolver::resolve(AnyType &any_type)
+{
+    return shared_ptr< TypeDescriptor >();
+}
 shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
 	else if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >();
@@ -162,6 +169,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BitStringType &bit_string_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(BooleanType &bit_string_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	//TODO
 	if (contexts_.back().mode_ == clone_if_choice__) return shared_ptr< TypeDescriptor >();
@@ -279,16 +287,8 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// When cloning choices, we do not need to go any further than this, unless the underlying type is a CHOICE, in which case we will return a clone of the choice.
 	// Regardless of what we're doing, we need to resolve the type name to make sure it exists.
-	auto type_assignments(listener_->getTypeAssignments());
-	auto const name(defined_type.getTypeName());
-	auto which(find_if(type_assignments.begin(), type_assignments.end(), [name](auto type_assignment){ return name == type_assignment.getName(); }));
-	if (which == type_assignments.end())
-	{
-		emitError(which->getSourceLocation(), "undefined reference to %s", defined_type.getTypeName().c_str());
-		throw UndefinedReference("undefined reference");
-	}
-	else
-	{ /* found it */ }
+    DefinedTypeResolutionVisitor(*listener_).visit(defined_type);
+
 	switch (contexts_.back().mode_)
 	{
 	case clone_if_choice__ :
@@ -307,7 +307,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 		//
 		// We know that our defined type is a clone if the resolution results in a different pointer than the one we have.
 		{
-			auto the_referred_type(which->getType());
+			auto the_referred_type(defined_type.getReferencedType());
 			auto the_resolved_type(resolve(the_referred_type));
 			if (the_referred_type != the_resolved_type)
 			{
@@ -325,7 +325,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 		// if we're collapsing primitives, we only need to know whether the type we contain is a primitive (which we can ask it).
 		// If so, we return it. Otherwise, we return an empty shared_ptr.
 		{
-			auto the_referred_type(which->getType());
+			auto the_referred_type(defined_type.getReferencedType());
 			auto the_resolved_type(resolve(the_referred_type));
 			if (the_referred_type != the_resolved_type)
 			{
@@ -346,6 +346,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -363,6 +364,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(EnumeratedType &enumerated_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_type_reference)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -379,6 +381,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ExternalTypeReference &external_t
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_time_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -396,6 +399,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(GeneralizedTimeType &generalized_
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(IntegerType &integer_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
@@ -427,6 +431,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(NamedType &named_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_descriptor_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -443,6 +448,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ObjectDescriptorType &object_desc
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -460,6 +466,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -478,9 +485,19 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SelectionType &selection_type)
 		else
 		{
 		}
-	///	
+	///TODO
 	}
 	case resolve__ :
+    {
+        if (phase_ == 1)
+        {
+		    auto the_referred_type(selection_type.getType());
+		    resolve(the_referred_type); // known to not change the type, just annotate it
+        }
+        else
+        { /* not phase 1: not annotating defined types */ }
+	    return shared_ptr< TypeDescriptor >();
+    }
 	case clone_if_choice__ :
 		return shared_ptr< TypeDescriptor >();
 	case get_selected_type__ :
@@ -591,15 +608,23 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 	}
 	case resolve__ :
 	{
-		{ // resolve COMPONENTS OF
-			ComponentsOfResolutionVisitor visitor(*listener_);
+        if (phase_ == 1) // annotate defined types
+        {
+    		DefinedTypeResolutionVisitor visitor(*listener_);
 			visitor(sequence_or_set_type);
-			sequence_or_set_type.flatten();
-		}
-		{ // resolve defined values in tags
-			TagResolutionVisitor visitor(*listener_);
-			visitor(sequence_or_set_type);
-		}
+        }
+        else
+        {
+		    { // resolve COMPONENTS OF
+    			ComponentsOfResolutionVisitor visitor(*listener_);
+			    visitor(sequence_or_set_type);
+			    sequence_or_set_type.flatten();
+		    }
+		    { // resolve defined values in tags
+    			TagResolutionVisitor visitor(*listener_);
+			    visitor(sequence_or_set_type);
+		    }
+        }
 		return shared_ptr< TypeDescriptor >();
 	}
 	case collapse__ :
@@ -624,6 +649,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetType &sequence_or_se
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_set_of_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -640,6 +666,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(SequenceOrSetOfType &sequence_or_
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -658,6 +685,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TaggedType &tagged_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_constraint)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -676,6 +704,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_con
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
@@ -692,6 +721,7 @@ shared_ptr< TypeDescriptor > Resolver::resolve(UnknownType &unknown_type)
 }
 shared_ptr< TypeDescriptor > Resolver::resolve(UTCTimeType &utc_time_type)
 {
+    if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
 	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)

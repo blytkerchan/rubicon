@@ -38,6 +38,8 @@ public :
 		clone_name_ = clone_name;
 	}
 
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	AlternativeTypes alternative_types_;
 	bool extensible_;

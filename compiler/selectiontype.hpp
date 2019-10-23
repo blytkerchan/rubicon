@@ -27,6 +27,8 @@ public :
 
 	std::string getSelection() const { return selection_; }
 
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	std::string selection_;
 	std::shared_ptr< TypeDescriptor > type_;

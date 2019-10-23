@@ -13,7 +13,6 @@ public :
 		: TypeDescriptor(source_location)
 		, type_name_(type_name)
 	{ /* no-op */ }
-
 	
 	virtual Tag getTag() const override;
 	virtual void setTag(Tag const &tag) override;
@@ -24,9 +23,15 @@ public :
 
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
 
+    void setReferencedType(std::shared_ptr< TypeDescriptor > const &referenced_type) { referenced_type_ = referenced_type; }
+    std::shared_ptr< TypeDescriptor > getReferencedType() const { return referenced_type_; }
+
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	std::unique_ptr< Tag > tag_;
 	std::string type_name_;
+    std::shared_ptr< TypeDescriptor > referenced_type_;
 };
 }}}
 

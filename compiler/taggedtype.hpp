@@ -23,6 +23,8 @@ public :
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
+    virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
+
 private :
 	Tag tag_;
 	bool explicit_tagging_;
