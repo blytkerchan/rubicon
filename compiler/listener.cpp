@@ -322,17 +322,41 @@ shared_ptr< TypeDescriptor > Listener::parseType(asn1Parser::TypeContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
-	return
-		  ctx->builtin_type() ? parseBuiltinType(ctx->builtin_type())
-		: ctx->referenced_type()
-			? ctx->referenced_type()->defined_type()		? parseDefinedType(ctx->referenced_type()->defined_type())
-			: ctx->referenced_type()->useful_type()			? parseUsefulType(ctx->referenced_type()->useful_type())
-			: ctx->referenced_type()->selection_type()		? parseSelectionType(ctx->referenced_type()->selection_type())
-
-		: ctx->constrained_type()	? parseContrainedType(ctx->constrained_type())
-		: make_shared< UnknownType >(ctx)
-		: make_shared< UnknownType >(ctx)
-		;
+    if (ctx->builtin_type())
+    {
+        return parseBuiltinType(ctx->builtin_type());
+    }
+    else if (ctx->referenced_type())
+    {
+        if (ctx->referenced_type()->defined_type())
+        {
+            return parseDefinedType(ctx->referenced_type()->defined_type());
+        }
+        else if (ctx->referenced_type()->useful_type())
+        {
+            return parseUsefulType(ctx->referenced_type()->useful_type());
+        }
+        else if (ctx->referenced_type()->selection_type())
+        {
+            return parseSelectionType(ctx->referenced_type()->selection_type());
+        }
+        else
+        {
+            return make_shared< UnknownType >(ctx);
+        }
+    }
+    else if (ctx->constrained_type())
+    {
+        return parseContrainedType(ctx->constrained_type());
+    }
+    else if (ctx->any_type())
+    {
+        return parseAnyType(ctx->any_type());
+    }
+    else
+    {
+        return make_shared< UnknownType >(ctx);
+    }
 }
 shared_ptr< TypeDescriptor > Listener::parseBuiltinType(asn1Parser::Builtin_typeContext *ctx)
 {
