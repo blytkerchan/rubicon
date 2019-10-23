@@ -14,6 +14,7 @@ struct Tag
 		, application__
 		, private__
 		, context_specific__
+        , internal__ // used for ANY, for example -- when we don't know what type to expect and need user code to validate
 		};
 
 	Tag(Class a_class, unsigned int class_number);

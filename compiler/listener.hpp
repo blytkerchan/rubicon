@@ -68,6 +68,7 @@ private :
 	std::shared_ptr< TypeDescriptor > parseSelectionType(asn1Parser::Selection_typeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseContrainedType(asn1Parser::Constrained_typeContext *ctx);
 	std::shared_ptr< TypeDescriptor > parseReferencedType(asn1Parser::Referenced_typeContext *ctx);
+	std::shared_ptr< TypeDescriptor > parseAnyType(asn1Parser::Any_typeContext *ctx);
 	Constraint parseConstraint(asn1Parser::ConstraintContext *ctx);
     Constraint parseSizeConstraint(asn1Parser::Size_constraintContext *ctx);
 

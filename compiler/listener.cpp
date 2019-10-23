@@ -1,6 +1,7 @@
 #include "../runtime/exceptions.hpp"
 #include "../exceptions/contract.hpp"
 #include "../tracing.hpp"
+#include "anytype.hpp"
 #include "bitstringtype.hpp"
 #include "bitstringvalue.hpp"
 #include "booleantype.hpp"
@@ -892,6 +893,18 @@ shared_ptr< TypeDescriptor > Listener::parseReferencedType(asn1Parser::Reference
 		: ctx->useful_type() ? parseUsefulType(ctx->useful_type())
 		: parseSelectionType(ctx->selection_type())
 		;
+}
+
+std::shared_ptr<TypeDescriptor> Listener::parseAnyType(asn1Parser::Any_typeContext *ctx)
+{
+    if (ctx->IDENTIFIER())
+    {
+        return make_shared< AnyType >(SourceLocation(ctx), ctx->IDENTIFIER()->getText());
+    }
+    else
+    {
+        return make_shared< AnyType >(SourceLocation(ctx));
+    }
 }
 
 Constraint Listener::parseConstraint(asn1Parser::ConstraintContext *ctx)

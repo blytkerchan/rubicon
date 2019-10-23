@@ -6,6 +6,7 @@
 #include "statemachinebuilder.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class AnyType;
 class BitStringType;
 class BooleanType;
 class CharacterStringType;
@@ -40,6 +41,7 @@ public :
 	Resolver const& operator()(TypeAssignment &type_assignment, int phase = 0);
 	Resolver const& operator()(ValueAssignment &value_assignment);
 
+	std::shared_ptr< TypeDescriptor > resolve(AnyType &any_type);
 	std::shared_ptr< TypeDescriptor > resolve(BitStringType &bit_string_type);
 	std::shared_ptr< TypeDescriptor > resolve(BooleanType &bit_string_type);
 	std::shared_ptr< TypeDescriptor > resolve(CharacterStringType &character_string_type);
