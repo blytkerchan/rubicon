@@ -15,6 +15,7 @@
 #include "primitivetype.hpp"
 #include "selectiontype.hpp"
 #include "typeassignment.hpp"
+#include "typewithconstraint.hpp"
 #include "utctimetype.hpp"
 #include "valueassignment.hpp"
 #include "tagresolutionvisitor.hpp"
@@ -61,7 +62,7 @@ Resolver const& Resolver::operator()(ValueAssignment &value_assignment)
 	value_assignment.setValue(resolve(value_assignment.getValue()));
 	return *this;
 }
-shared_ptr<TypeDescriptor> Resolver::resolve(AnyType &any_type)
+shared_ptr< TypeDescriptor > Resolver::resolve(AnyType &any_type)
 {
     return shared_ptr< TypeDescriptor >();
 }
@@ -181,7 +182,12 @@ shared_ptr< TypeDescriptor > Resolver::resolve(BooleanType &bit_string_type)
 shared_ptr< TypeDescriptor > Resolver::resolve(CharacterStringType &character_string_type)
 {
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
+    if (contexts_.back().mode_ == build_decoder_state_machine__)
+	{
+		state_machine_builder_.addState(0, 27);
+	}
+    else
+    { /* not building the state machine */ }
 	// For character strings, the Listener does everything that needs to be done
 	return shared_ptr< TypeDescriptor >();
 }
@@ -238,7 +244,6 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type)
 {
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case clone_if_choice__ :
@@ -276,6 +281,9 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type
 		// once for the general transformations.
 		emitWarning(constrained_type.getSourceLocation(), "don't know how to constrain types (yet) -- using unconstrained type in stead");
 		return resolve(constrained_type.getType());
+    case build_decoder_state_machine__ :
+        // the state machine is for whatever we constrain..
+        return resolve(constrained_type.getType());
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
@@ -284,7 +292,6 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ConstrainedType &constrained_type
 shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 {
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	// When cloning choices, we do not need to go any further than this, unless the underlying type is a CHOICE, in which case we will return a clone of the choice.
 	// Regardless of what we're doing, we need to resolve the type name to make sure it exists.
     DefinedTypeResolutionVisitor(*listener_).visit(defined_type);
@@ -338,6 +345,10 @@ shared_ptr< TypeDescriptor > Resolver::resolve(DefinedType &defined_type)
 	case resolve__ :
 		// If we're doing a "normal" resolution, we have nothing more to do - return an empty shared_ptr
 		return shared_ptr< TypeDescriptor >();
+    case build_decoder_state_machine__ :
+        // A defined type is encoded as the underlying type, so we need to send the resolver into the underlying type and have it handle building the state machine there.
+        return resolve(defined_type.getReferencedType());
+
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
@@ -450,7 +461,6 @@ shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 {
     if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -458,6 +468,13 @@ shared_ptr< TypeDescriptor > Resolver::resolve(PrimitiveType &primitive_type)
 	case resolve__ :
 	case clone_if_choice__ :
 		return shared_ptr< TypeDescriptor >();
+    case build_decoder_state_machine__ :
+    {
+        auto tag(primitive_type.getTag());
+        assert(tag.class_number_.which() == 0);
+        state_machine_builder_.addState(tag.class_, boost::get< unsigned int >(tag.class_number_));
+        break;
+    }
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
@@ -687,7 +704,6 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_con
 {
     if (phase_ == 1) return shared_ptr< TypeDescriptor >();
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	switch (contexts_.back().mode_)
 	{
 	case collapse__ :
@@ -695,7 +711,8 @@ shared_ptr< TypeDescriptor > Resolver::resolve(TypeWithConstraint &type_with_con
 		//TODO
 	case resolve__ :
 	case clone_if_choice__ :
-		return shared_ptr< TypeDescriptor >(); //TODO check this- should go through the underlying type
+    case build_decoder_state_machine__ :
+        return resolve(type_with_constraint.getType());
 	case get_selected_type__ :
 	default :
 		throw logic_error("Unexpected mode");
