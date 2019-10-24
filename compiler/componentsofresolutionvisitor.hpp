@@ -23,17 +23,17 @@ public :
 
 private :
 	enum State {
-                  gather__
-                , dive__
-	};
+          gather__
+        , dive__
+        };
 
-        static void emitWarning(SourceLocation const &source_location, char const *fmt, ...);
-        static void emitError(SourceLocation const &source_location, char const *fmt, ...);
+    static void emitWarning(SourceLocation const &source_location, char const *fmt, ...);
+    static void emitError(SourceLocation const &source_location, char const *fmt, ...);
 
-        std::vector< std::shared_ptr< SequenceOrSetType::ComponentType > > components_;
+    std::vector< std::shared_ptr< SequenceOrSetType::ComponentType > > components_;
 
-        State state_ = gather__;
-        Directory directory_;
+    State state_ = gather__;
+    Directory directory_;
 };
 }}}
 

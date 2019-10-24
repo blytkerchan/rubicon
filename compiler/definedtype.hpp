@@ -28,6 +28,8 @@ public :
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
+	virtual std::shared_ptr< StateMachine > getStateMachine() const override { return referenced_type_->getStateMachine(); }
+
 private :
 	std::unique_ptr< Tag > tag_;
 	std::string type_name_;

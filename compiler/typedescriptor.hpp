@@ -49,7 +49,7 @@ public :
 
 	SourceLocation getSourceLocation() const { return source_location_; }
 
-	std::shared_ptr< StateMachine > getStateMachine() const { return state_machine_; }
+	virtual std::shared_ptr< StateMachine > getStateMachine() const { return state_machine_; }
 	void setStateMachine(StateMachine const &state_machine);
 
 private :

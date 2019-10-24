@@ -24,6 +24,9 @@ public :
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
+	virtual std::shared_ptr< StateMachine > getStateMachine() const override { return type_->getStateMachine(); }
+
+
 private :
 	std::shared_ptr< TypeDescriptor > type_;
 	Constraint constraint_;

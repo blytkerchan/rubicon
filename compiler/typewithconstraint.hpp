@@ -38,6 +38,8 @@ public :
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
+	virtual std::shared_ptr< StateMachine > getStateMachine() const;
+
 private :
 	bool is_set_;
 	Constraint constraint_;

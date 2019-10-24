@@ -11,7 +11,7 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	os << "//TODO " << typeid(*this).name() << endl;
 }
-void TypeWithConstraint::visit(DefinedTypeResolutionVisitor &visitor)
+/*virtual */void TypeWithConstraint::visit(DefinedTypeResolutionVisitor &visitor)/* override*/
 {
     if (type_)
     {
@@ -20,6 +20,17 @@ void TypeWithConstraint::visit(DefinedTypeResolutionVisitor &visitor)
     else
     {
         named_type_.visit(visitor);
+    }
+}
+/*virtual */std::shared_ptr< StateMachine > TypeWithConstraint::getStateMachine() const/* override*/
+{
+    if (type_)
+    {
+        return type_->getStateMachine();
+    }
+    else
+    {
+        return named_type_.getStateMachine();
     }
 }
 }}}

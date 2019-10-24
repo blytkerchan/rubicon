@@ -29,6 +29,8 @@ public :
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
+	virtual std::shared_ptr< StateMachine > getStateMachine() const override { return type_->getStateMachine(); }
+
 private :
 	std::string selection_;
 	std::shared_ptr< TypeDescriptor > type_;
