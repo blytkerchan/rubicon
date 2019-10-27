@@ -271,6 +271,8 @@ add_library(rubicon SHARED
 	runtime/integer.cpp
 	runtime/integer.hpp
 	runtime/null.hpp
+	runtime/objectidentifier.cpp
+	runtime/objectidentifier.hpp
 	runtime/octetstring.cpp
 	runtime/octetstring.hpp
 	runtime/real.cpp
