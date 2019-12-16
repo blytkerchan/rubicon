@@ -82,32 +82,32 @@ private :
 	std::pair< std::vector< unsigned char >, unsigned int > parseBString(antlr4::tree::TerminalNode *bstring);
 	std::pair< std::vector< unsigned char >, unsigned int > parseHString(antlr4::tree::TerminalNode *hstring);
 
-	std::shared_ptr< Value > parseBooleanValue(asn1Parser::Boolean_valueContext *ctx);
-	std::shared_ptr< Value > parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx);
-	std::shared_ptr< Value > parseRestrictedCharacterStringValue(asn1Parser::Restricted_character_string_valueContext *ctx);
+	std::shared_ptr< Value > parseBooleanValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Boolean_valueContext *ctx);
+	std::shared_ptr< Value > parseCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Character_string_valueContext *ctx);
+	std::shared_ptr< Value > parseRestrictedCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Restricted_character_string_valueContext *ctx);
 	void parseCharacterStringList(RestrictedCharacterStringValue &retval, asn1Parser::Character_string_listContext *ctx);
 	void parseQuadruple(RestrictedCharacterStringValue &retval, asn1Parser::QuadrupleContext *ctx);
 	void parseTuple(RestrictedCharacterStringValue &retval, asn1Parser::TupleContext *ctx);
 
-	std::shared_ptr< Value > parseUnrestrictedCharacterStringValue(asn1Parser::Unrestricted_character_string_valueContext *ctx);
-	std::shared_ptr< Value > parseChoiceValue(asn1Parser::Choice_valueContext *ctx);
-	std::shared_ptr< Value > parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx);
-	std::shared_ptr< Value > parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx);
-	std::shared_ptr< Value > parseIntegerValue(asn1Parser::Integer_valueContext *ctx);
-	std::shared_ptr< Value > parseIRIValue(asn1Parser::Iri_valueContext *ctx);
-	std::shared_ptr< Value > parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx);
-	std::shared_ptr< Value > parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx);
-	std::shared_ptr< Value > parseRealValue(asn1Parser::Real_valueContext *ctx);
-	std::shared_ptr< Value > parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx);
-	std::shared_ptr< Value > parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx);
+	std::shared_ptr< Value > parseUnrestrictedCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Unrestricted_character_string_valueContext *ctx);
+	std::shared_ptr< Value > parseChoiceValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Choice_valueContext *ctx);
+	std::shared_ptr< Value > parseEmbeddedPDVValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Embedded_pdv_valueContext *ctx);
+	std::shared_ptr< Value > parseEnumeratedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Enumerated_valueContext *ctx);
+	std::shared_ptr< Value > parseIntegerValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Integer_valueContext *ctx);
+	std::shared_ptr< Value > parseIRIValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Iri_valueContext *ctx);
+	std::shared_ptr< Value > parseObjectIdentifierValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Object_identifier_valueContext *ctx);
+	std::shared_ptr< Value > parseOctetStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Octet_string_valueContext *ctx);
+	std::shared_ptr< Value > parseRealValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Real_valueContext *ctx);
+	std::shared_ptr< Value > parseRelativeIRIValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Relative_iri_valueContext *ctx);
+	std::shared_ptr< Value > parseRelativeOIDValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Relative_oid_valueContext *ctx);
 	OIDComponent parseOIDComponent(asn1Parser::Relative_oid_componentsContext *ctx);
 
-	std::shared_ptr< Value > parseSequenceValue(asn1Parser::Sequence_valueContext *ctx);
-	std::shared_ptr< Value > parseNamedValue(asn1Parser::Named_valueContext *ctx);
-	std::shared_ptr< Value > parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx);
-	std::shared_ptr< Value > parseSetValue(asn1Parser::Set_valueContext *ctx);
-	std::shared_ptr< Value > parseSetOfValue(asn1Parser::Set_of_valueContext *ctx);
-	std::shared_ptr< Value > parseTimeValue(asn1Parser::Time_valueContext *ctx);
+	std::shared_ptr< Value > parseSequenceValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Sequence_valueContext *ctx);
+	std::shared_ptr< Value > parseNamedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Named_valueContext *ctx);
+	std::shared_ptr< Value > parseSequenceOfValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Sequence_of_valueContext *ctx);
+	std::shared_ptr< Value > parseSetValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Set_valueContext *ctx);
+	std::shared_ptr< Value > parseSetOfValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Set_of_valueContext *ctx);
+	std::shared_ptr< Value > parseTimeValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Time_valueContext *ctx);
 
 	ArcIdentifier parseArcIdentifier(asn1Parser::Arc_identifierContext *ctx);
 

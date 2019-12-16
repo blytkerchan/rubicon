@@ -243,6 +243,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/objectdescriptortype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/objectidentifier.hpp
+	${PROJECT_SOURCE_DIR}/compiler/objectidentifiervalue.cpp
 	${PROJECT_SOURCE_DIR}/compiler/objectidentifiervalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/octetstringvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/oidcomponent.hpp
@@ -402,11 +403,11 @@ install(
 )
 target_include_directories(rubicon INTERFACE "$<INSTALL_INTERFACE:include>")
 
+file(GLOB TEST_RUBICON_SOURCES tests/*.test.cpp)
+
 add_executable(test_rubicon
-	tests/bitstring.cpp
+	${TEST_RUBICON_SOURCES}
 	tests/catch.hpp
-	tests/derdecoder.cpp
-	tests/derencoder.cpp
 	tests/main.cpp
 	)
 if (WIN32)

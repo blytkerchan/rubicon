@@ -40,6 +40,8 @@ public :
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
 
+    AlternativeTypes getAlternativeTypes() const { return alternative_types_; }
+
 private :
 	AlternativeTypes alternative_types_;
 	bool extensible_;

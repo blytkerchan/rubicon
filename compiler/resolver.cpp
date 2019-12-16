@@ -194,7 +194,6 @@ shared_ptr< TypeDescriptor > Resolver::resolve(CharacterStringType &character_st
 shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 {
 	assert(contexts_.back().mode_ != auto_tag__); // not implemented yet
-	assert(contexts_.back().mode_ != build_decoder_state_machine__); // not implemented yet
 	if (contexts_.back().mode_ == clone_if_choice__)
 	{
 		return make_shared< ChoiceType >(choice_type);
@@ -203,6 +202,41 @@ shared_ptr< TypeDescriptor > Resolver::resolve(ChoiceType &choice_type)
 	{ /* not cloning */ }
 	if (contexts_.back().mode_ == collapse__) return shared_ptr< TypeDescriptor >(); // definitely not a primitive
 	if (contexts_.back().mode_ == get_selected_type__) return shared_ptr< TypeDescriptor >(); //TODO: select
+
+    if (contexts_.back().mode_ == build_decoder_state_machine__)
+    {
+        state_machine_builder_.commit();
+
+        auto alternative_types(choice_type.getAlternativeTypes());
+        for (auto alternative_type : alternative_types)
+        {
+            struct AlternativeTypeVisitor : boost::static_visitor<>
+            {
+                AlternativeTypeVisitor(StateMachineBuilder &state_machine_builder)
+                    : state_machine_builder_(state_machine_builder)
+                { /* no-op */ }
+                void operator()(NamedType const &named_type) const
+                {
+                    assert(named_type.getTag() != Tag(Tag::universal__, 0));
+                    auto tag(named_type.getTag());
+                    state_machine_builder_.addToState(tag.class_, get< unsigned int >(tag.class_number_));
+                }
+
+                void operator()(VersionedTypeList const &versioned_type_list) const
+                {
+                    throw logic_error("Not yet implemented");
+                }
+
+                StateMachineBuilder &state_machine_builder_;
+            };
+            // alternative_type is a variant of either a named type or a versioned type list
+            boost::apply_visitor(AlternativeTypeVisitor(state_machine_builder_), alternative_type);
+        }
+
+        return shared_ptr< TypeDescriptor >();
+    }
+    else
+    { /* not building a state machine */ }
 
 	// The goal of resolution here is to ascertain that all the types in the choice type have a unique tag. For that to
 	// be the case, they must be tagged either using their user-provided (textual) tag or using automatic tags.

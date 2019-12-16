@@ -5,6 +5,7 @@
 #include "objectidentifier.hpp"
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class SequenceValue;
 class ObjectIdentifierValue : public Value
 {
 public :
@@ -12,6 +13,8 @@ public :
 		: Value(source_location)
 		, oid_(oid)
 	{ /* no-op */ }
+
+    ObjectIdentifierValue(SequenceValue const &oid);
 
 	std::string getTypeName() const override { return "ObjectIdentifier"; }
 

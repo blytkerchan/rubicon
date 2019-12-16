@@ -1,4 +1,5 @@
 #include "primitivetype.hpp"
+#include "objectidentifiervalue.hpp"
 
 using namespace std;
 
@@ -66,6 +67,32 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 /*virtual */void PrimitiveType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	cout << "//TODO " << typeid(*this).name() << endl;
+}
+std::shared_ptr< Value > PrimitiveType::cast(SequenceValue const &sequence_value) const
+{
+	switch (primitive_)
+	{
+	case date__ :
+	case date_time__ :
+	case time__ :
+	case time_of_day__ :
+	case duration__ :
+        return std::shared_ptr<Value>();
+	case embedded_pdv__ :
+        return std::shared_ptr<Value>();
+	case object_identifier__ :
+	case oid_iri__ :
+	case relative_oid_iri__ :
+	case relative_oid__ :
+        return make_shared< ObjectIdentifierValue >(sequence_value);
+	case octet_string__ :
+        return std::shared_ptr<Value>();
+	case null__ :
+        return std::shared_ptr<Value>();
+	case external__ :
+        return std::shared_ptr<Value>();
+	}
+	throw logic_error("Unknown primitive type");
 }
 }}}
 

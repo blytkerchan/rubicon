@@ -7,6 +7,9 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 class SequenceValue : public Value
 {
 public :
+    typedef std::vector< std::shared_ptr< Value > > Values_;
+    typedef Values_::const_iterator const_iterator;
+
 	SequenceValue(SourceLocation const &source_location)
 		: Value(source_location)
 	{ /* no-op */ }
@@ -20,8 +23,11 @@ public :
 
 	std::string generateInstance() const override { return "/*TODO*/"; }
 
+    const_iterator begin() const { return values_.begin(); }
+    const_iterator end() const { return values_.end(); }
+
 private :
-	std::vector< std::shared_ptr< Value > > values_;
+	Values_ values_;
 };
 }}}
 

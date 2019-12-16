@@ -6,6 +6,7 @@
 #include <string>
 
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class SequenceValue;
 class PrimitiveType : public TypeDescriptor
 {
 public :
@@ -33,6 +34,9 @@ public :
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 	virtual std::string getTypeName() const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
+    Primitive getType() const noexcept { return primitive_; }
+
+    std::shared_ptr< Value > cast(SequenceValue const &sequence_value) const;
 
 private :
 	Primitive primitive_;

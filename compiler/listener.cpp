@@ -998,25 +998,25 @@ shared_ptr< Value > Listener::parseBuiltinValue(shared_ptr< TypeDescriptor > con
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return
-		  ctx->bit_string_value()		? parseBitStringValue(type, ctx->bit_string_value())
-		: ctx->boolean_value()			? parseBooleanValue(ctx->boolean_value())
-		: ctx->character_string_value()		? parseCharacterStringValue(ctx->character_string_value())
-		: ctx->choice_value()			? parseChoiceValue(ctx->choice_value())
-		: ctx->embedded_pdv_value()		? parseEmbeddedPDVValue(ctx->embedded_pdv_value())
-		: ctx->enumerated_value()		? parseEnumeratedValue(ctx->enumerated_value())
-		: ctx->integer_value()			? parseIntegerValue(ctx->integer_value())
-		: ctx->iri_value()			? parseIRIValue(ctx->iri_value())
-		: ctx->NULL_RW()			? make_shared< NullValue >(ctx)
-		: ctx->object_identifier_value()	? parseObjectIdentifierValue(ctx->object_identifier_value())
-		: ctx->octet_string_value()		? parseOctetStringValue(ctx->octet_string_value())
-		: ctx->real_value()			? parseRealValue(ctx->real_value())
-		: ctx->relative_iri_value()		? parseRelativeIRIValue(ctx->relative_iri_value())
-		: ctx->relative_oid_value()		? parseRelativeOIDValue(ctx->relative_oid_value())
-		: ctx->sequence_value()			? parseSequenceValue(ctx->sequence_value())
-		: ctx->sequence_of_value()		? parseSequenceOfValue(ctx->sequence_of_value())
-		: ctx->set_value()			? parseSetValue(ctx->set_value())
-		: ctx->set_of_value()			? parseSetOfValue(ctx->set_of_value())
-							: parseTimeValue(ctx->time_value())
+		  ctx->bit_string_value()		    ? parseBitStringValue(type, ctx->bit_string_value())
+		: ctx->boolean_value()			    ? parseBooleanValue(type, ctx->boolean_value())
+		: ctx->character_string_value()		? parseCharacterStringValue(type, ctx->character_string_value())
+		: ctx->choice_value()			    ? parseChoiceValue(type, ctx->choice_value())
+		: ctx->embedded_pdv_value()		    ? parseEmbeddedPDVValue(type, ctx->embedded_pdv_value())
+		: ctx->enumerated_value()		    ? parseEnumeratedValue(type, ctx->enumerated_value())
+		: ctx->integer_value()			    ? parseIntegerValue(type, ctx->integer_value())
+		: ctx->iri_value()			        ? parseIRIValue(type, ctx->iri_value())
+		: ctx->NULL_RW()			        ? make_shared< NullValue >(ctx)
+		: ctx->object_identifier_value()	? parseObjectIdentifierValue(type, ctx->object_identifier_value())
+		: ctx->octet_string_value()		    ? parseOctetStringValue(type, ctx->octet_string_value())
+		: ctx->real_value()			        ? parseRealValue(type, ctx->real_value())
+		: ctx->relative_iri_value()		    ? parseRelativeIRIValue(type, ctx->relative_iri_value())
+		: ctx->relative_oid_value()		    ? parseRelativeOIDValue(type, ctx->relative_oid_value())
+		: ctx->sequence_value()			    ? parseSequenceValue(type, ctx->sequence_value())
+		: ctx->sequence_of_value()		    ? parseSequenceOfValue(type, ctx->sequence_of_value())
+		: ctx->set_value()			        ? parseSetValue(type, ctx->set_value())
+		: ctx->set_of_value()			    ? parseSetOfValue(type, ctx->set_of_value())
+							                : parseTimeValue(type, ctx->time_value())
 		;
 }
 shared_ptr< Value > Listener::parseDefinedValue(shared_ptr< TypeDescriptor > const &type, asn1Parser::Defined_valueContext *ctx)
@@ -1185,7 +1185,7 @@ pair< vector< unsigned char >, unsigned int > Listener::parseHString(antlr4::tre
 	return make_pair(bstring_value, bits_remaining % 8);
 }
 
-shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext *ctx)
+shared_ptr< Value > Listener::parseBooleanValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Boolean_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1194,19 +1194,19 @@ shared_ptr< Value > Listener::parseBooleanValue(asn1Parser::Boolean_valueContext
 	return make_shared< BooleanValue >(ctx, ctx->TRUE_RW() != nullptr);
 }
 
-shared_ptr< Value > Listener::parseCharacterStringValue(asn1Parser::Character_string_valueContext *ctx)
+shared_ptr< Value > Listener::parseCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Character_string_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->restricted_character_string_value() || ctx->unrestricted_character_string_value());
 	return
 		  ctx->restricted_character_string_value()
-		? parseRestrictedCharacterStringValue(ctx->restricted_character_string_value())
-		: parseUnrestrictedCharacterStringValue(ctx->unrestricted_character_string_value())
+		? parseRestrictedCharacterStringValue(type, ctx->restricted_character_string_value())
+		: parseUnrestrictedCharacterStringValue(type, ctx->unrestricted_character_string_value())
 		;
 }
 
-shared_ptr< Value > Listener::parseRestrictedCharacterStringValue(asn1Parser::Restricted_character_string_valueContext *ctx)
+shared_ptr< Value > Listener::parseRestrictedCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Restricted_character_string_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1279,38 +1279,58 @@ void Listener::parseTuple(RestrictedCharacterStringValue &retval, asn1Parser::Tu
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 }
 
-shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(asn1Parser::Unrestricted_character_string_valueContext *ctx)
+shared_ptr< Value > Listener::parseUnrestrictedCharacterStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Unrestricted_character_string_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->sequence_value());
-	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
-	//TODO: check that the sequence value corresponds to spec
-	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
-	return make_shared< UnrestrictedCharacterStringValue >(ctx, sequence_value);
+	auto sequence_value(parseSequenceValue(type, ctx->sequence_value()));
+    if (dynamic_pointer_cast< CharacterStringType >(type))
+    {
+	    //TODO: check that the sequence value corresponds to spec
+	    tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
+	    return make_shared< UnrestrictedCharacterStringValue >(ctx, sequence_value);
+    }
+    else
+    {   // the parser was confused by ambiguity in the ASN.1 grammar as defined by X.680. This can happen, for example,
+        // if we're really parsing an OID. Some other types may be subject to this as well, so we check the underlying 
+        // type of the value assignment here, and handle it if we can. In cases we can't, we will emit an error with
+        // instructions to the user.
+        if (dynamic_pointer_cast< PrimitiveType >(type))
+        {
+            assert(dynamic_pointer_cast< SequenceValue >(sequence_value));
+            return static_pointer_cast< PrimitiveType >(type)->cast(*static_pointer_cast< SequenceValue >(sequence_value));
+        }
+        else
+        {
+            SourceLocation source_location(ctx);
+	        tracer__->trace(1, TRACE_ERROR, "%s:%u:%u: Cannot parse value as a %s (Internal error, please concact Vlinder Software support)\n", source_location.filename_.c_str(), source_location.line_, source_location.offset_, type->getTypeName().c_str());
+            return shared_ptr< Value >();
+        }
+    }
 }
-shared_ptr< Value > Listener::parseChoiceValue(asn1Parser::Choice_valueContext *ctx)
+shared_ptr< Value > Listener::parseChoiceValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Choice_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	return make_shared< ChoiceValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value()));
 }
-shared_ptr< Value > Listener::parseEmbeddedPDVValue(asn1Parser::Embedded_pdv_valueContext *ctx)
+shared_ptr< Value > Listener::parseEmbeddedPDVValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Embedded_pdv_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	assert(ctx->sequence_value());
-	auto sequence_value(parseSequenceValue(ctx->sequence_value()));
+	auto sequence_value(parseSequenceValue(type, ctx->sequence_value()));
 	//TODO: check that the sequence value corresponds to spec
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return make_shared< EmbeddedPDVValue >(ctx, sequence_value);
 }
-shared_ptr< Value > Listener::parseEnumeratedValue(asn1Parser::Enumerated_valueContext *ctx)
+shared_ptr< Value > Listener::parseEnumeratedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Enumerated_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return make_shared< EnumeratedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText());
 }
-shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext *ctx)
+shared_ptr< Value > Listener::parseIntegerValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Integer_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1319,7 +1339,7 @@ shared_ptr< Value > Listener::parseIntegerValue(asn1Parser::Integer_valueContext
 		: make_shared< IntegerValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText())
 		;
 }
-shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
+shared_ptr< Value > Listener::parseIRIValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Iri_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1331,12 +1351,12 @@ shared_ptr< Value > Listener::parseIRIValue(asn1Parser::Iri_valueContext *ctx)
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseObjectIdentifierValue(asn1Parser::Object_identifier_valueContext *ctx)
+shared_ptr< Value > Listener::parseObjectIdentifierValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Object_identifier_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	return make_shared< ObjectIdentifierValue >(ctx, parseObjectIdentifier(ctx));
 }
-shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_valueContext *ctx)
+shared_ptr< Value > Listener::parseOctetStringValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Octet_string_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	if (ctx->BSTRING())
@@ -1356,7 +1376,7 @@ shared_ptr< Value > Listener::parseOctetStringValue(asn1Parser::Octet_string_val
 	}
 	return shared_ptr< Value >();
 }
-shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
+shared_ptr< Value > Listener::parseRealValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Real_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1410,7 +1430,7 @@ shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
 	}
 	else if (ctx->sequence_value())
 	{
-		return make_shared< RealValue >(ctx, parseSequenceValue(ctx->sequence_value()));
+		return make_shared< RealValue >(ctx, parseSequenceValue(type, ctx->sequence_value()));
 	}
 	else
 	{
@@ -1421,7 +1441,7 @@ shared_ptr< Value > Listener::parseRealValue(asn1Parser::Real_valueContext *ctx)
 			);
 	}
 }
-shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_valueContext *ctx)
+shared_ptr< Value > Listener::parseRelativeIRIValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Relative_iri_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1433,7 +1453,7 @@ shared_ptr< Value > Listener::parseRelativeIRIValue(asn1Parser::Relative_iri_val
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseRelativeOIDValue(asn1Parser::Relative_oid_valueContext *ctx)
+shared_ptr< Value > Listener::parseRelativeOIDValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Relative_oid_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1474,7 +1494,7 @@ OIDComponent Listener::parseOIDComponent(asn1Parser::Relative_oid_componentsCont
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueContext *ctx)
+shared_ptr< Value > Listener::parseSequenceValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Sequence_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1484,23 +1504,22 @@ shared_ptr< Value > Listener::parseSequenceValue(asn1Parser::Sequence_valueConte
 	{
 		for (auto value : ctx->component_value_list()->named_value())
 		{
-			retval->add(parseNamedValue(value));
+			retval->add(parseNamedValue(type, value));
 		}
 	}
 	else
 	{ /* no values */ }
 
-
 	return retval;
 }
-shared_ptr< Value > Listener::parseNamedValue(asn1Parser::Named_valueContext *ctx)
+shared_ptr< Value > Listener::parseNamedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Named_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
 	auto retval(make_shared< NamedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText(), parseValue(ctx->value())));
 	return retval;
 }
-shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_valueContext *ctx)
+shared_ptr< Value > Listener::parseSequenceOfValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Sequence_of_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1516,7 +1535,7 @@ shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_value
 	{
 		for (auto value : ctx->named_value_list()->named_value())
 		{
-			retval->add(parseNamedValue(value));
+			retval->add(parseNamedValue(type, value));
 		}
 	}
 	else
@@ -1525,7 +1544,7 @@ shared_ptr< Value > Listener::parseSequenceOfValue(asn1Parser::Sequence_of_value
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
+shared_ptr< Value > Listener::parseSetValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Set_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1534,7 +1553,7 @@ shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
 	{
 		for (auto value : ctx->component_value_list()->named_value())
 		{
-			retval->add(parseNamedValue(value));
+			retval->add(parseNamedValue(type, value));
 		}
 	}
 	else
@@ -1542,7 +1561,7 @@ shared_ptr< Value > Listener::parseSetValue(asn1Parser::Set_valueContext *ctx)
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *ctx)
+shared_ptr< Value > Listener::parseSetOfValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Set_of_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);
@@ -1558,7 +1577,7 @@ shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *c
 	{
 		for (auto value : ctx->named_value_list()->named_value())
 		{
-			retval->add(parseNamedValue(value));
+			retval->add(parseNamedValue(type, value));
 		}
 	}
 	else
@@ -1566,7 +1585,7 @@ shared_ptr< Value > Listener::parseSetOfValue(asn1Parser::Set_of_valueContext *c
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): /%s\n", __FILE__, __LINE__, __func__);
 	return retval;
 }
-shared_ptr< Value > Listener::parseTimeValue(asn1Parser::Time_valueContext *ctx)
+shared_ptr< Value > Listener::parseTimeValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Time_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
 	pre_condition(ctx);

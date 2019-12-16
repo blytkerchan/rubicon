@@ -22,6 +22,8 @@ public :
 
 	std::string generateInstance() const override { return "/*TODO*/"; }
 
+    std::string getName() const { return name_; }
+
 private :
 	std::string name_;
 	std::shared_ptr< Value > value_;

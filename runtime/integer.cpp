@@ -7,16 +7,16 @@ using namespace std;
 
 namespace Vlinder { namespace Rubicon { 
 Integer::Integer(char value) : signed_(true), size_(0) { set(value); }
-Integer::Integer(unsigned char value) : signed_(false), size_(0) { set(value);}
-Integer::Integer(short value) : signed_(true), size_(0) { set(value);}
-Integer::Integer(unsigned short value) : signed_(false), size_(0) { set(value);}
-Integer::Integer(int value) : signed_(true), size_(0) { set(value);}
-Integer::Integer(unsigned int value) : signed_(false), size_(0) { set(value);}
-Integer::Integer(long value) : signed_(true), size_(0) { set(value);}
-Integer::Integer(unsigned long value) : signed_(false), size_(0) { set(value);}
+Integer::Integer(unsigned char value) : signed_(false), size_(0) { set(value); }
+Integer::Integer(short value) : signed_(true), size_(0) { set(value); }
+Integer::Integer(unsigned short value) : signed_(false), size_(0) { set(value); }
+Integer::Integer(int value) : signed_(true), size_(0) { set(value); }
+Integer::Integer(unsigned int value) : signed_(false), size_(0) { set(value); }
+Integer::Integer(long value) : signed_(true), size_(0) { set(value); }
+Integer::Integer(unsigned long value) : signed_(false), size_(0) { set(value); }
 #ifdef RUBICON_HAVE_LONG_LONG
-Integer::Integer(long long value) : signed_(true), size_(0) { set(value);}
-Integer::Integer(unsigned long long value) : signed_(false), size_(0) { set(value);}
+Integer::Integer(long long value) : signed_(true), size_(0) { set(value); }
+Integer::Integer(unsigned long long value) : signed_(false), size_(0) { set(value); }
 #endif
 
 Integer& Integer::swap(Integer &other)
