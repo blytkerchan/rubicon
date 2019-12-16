@@ -9,3 +9,5 @@ build
 generated
 html
 latex
+out/
+
