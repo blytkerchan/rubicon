@@ -3,8 +3,7 @@
 
 using namespace Vlinder::Rubicon;
 
-TEST_CASE( "Default-constructed BitStrings are empty", "[bitstring]" )
-{
+TEST_CASE( "Default-constructed BitStrings are empty", "[bitstring]" ) {
     BitString bit_string;
 
     REQUIRE(bit_string.empty());
