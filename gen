@@ -9,6 +9,11 @@ if [ $(uname -m) == "armv7l" ]; then
 	MACHINE=-arm32v7
 fi
 
+DOCKER_INVOCATION=
+if [ x"" == x"${CI}" ]; then
+	DOCKER_INVOCATION=docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4${MACHINE}
+fi
+
 while (( "$#" )); do
 	case "$1" in
 	-d)
@@ -29,13 +34,13 @@ done
 
 if [ x"${DO_ALL}${DO_PREPROC}" != x"00" ]; then
 	mkdir -p generated
-	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4${MACHINE} antlr4 -Dlanguage=Cpp -o generated preproc.g4
+	${DOCKER_INVOCATION} antlr4 -Dlanguage=Cpp -o generated preproc.g4
 fi
 if [ x"${DO_ALL}${DO_ASN1}" != x"00" ]; then
 	mkdir -p generated
-	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4${MACHINE} antlr4 -Dlanguage=Cpp -o generated -visitor asn1.g4
+	${DOCKER_INVOCATION} antlr4 -Dlanguage=Cpp -o generated -visitor asn1.g4
 fi
 if [ x"${DO_ALL}${DO_DEPLOY}" != x"00" ]; then
-	docker run -v `pwd`:`pwd` -w `pwd` -u `id -u`:`id -g` vlinder/antlr4${MACHINE} deploy -o antlr4
+	${DOCKER_INVOCATION} deploy -o antlr4
 fi
 
