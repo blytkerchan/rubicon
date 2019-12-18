@@ -102,6 +102,7 @@ public :
 		void generateMemberDeclarations(std::ostream &os) const;
 		void generateGetterImplementation(std::string const &type_name, std::ostream &os) const;
 		void generateSetterImplementation(std::string const &type_name, std::ostream &os) const;
+	    void generateCompareImplementation(std::ostream &os) const;
 		virtual std::shared_ptr< ComponentType > visit(AutoTagVisitor &visitor) override;
 		virtual std::shared_ptr< ComponentType > visit(ComponentsOfResolutionVisitor &visitor) override;
 		virtual void visit(DefinedTypeResolutionVisitor &visitor) override;
@@ -171,6 +172,7 @@ public :
 	virtual void generateDestructorImplementation(std::ostream &os) const override;
 	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
+	virtual void generateCompareImplementation(std::ostream &os) const override;
 	bool isSet() const { return is_set_; }
 	ComponentTypes getComponentTypes() const noexcept { return component_types_; } 
 

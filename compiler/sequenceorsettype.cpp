@@ -36,7 +36,7 @@ void SequenceOrSetType::NamedComponentType::generateHeaderGetterAndSetter(ostrea
 	os << "\t" << getTypeName() << ((optional() && !hasDefaultValue()) ? " const* " : " ") << "get" << name << "() const;\n";
 	os << "\t" << "void set" << name << "(" << getTypeName() << " const &" << toVariableName(getName()) << ");\n";
 }
-void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string const &type_name, ostream &os) const
+/*virtual */void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string const &type_name, ostream &os) const/* override*/
 {
 	string name(getName());
 	name[0] = toupper(name[0]);
@@ -46,7 +46,11 @@ void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string 
 		;
 	if (optional() && hasDefaultValue())
 	{
-		os << "\treturn " << toMemberName(getName()) << " ? " << toMemberName(getName()) << " : " << default_value_->generateInstance() << "\n";
+		os << "\treturn " << toMemberName(getName()) << " ? *" << toMemberName(getName()) << " : " << default_value_->generateInstance() << ";\n";
+	}
+    else if (optional() && !hasDefaultValue())
+	{
+		os << "\treturn " << toMemberName(getName()) << ";\n";
 	}
 	else
 	{
@@ -55,7 +59,7 @@ void SequenceOrSetType::NamedComponentType::generateGetterImplementation(string 
 	}
 	os << "}\n";
 }
-void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string const &type_name, ostream &os) const
+/*virtual */void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string const &type_name, ostream &os) const/* override*/
 {
 	string name(getName());
 	name[0] = toupper(name[0]);
@@ -87,9 +91,49 @@ void SequenceOrSetType::NamedComponentType::generateSetterImplementation(string 
 		"}\n"
 		;
 }
-void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const
+void SequenceOrSetType::NamedComponentType::generateCompareImplementation(std::ostream& os) const
 {
-	os << "\t" << getTypeName() << (optional() ? " *" : " ") << toMemberName(getName()) << ";\n";
+    if (optional())
+    {   // if optional and both sides are NULL, we don't care about default values
+        os << "\tif (!" << toMemberName(getName()) << " && !other." << toMemberName(getName()) << ")\n";
+        os << "\t{ /* both sides are NULL, so either both default values or absent */ }\n";
+        os << "\telse if (!" << toMemberName(getName()) << " && other." << toMemberName(getName()) << ")\n";
+        os << "\t{ // we have a right-hand-side\n";
+        if (!!default_value_)
+        {
+            os << "\t\tcompare_result = -other." << toMemberName(getName()) << "->compare(" << default_value_->generateInstance() << ");\n";
+        }
+        else
+        { // no default value
+            os << "\t\t// We don't have a default value, so if the other side exists, they get it.\n";
+            os << "\t\tcompare_result = 1;\n";
+        }
+        os << "\t}\n";
+        os << "\telse if (" << toMemberName(getName()) << " && !other." << toMemberName(getName()) << ")\n";
+        os << "\t{ // we have a left-hand-side\n";
+        if (!!default_value_)
+        {
+            os << "\t\tcompare_result = "<< toMemberName(getName()) << "->compare(" << default_value_->generateInstance() << ");\n";
+        }
+        else
+        { // no default value
+            os << "\t\t// We don't have a default value, so if the we exist and the other side doesn't, we get it.\n";
+            os << "\t\tcompare_result = -1;\n";
+        }
+        os << "\t}\n";
+        os << "\telse\n";
+        os << "\t{ // we have both sides\n";
+        os << "\t\tcompare_result = "<< toMemberName(getName()) << "->compare(*other." << toMemberName(getName()) << ");\n";
+        os << "\t}\n";
+    }
+    else
+    {   // if not optional, we can just directly run compare
+        os << "\tcompare_result = "<< toMemberName(getName()) << ".compare(other." << toMemberName(getName()) << ");\n";
+    }
+}
+/*virtual */void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const/* override*/
+{
+	os << "\t" << getTypeName() << (optional() ? " *" : " ") << toMemberName(getName()) << (optional() ? " = nullptr" : "") << ";\n";
 }
 /*static */string SequenceOrSetType::NamedComponentType::toVariableName(string const &name)
 {
@@ -434,6 +478,33 @@ void SequenceOrSetType::flatten()
 			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
 		}
 	}
+}
+
+void SequenceOrSetType::generateCompareImplementation(std::ostream& os) const
+{
+    os << "\tint compare_result(0);\n";
+    for (auto type : component_types_)
+	{
+		auto named_component_type(dynamic_pointer_cast< NamedComponentType >(type));
+		if (named_component_type)
+		{
+            named_component_type->generateCompareImplementation(os);
+            os << "\tif (compare_result) return compare_result;\n";
+            //if (output_else) os << "\telse ";
+            //os << (output_else ? "" : "\t") << "if (";
+            //named_component_type->generateCompareImplementation(os, false);
+            //os << ") return -1;\n";
+            //os << "\telse if (";
+            //named_component_type->generateCompareImplementation(os, true);
+            //os << ") return 1;\n";
+            //output_else = true;
+		}
+		else
+		{
+			throw logic_error("Generation of sequences and sets with COMPONENTS OF is not implemented yet");
+		}
+	}
+    os << "\treturn compare_result;\n";
 }
 
 }}}
