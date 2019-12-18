@@ -1,21 +1,22 @@
 #ifndef rubicon_compiler_enumeratedvalue_hpp
 #define rubicon_compiler_enumeratedvalue_hpp
 
+#include "value.hpp"
+
 namespace Vlinder { namespace Rubicon { namespace Compiler {
+class TypeDescriptor;
 class EnumeratedValue : public Value
 {
 public :
-	EnumeratedValue(SourceLocation const &source_location, std::string const &identifier)
-		: Value(source_location)
-		, identifier_(identifier)
-	{ /* no-op */ }
+	EnumeratedValue(SourceLocation const &source_location, std::string const &identifier, std::shared_ptr< TypeDescriptor > const &type);
 
-	std::string getTypeName() const override { return typeid(*this).name(); }
+	virtual std::string getTypeName() const override;
 
-	std::string generateInstance() const override { return "/*TODO*/"; }
+	virtual std::string generateInstance() const override;
 
 private :
 	std::string identifier_;
+    std::string type_name_;
 };
 }}}
 

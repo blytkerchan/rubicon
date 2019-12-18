@@ -717,7 +717,7 @@ shared_ptr< TypeDescriptor > Listener::parseSequenceOrSetType(asn1Parser::Sequen
 					auto named_type(parseNamedType(component_type->named_type()));
 					if (component_type->DEFAULT_RW())
 					{
-						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(ctx, root, named_type, parseValue(component_type->value())));
+						component_types.push_back(make_shared< SequenceOrSetType::NamedComponentType >(ctx, root, named_type, parseValue(make_shared< decltype(named_type) >(named_type), component_type->value())));
 					}
 					else
 					{
@@ -1328,7 +1328,7 @@ shared_ptr< Value > Listener::parseEmbeddedPDVValue(std::shared_ptr< TypeDescrip
 shared_ptr< Value > Listener::parseEnumeratedValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Enumerated_valueContext *ctx)
 {
 	tracer__->trace(1, TRACE_DEBUG, "%s(%u): %s\n", __FILE__, __LINE__, __func__);
-	return make_shared< EnumeratedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText());
+	return make_shared< EnumeratedValue >(ctx, ctx->IDENTIFIER()->getSymbol()->getText(), type);
 }
 shared_ptr< Value > Listener::parseIntegerValue(std::shared_ptr< TypeDescriptor > const &type, asn1Parser::Integer_valueContext *ctx)
 {

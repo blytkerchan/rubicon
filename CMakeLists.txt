@@ -218,6 +218,7 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/embeddedpdvvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/enumeratedtype.hpp
+	${PROJECT_SOURCE_DIR}/compiler/enumeratedvalue.cpp
 	${PROJECT_SOURCE_DIR}/compiler/enumeratedvalue.hpp
 	${PROJECT_SOURCE_DIR}/compiler/errorlistener.cpp
 	${PROJECT_SOURCE_DIR}/compiler/errorlistener.hpp
