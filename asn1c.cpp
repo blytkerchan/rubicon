@@ -28,6 +28,7 @@ int main(int argc, char const **argv)
 		("namespace-suffix,s", po::value< string >(), "suffix to append to the namespace (defaults to \"::ASN1\")")
 		("output-dependencies,g", "output dependencies in dot format")
 		("debug,d", "output compiler debug info")
+        ("include-directory,I", po::value< string >(), "directory to find rubicon headers in (defaults to \"rubicon\")")
 		;
 	po::options_description hidden_options("Hidden options");
 	hidden_options.add_options()
@@ -70,6 +71,7 @@ int main(int argc, char const **argv)
 	string const namespace_prefix(vm.count("namespace-prefix") == 0 ? string() : vm["namespace-prefix"].as< string >());
 	string const namespace_suffix(vm.count("namespace-suffix") == 0 ? string("::ASN1") : vm["namespace-suffix"].as< string >());
 	string const input_filename(vm["input-file"].as< string >());
+    string const include_directory(vm.count("include-directory") == 0 ? string("rubicon") : vm["include-directory"].as< string >());
 
 	pre::Preprocessor preprocessor(input_filename);
 	stringstream ss;
@@ -77,7 +79,7 @@ int main(int argc, char const **argv)
 	{
 		cpl::Builder builder(input_filename);
 		cpl::Generator generator(vm.count("output") ? vm["output"].as< string >() : string(), namespace_prefix, namespace_suffix);
-		return generator(builder(ss, vm.count("debug") != 0), vm.count("output-dependencies") != 0) ? 0 : 1;
+		return generator(builder(ss, vm.count("debug") != 0), vm.count("output-dependencies") != 0, include_directory) ? 0 : 1;
 	}
 	else return 1;
 }

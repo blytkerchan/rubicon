@@ -21,8 +21,9 @@ Generator::Generator(string const &output_directory_name, string const &namespac
 Generator::~Generator()
 { /* no-op */ }
 
-Generator& Generator::operator()(Builder const &builder, bool output_dependencies)
+Generator& Generator::operator()(Builder const &builder, bool output_dependencies, string const &rubicon_include_directory)
 {
+    rubicon_include_directory_ = rubicon_include_directory;
 	okay_ = (bool)builder;
 	if (okay_)
 	{
@@ -204,9 +205,9 @@ void Generator::generateDecoderHeader()
 
 	ofs << "#include <deque>\n";
 	ofs << "#include <vector>\n";
-	ofs << "#include <rubicon/derdecoder.hpp>\n";
-	ofs << "#include <rubicon/exceptions.hpp>\n";
-	ofs << "#include <rubicon/details/any.hpp>\n";
+	ofs << "#include \"" << rubicon_include_directory_ << "/derdecoder.hpp\"\n";
+	ofs << "#include \"" << rubicon_include_directory_ << "/exceptions.hpp\"\n";
+	ofs << "#include \"" << rubicon_include_directory_ << "/details/any.hpp\"\n";
 
 	for (auto type_assignment : builder_->getTypeAssignments())
 	{
@@ -483,12 +484,12 @@ void Generator::closeIncludeGuard(ostream &ofs) const
 }
 void Generator::generateHeaderIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
-	for (auto dependency : type_assignment.getStrongDependencies())
+	for (auto dependency : type_assignment.getDependencies())
 	{
 		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
 	}
 	ofs <<
-		"#include \"rubicon/types.hpp\"\n"
+		"#include \"" << rubicon_include_directory_ << "/types.hpp\"\n"
 		;
 	ofs << "\n";
 }
@@ -499,7 +500,7 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, ValueAssignment co
 		ofs << "#include \"" << alg::replace_all_copy(alg::to_lower_copy(dependency), ".", "/") << ".hpp\"\n";
 	}
 	ofs <<
-		"#include \"rubicon/types.hpp\"\n"
+		"#include \"" << rubicon_include_directory_ << "/types.hpp\"\n"
 		;
 	ofs << "\n";
 }
@@ -520,7 +521,7 @@ void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssign
 	}
 	else
 	{ /* no optional members, no need for unique_ptr */ }
-	ofs << "#include <rubicon/derencoder.hpp>\n";
+	ofs << "#include \"" << rubicon_include_directory_ << "/derencoder.hpp\"\n";
 	ofs << "\n";
 }
 void Generator::generateImplementationUsingDirectives(ostream &ofs, TypeAssignment const &type_assignment) const

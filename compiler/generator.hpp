@@ -18,7 +18,7 @@ public :
 	Generator& operator=(Generator const&) = delete;
 
 	explicit operator bool () const { return okay_; }
-	Generator& operator()(Builder const &builder, bool output_dependencies);
+	Generator& operator()(Builder const &builder, bool output_dependencies, std::string const &rubicon_include_directory);
 
 	std::string getNamespaceName() const { return namespace_name_; }
 	std::string getOutputDirectoryName() const { return output_directory_name_; }
@@ -78,6 +78,7 @@ private :
 	std::string namespace_name_;
 	Builder const *builder_ = nullptr;
 	std::vector< boost::filesystem::path > generated_files_;
+    std::string rubicon_include_directory_;
 };
 }}}
 
