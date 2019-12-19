@@ -7,7 +7,9 @@ void TypeAssignment::generateCopyConstructorImplementation(ostream &os) const
 {
 	if (hasOptionalMembers())
 	{
-		os << getName() << "::" << getName() << "(" << getName() << " const &other)\n{\n";
+		os << getName() << "::" << getName() << "(" << getName() << " const &other)\n";
+        type_descriptor_->generateCopyConstructorInitializers(os);
+        os << "{\n";
 		type_descriptor_->generateCopyConstructorImplementation(os);
 		os << "}\n";
 	}

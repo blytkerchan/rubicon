@@ -26,7 +26,17 @@ public :
 	virtual bool requireExplicitTag() const override { return true; }
 	virtual std::set< std::string > getDependencies() const;
 
+    virtual bool hasOptionalMembers() const { return true; } // all members in a choice are optional
+
 	virtual void generateEncodeImplementation(std::ostream &os) const override;
+    virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;
+    virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
+    virtual void generateMemberDeclarations(std::ostream &os) const override;
+    virtual void generateCopyConstructorInitializers(std::ostream &os) const override;
+    virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
+    virtual void generateDestructorImplementation(std::ostream &os) const override;
+    virtual void generateSwapparatorImplementation(std::ostream &os) const override;
+    virtual void generateCompareImplementation(std::ostream &os) const override;
 
 	bool isClone() const { return is_clone_; }
 	unsigned int getCloneID() const;
