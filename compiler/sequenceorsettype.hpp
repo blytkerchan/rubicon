@@ -111,9 +111,6 @@ public :
 		void setTag(Tag const &tag) { named_type_.setTag(tag); }
 		bool tagged() const { return named_type_.tagged(); }
 
-		static std::string toVariableName(std::string const &name);
-		static std::string toMemberName(std::string const &name);
-
 		bool root_;
 		NamedType named_type_;
 		bool optional_;

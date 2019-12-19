@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "../exceptions/contract.hpp"
 #include "definedtyperesolutionvisitor.hpp"
+#include "helpers.hpp"
 
 using namespace std;
 using namespace boost;

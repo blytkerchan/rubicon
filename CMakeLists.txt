@@ -228,6 +228,8 @@ set(compiler-SRC
 	${PROJECT_SOURCE_DIR}/compiler/generalizedtimetype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/generator.cpp
 	${PROJECT_SOURCE_DIR}/compiler/generator.hpp
+	${PROJECT_SOURCE_DIR}/compiler/helpers.cpp
+	${PROJECT_SOURCE_DIR}/compiler/helpers.hpp
 	${PROJECT_SOURCE_DIR}/compiler/integertype.cpp
 	${PROJECT_SOURCE_DIR}/compiler/integertype.hpp
 	${PROJECT_SOURCE_DIR}/compiler/integervalue.hpp

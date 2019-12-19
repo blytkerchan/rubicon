@@ -5,6 +5,7 @@
 #include "componentsofresolutionvisitor.hpp"
 #include "definedtyperesolutionvisitor.hpp"
 #include "tagresolutionvisitor.hpp"
+#include "helpers.hpp"
 
 using namespace std;
 
@@ -134,28 +135,6 @@ void SequenceOrSetType::NamedComponentType::generateCompareImplementation(std::o
 /*virtual */void SequenceOrSetType::NamedComponentType::generateMemberDeclarations(ostream &os) const/* override*/
 {
 	os << "\t" << getTypeName() << (optional() ? " *" : " ") << toMemberName(getName()) << (optional() ? " = nullptr" : "") << ";\n";
-}
-/*static */string SequenceOrSetType::NamedComponentType::toVariableName(string const &name)
-{
-	string retval;
-	for (char c : name)
-	{
-		if (c == tolower(c))
-		{
-			retval.append(1, c);
-		}
-		else
-		{
-			retval.append("_");
-			retval.append(1, tolower(c));
-		}
-	}
-
-	return retval;
-}
-/*static */string SequenceOrSetType::NamedComponentType::toMemberName(string const &name)
-{
-	return toVariableName(name) + "_";
 }
 /*virtual */shared_ptr< SequenceOrSetType::ComponentType > SequenceOrSetType::NamedComponentType::visit(AutoTagVisitor &visitor)
 {
@@ -392,7 +371,7 @@ void SequenceOrSetType::flatten()
 				auto named_component_type(dynamic_pointer_cast< NamedComponentType >(component_type));
 				if (named_component_type)
 				{
-					os << "\tauto " << NamedComponentType::toVariableName(named_component_type->getName()) << "(make_unique< " << named_component_type->getTypeName() << " >(*other." << NamedComponentType::toMemberName(named_component_type->getName()) << "));\n";
+					os << "\tauto " << toVariableName(named_component_type->getName()) << "(make_unique< " << named_component_type->getTypeName() << " >(*other." << toMemberName(named_component_type->getName()) << "));\n";
 					optional_members.push(named_component_type->getName());
 				}
 				else
@@ -404,7 +383,7 @@ void SequenceOrSetType::flatten()
 
 		while (!optional_members.empty())
 		{
-			os << "\t" << NamedComponentType::toMemberName(optional_members.top()) << " = " << NamedComponentType::toVariableName(optional_members.top())<< ".release();\n";
+			os << "\t" << toMemberName(optional_members.top()) << " = " << toVariableName(optional_members.top())<< ".release();\n";
 			optional_members.pop();
 		}
 	}
@@ -434,7 +413,7 @@ void SequenceOrSetType::flatten()
 
 		while (!optional_members.empty())
 		{
-			os << "\tdelete " << NamedComponentType::toMemberName(optional_members.top()) << ";\n";
+			os << "\tdelete " << toMemberName(optional_members.top()) << ";\n";
 			optional_members.pop();
 		}
 	}
@@ -450,11 +429,11 @@ void SequenceOrSetType::flatten()
 		{
 			if (component_type->optional())
 			{
-				os << "\tstd::swap(" << NamedComponentType::toMemberName(named_component_type->getName()) << ", other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
+				os << "\tstd::swap(" << toMemberName(named_component_type->getName()) << ", other." << toMemberName(named_component_type->getName()) << ");\n";
 			}
 			else
 			{
-				os << "\t" << NamedComponentType::toMemberName(named_component_type->getName()) << ".swap(other." << NamedComponentType::toMemberName(named_component_type->getName()) << ");\n";
+				os << "\t" << toMemberName(named_component_type->getName()) << ".swap(other." << toMemberName(named_component_type->getName()) << ");\n";
 			}
 		}
 		else
