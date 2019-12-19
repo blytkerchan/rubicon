@@ -1,0 +1,57 @@
+-- ===================================================================
+-- AMP abstract syntax
+-- ===================================================================
+-- For now, I've reserved an OID in the Vlinder Software namespace (as our second security protocol after SIT). This should move to an IEEE namespace, but the reservation will have to stand.
+AuthorizationManagementProtocol { iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) vlinder-software(49974) security(0) protocols(0) authorization-management-protocol(1) }
+
+-- Definitions are organized into sections: upper bounds, types, .... The first section is the one thing we expect (in this case, the AMP PDU)
+-- Definitions within each section appear in alphabetical order
+-- prefixes: 
+--     curve == Elliptic Curve
+--     hmac == keyed-hash MAC
+--     ea == encryption algorithm
+--     mda == message digest algorithm
+--     sa == signature algorithm;
+--     ub == upper bound;
+DEFINITIONS ::= BEGIN
+	EXPORTS AMPPDU;
+	
+	-- ===================================================================
+	-- the principal type
+	-- ===================================================================
+	AMPPDU ::= SEQUENCE {
+		version				Version DEFAULT v20191216,
+		payload				AMPPDUPayload
+	}
+	
+	-- ===================================================================
+	-- upper bounds
+	-- ===================================================================
+	
+	-- ===================================================================
+	-- types
+	-- ===================================================================
+	-- the PDU payload: a top-level choice item
+	AMPPDUPayload ::= CHOICE {
+		confirmedRequest		[0]		IMPLICIT	ConfirmedRequest
+	}
+	
+	-- a request from either the Authority or a field device that requires confirmation from the other end
+	ConfirmedRequest ::= SEQUENCE {
+		requestType			RequestType
+	}
+	
+	-- ===================================================================
+	-- enumerations
+	-- ===================================================================
+	-- Types of requests we can handle
+	RequestType ::= INTEGER { association-status-request(0) }
+	
+	-- unofficial versions are denoted with datecodes. This leaves official
+	-- versions with over 20,000,000 possible versions before there is a 
+	-- possibility of collision, and clearly shows the difference between
+	-- official and unofficial versions.
+	Version ::= INTEGER { v20191216(20191216) }
+	
+END
+
