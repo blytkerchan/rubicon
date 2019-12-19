@@ -297,6 +297,91 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
     os << "\treturn compare_result;\n";
 }
 
+/*virtual */void ChoiceType::generateGetterAndSetterImplementations(std::string const& type_name, std::ostream& os) const/* override*/
+{
+    os << "unsigned int " << type_name << "::getTag() const noexcept\n";
+    os << "{\n";
+    os << "\treturn tag_;\n";
+    os << "}\n";
+    os << "\n";
+	struct TypeVisitor : static_visitor<>
+	{
+		TypeVisitor(ostream& os, string const& type_name, AlternativeTypes const &alternative_types)
+            : os_(os)
+            , type_name_(type_name)
+            , alternative_types_(alternative_types)
+		{ /* no-op */ }
+
+		void operator()(NamedType &named_type) const
+		{
+			os_ << named_type.getTypeName() << "* const " << type_name_ << "::get" << named_type.getTypeName() << "() const\n";
+            os_ << "{\n";
+            os_ << "\treturn " << toMemberName(named_type.getName()) << ";\n";
+            os_ << "}\n";
+            os_ << "\n";
+			os_ << "void " << type_name_ << "::set" << named_type.getTypeName() << "(" << named_type.getTypeName() << " const &" << toVariableName(named_type.getName()) << ")\n";
+            os_ << "{\n";
+            
+            os_ << "\tif (" << toMemberName(named_type.getName()) << ")\n";
+            os_ << "\t{\n";
+            os_ << "\t\t*" << toMemberName(named_type.getName()) << " = " << toVariableName(named_type.getName()) << ";\n";
+            os_ << "\t}\n";
+            os_ << "\telse\n";
+            os_ << "\t{\n";
+            os_ << "\t\t" << toMemberName(named_type.getName()) << " = new " << named_type.getTypeName() << "(" << toVariableName(named_type.getName()) << ");\n";
+            os_ << "\t}\n";
+
+	        struct TypeVisitor2 : static_visitor<>
+	        {
+		        TypeVisitor2(ostream& os, string const& type_name, NamedType &current_named_type)
+                    : os_(os)
+                    , type_name_(type_name)
+                    , current_named_type_(current_named_type)
+		        { /* no-op */ }
+
+		        void operator()(NamedType &named_type) const
+		        {
+                    if (named_type.getName() != current_named_type_.getName())
+                    {
+                        os_ << "\tdelete " << toMemberName(named_type.getName()) << "\n";
+                        os_ << "\t" << toMemberName(named_type.getName()) << " = nullptr;\n";
+                    }
+                    else
+                    { /* nothing to delete */ }
+		        }
+		        void operator()(VersionedTypeList &versioned_type_list) const
+		        {
+                    throw logic_error("not yet implemented");
+		        }
+
+		        ostream& os_;
+                string type_name_;
+                NamedType &current_named_type_;
+	        };
+            for (auto type : alternative_types_)
+            {
+                apply_visitor(TypeVisitor2(os_, type_name_, named_type), type);
+            }
+
+            os_ << "}\n";
+            os_ << "\n";
+		}
+		void operator()(VersionedTypeList &versioned_type_list) const
+		{
+            throw logic_error("not yet implemented");
+		}
+
+		ostream& os_;
+        string type_name_;
+        AlternativeTypes const &alternative_types_;
+	};
+
+	for (auto type : alternative_types_)
+	{
+		apply_visitor(TypeVisitor(os, type_name, alternative_types_), type);
+	}
+}
+
 unsigned int ChoiceType::getCloneID() const
 {
 	pre_condition(isClone());

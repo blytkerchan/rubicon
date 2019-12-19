@@ -37,6 +37,7 @@ public :
     virtual void generateDestructorImplementation(std::ostream &os) const override;
     virtual void generateSwapparatorImplementation(std::ostream &os) const override;
     virtual void generateCompareImplementation(std::ostream &os) const override;
+    virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;
 
 	bool isClone() const { return is_clone_; }
 	unsigned int getCloneID() const;
