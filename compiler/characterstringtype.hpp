@@ -20,7 +20,6 @@ public :
 	bool restricted() const { return (tag_.class_ != Tag::universal__) || (boost::get< unsigned int >(tag_.class_number_) != 27); }
 
 	virtual Tag getTag() const override { return tag_; }
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual std::string getTypeName() const override { return "CharacterString"; };
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
 

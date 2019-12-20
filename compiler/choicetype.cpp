@@ -72,10 +72,6 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 	return retval;
 }
 
-/*virtual */void ChoiceType::generateEncodeImplementation(ostream &os) const/* override*/
-{
-	os << "//TODO" << endl;
-}
 /*virtual */void ChoiceType::generateAlternateConstructorDeclarations(ostream& os, string const& class_name) const/* override*/
 {
 	struct TypeVisitor : static_visitor<>

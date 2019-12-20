@@ -13,7 +13,6 @@ public :
 	virtual std::vector< std::string > getPublicParents() const override;
 	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;
 	virtual void generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const override;
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
 	virtual void generateSwapparatorImplementation(std::ostream &os) const override;
 	virtual void generateGetterAndSetterImplementations(std::string const &type_name, std::ostream &ofs) const override;

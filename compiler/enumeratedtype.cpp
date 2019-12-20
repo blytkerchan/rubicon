@@ -35,10 +35,6 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
         os << "\tVlinder::Rubicon::Integer::swap(other);\n";
 }
-/*virtual */void EnumeratedType::generateEncodeImplementation(ostream &os) const/* override*/
-{
-        os << "\tder_encoder.encodeEnumerated(*this);\n";
-}
 /*virtual */void EnumeratedType::generateCompareImplementation(ostream &os) const/* override*/
 {
 	os << "\treturn Vlinder::Rubicon::Integer::compare(other);\n";

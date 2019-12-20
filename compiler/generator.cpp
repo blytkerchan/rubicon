@@ -157,7 +157,6 @@ void Generator::generateImplementation(TypeAssignment const &type_assignment)
 	generateSwapparatorImplementation(ofs, type_assignment);
 	generateCompareImplementation(ofs, type_assignment);
 	generateGetterAndSetterImplementations(ofs, type_assignment);
-	generateEncodeImplementation(ofs, type_assignment);
 	generateComparisonOperatorDefinitions(ofs, type_assignment);
 
 	closeNamespace(ofs);
@@ -506,7 +505,6 @@ void Generator::generateHeaderIncludeDirectives(ostream &ofs, ValueAssignment co
 }
 void Generator::generateHeaderForwardDeclarations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
-	ofs << "namespace Vlinder { namespace Rubicon { class DEREncoder; }}\n";
 }
 void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
 {
@@ -521,7 +519,6 @@ void Generator::generateImplementationIncludeDirectives(ostream &ofs, TypeAssign
 	}
 	else
 	{ /* no optional members, no need for unique_ptr */ }
-	ofs << "#include \"" << rubicon_include_directory_ << "/derencoder.hpp\"\n";
 	ofs << "\n";
 }
 void Generator::generateImplementationUsingDirectives(ostream &ofs, TypeAssignment const &type_assignment) const
@@ -615,11 +612,6 @@ void Generator::generatePublicDefinitionSection(ostream &ofs, TypeAssignment con
 	ofs << "\n";
 	type_assignment.generateHeaderGettersAndSetters(ofs);
 	ofs << "\n";
-
-	ofs <<
-		"\tvoid encode(Vlinder::Rubicon::DEREncoder &der_encoder) const;\n"
-		"\n"
-		;
 }
 void Generator::generatePublicStaticMembers(ostream &ofs, TypeAssignment const &type_assignment) const
 {
@@ -655,10 +647,6 @@ void Generator::generateSwapparatorImplementation(ostream &ofs, TypeAssignment c
 void Generator::generateGetterAndSetterImplementations(ostream &ofs, TypeAssignment const &type_assignment) const
 {
 	type_assignment.generateGetterAndSetterImplementations(ofs);
-}
-void Generator::generateEncodeImplementation(ostream &ofs, TypeAssignment const &type_assignment) const
-{
-	type_assignment.generateEncodeImplementation(ofs);
 }
 void Generator::generateDeclaration(ostream &os, ValueAssignment const &value_assignment) const
 {

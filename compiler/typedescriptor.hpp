@@ -31,7 +31,6 @@ public :
 	virtual std::vector< std::string > getPrivateParents() const { return std::vector< std::string >(); }
 	virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const {}
 	virtual void generateAlternateConstructorImplementations(std::ostream &os, std::string const &class_name) const {}
-	virtual void generateEncodeImplementation(std::ostream &os) const;
 	virtual void generateEventHandlers(std::ostream &os) const {};
 	virtual void generateDataMembers(std::ostream &os) const;
 	virtual bool hasOptionalMembers() const { return false; }

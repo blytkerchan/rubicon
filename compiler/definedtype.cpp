@@ -30,7 +30,6 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
     return !!tag_;
 }
-/*virtual */void DefinedType::generateEncodeImplementation(ostream &os) const/* override*/ {}
 /*virtual */void DefinedType::visit(DefinedTypeResolutionVisitor& visitor)/* override*/
 {
     visitor.visit(*this);

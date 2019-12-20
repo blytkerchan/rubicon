@@ -28,7 +28,6 @@ public :
 	std::shared_ptr< TypeDescriptor > getType() const { return type_; }
 	void setType(std::shared_ptr< TypeDescriptor > const &type) { type_ = type; }
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
     
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;

@@ -39,7 +39,6 @@ public :
 	void generateAssignmentOperatorImplementation(std::ostream &os) const;
 	void generateSwapparatorImplementation(std::ostream &os) const;
 	void generateGetterAndSetterImplementations(std::ostream &ofs) const;
-	void generateEncodeImplementation(std::ostream &ofs) const;
 	void generateCompareImplementation(std::ostream &ofs) const;
 
 private :

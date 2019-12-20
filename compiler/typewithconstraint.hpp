@@ -33,7 +33,6 @@ public :
 	virtual std::string getTypeName() const override { return type_->getTypeName(); }
     std::shared_ptr< TypeDescriptor > getType() const { return type_; }
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
     virtual void visit(DefinedTypeResolutionVisitor &visitor) override;

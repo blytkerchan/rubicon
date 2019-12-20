@@ -28,7 +28,6 @@ public :
 
     virtual bool hasOptionalMembers() const { return true; } // all members in a choice are optional
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
     virtual void generateAlternateConstructorDeclarations(std::ostream &os, std::string const &class_name) const override;
     virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
     virtual void generateMemberDeclarations(std::ostream &os) const override;

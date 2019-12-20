@@ -20,8 +20,6 @@ public :
 	virtual bool hasTypeName() const override { return true; }
 	virtual std::string getTypeName() const override { return module_name_ + "." + symbol_name_; }
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
-
 private :
 	std::string module_name_;
 	std::string symbol_name_;

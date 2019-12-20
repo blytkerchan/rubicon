@@ -22,7 +22,6 @@ public :
 	virtual std::shared_ptr< TypeDescriptor > getType() const;
 	virtual std::string getTypeName() const override;
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual void generateCopyConstructorImplementation(std::ostream &os) const override;
 
 	std::string getSelection() const { return selection_; }

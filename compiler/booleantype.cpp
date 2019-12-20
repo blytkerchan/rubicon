@@ -26,10 +26,6 @@ BooleanType::BooleanType(SourceLocation const &source_location)
 		"{ /* no-op */ }\n"
 		;
 }
-/*virtual */void BooleanType::generateEncodeImplementation(ostream &os) const/* override*/
-{
-	os << "\tVlinder::Rubicon::Boolean::encode(der_encoder);\n";
-}
 /*virtual */void BooleanType::generateHeaderGettersAndSetters(ostream &os) const/* override*/
 {}
 /*virtual */void BooleanType::generateSwapparatorImplementation(ostream &os) const/* override*/

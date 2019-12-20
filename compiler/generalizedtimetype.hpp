@@ -12,7 +12,6 @@ public :
 	{ /* no-op */ }
 	virtual Tag getTag() const override { return { Tag::universal__, 24 }; }
 	virtual std::shared_ptr< TypeDescriptor > visit(Resolver &resolver) override { return resolver.resolve(*this); }
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
 	virtual std::string getTypeName() const override { return "Vlinder::Rubicon::GeneralizedTime"; }
 };
 }}}

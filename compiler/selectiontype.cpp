@@ -27,10 +27,6 @@ namespace Vlinder { namespace Rubicon { namespace Compiler {
 {
 	return type_->getTypeName(); // probably wrong
 }
-/*virtual */void SelectionType::generateEncodeImplementation(ostream &os) const/* override*/
-{
-	os << "//TODO " << typeid(*this).name() << endl;
-}
 /*virtual */void SelectionType::generateCopyConstructorImplementation(ostream &os) const/* override*/
 {
 	os << "//TODO " << typeid(*this).name() << endl;

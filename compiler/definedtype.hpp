@@ -21,8 +21,6 @@ public :
 	virtual bool hasTypeName() const override { return true; }
 	virtual std::string getTypeName() const override { return type_name_; }
 
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
-
     void setReferencedType(std::shared_ptr< TypeDescriptor > const &referenced_type) { referenced_type_ = referenced_type; }
     std::shared_ptr< TypeDescriptor > getReferencedType() const { return referenced_type_; }
 

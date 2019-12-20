@@ -61,13 +61,6 @@ void TypeAssignment::generateGetterAndSetterImplementations(ostream &ofs) const
 {
 	type_descriptor_->generateGetterAndSetterImplementations(getName(), ofs);
 }
-void TypeAssignment::generateEncodeImplementation(ostream &ofs) const
-{
-	ofs << "void " << getName() << "::encode(DEREncoder &der_encoder) const\n";
-	ofs << "{\n";
-	type_descriptor_->generateEncodeImplementation(ofs);
-	ofs << "}\n";
-}
 void TypeAssignment::generateCompareImplementation(ostream &ofs) const
 {
 	ofs << "int " << getName() << "::compare(" << getName() << " const &other) const\n";

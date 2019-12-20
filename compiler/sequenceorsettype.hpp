@@ -95,7 +95,6 @@ public :
 		virtual bool hasTypeName() const override { return named_type_.hasTypeName(); }
 		virtual std::string getTypeName() const override { return named_type_.getTypeName(); }
 		std::string getName() const { return named_type_.getName(); }
-		void generateEncodeImplementation(std::ostream &os, std::string const &member_name) const { /*named_type_.generateEncodeImplementation(os, member_name);*/ }
 		virtual bool optional() const override { return optional_; }
 		virtual bool hasDefaultValue() const override { return (bool)default_value_; }
 		void generateHeaderGetterAndSetter(std::ostream &os) const;
@@ -160,8 +159,6 @@ public :
 	virtual std::set< std::string > getDependencies() const override;
 	virtual std::set< std::string > getStrongDependencies() const override;
 	virtual std::set< std::string > getWeakDependencies() const override;
-	virtual void generateEncodeImplementation(std::ostream &os) const override;
-	virtual void generateEventHandlers(std::ostream &os) const override;
 	virtual bool hasOptionalMembers() const override;
 	virtual void generateHeaderGettersAndSetters(std::ostream &os) const override;
 	virtual void generateMemberDeclarations(std::ostream &os) const override;
